@@ -2,28 +2,10 @@
 
 #MUST BE NAMED COSMOS AND IN THE SAME DIR AS THE ACTUAL BINARIES!
 
-case "`uname`-`arch`" in
-  Linux-i686|Linux-i586|Linux-i486|Linux-i386)
-    echo "Cosmos Autoselecter: Running IA32 GNU/Linux Version"
-    $0.Linux-i686 "$@"
-    echo "Cosmos Autoselecter: Done"
-    ;;
-
-  Linux-ppc)
-    echo "Cosmos Autoselecter: Running PPC GNU/Linux Version"
-    $0.Linux-ppc "$@"
-    echo "Cosmos Autoselecter: Done"
-    ;;
-
-  Darwin-ppc)
-    echo "Cosmos Autoselecter: Running MacOS-X Version"
-    $0.Darwin-ppc "$@"
-    echo "Cosmos Autoselecter: Done"
-    ;;
-
-  *)
-    echo "Unknown or unsupported system: `uname`-`arch`"
-    exit 1
-    ;;
-esac
-
+if [ -x $0.`uname`-`arch` ]; then
+	echo "Cosmos Autoselecter: Running $0.`uname`-`arch`"
+	$0.`uname`-`arch` "$@"
+	echo "Cosmos Autoselecter: Done"
+else
+	echo "Cosmos Autoselecter: Unknown or unsupported system: `uname`-`arch`"
+fi

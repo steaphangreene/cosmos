@@ -1,4 +1,6 @@
 #include <fcntl.h>
+//#include <unistd.h>
+//#include <sys/mman.h>
 
 #include <SDL.h>
 
@@ -96,7 +98,10 @@ SDL_Surface *get_image(const char *filename, int xs, int ys) {
     fprintf(stderr, "Warning: can't open \"%s\"\n", filename);
     return NULL;
     }
-  unsigned char *img = new unsigned char[xs*ys*4];
+  unsigned char *img;
+//  img = (unsigned char *)mmap(NULL, xs*ys*4,
+//	PROT_READ, MAP_PRIVATE, fileno(gfl), 0);
+  img = new unsigned char[xs*ys*4];
   fread(img, xs*4, ys, gfl);  // Stupid Windows not letting me mmap()!
 
   SDL_Surface *s = SDL_CreateRGBSurfaceFrom(img, xs, ys, 32, 4*xs,

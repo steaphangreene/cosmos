@@ -197,8 +197,6 @@ void panel_clicked_planet(int mx, int my, int mb) {
     }
   }
 
-static SDL_Surface *panel = NULL;
-
 void stats_draw_planet(Planet *plan) {
   SDL_Rect screenrec = {800, 12, 224, 768};
   screenrec.h = 24*(plan->objs.size()+7);
