@@ -18,6 +18,7 @@ Planet::Planet(int ord, int sz, int min, int atmos) {
   int dist = (ord+1)*700;
   period = int(sqrt(double(dist)*double(dist)*double(dist)));
   startpos = rand()&65535;
+  type = rand()%5;
   };
 
 int Planet::XPos(int turn) {

@@ -1,4 +1,4 @@
-SDL_Surface *get_intro_image();
+SDL_Surface *get_image(const char *);
 SDL_Surface *get_star_image();
 
 SDL_Surface *build_button0(const char *);

@@ -15,7 +15,7 @@ using namespace std;
 int done = 0;
 
 extern SDL_Surface *screen;
-SDL_Surface *intro, *star, *button[BUTTON_MAX][2];
+SDL_Surface *intro, *planet[5], *star, *button[BUTTON_MAX][2];
 SDL_Event event;
 SDL_Rect rect;
 
@@ -134,7 +134,12 @@ void gui_main() {
   }
 
 void gui_init() {
-  intro = get_intro_image();
+  intro = get_image("graphics/intro.raw");
+  planet[0] = get_image("graphics/planet00.raw");
+  planet[1] = get_image("graphics/planet01.raw");
+  planet[2] = get_image("graphics/planet02.raw");
+  planet[3] = get_image("graphics/planet03.raw");
+  planet[4] = get_image("graphics/planet04.raw");
   star = get_star_image();
 
   button[BUTTON_RESUMEGAME][0] = build_button0("Resume Game");;
@@ -254,6 +259,13 @@ void page_draw() {
     SDL_BlitSurface(star, NULL, screen, &destr);
     page_update();
     }
+  if(page == PAGE_PLANET) {
+    SDL_Rect destr = {0, 0, 800, 768};
+    System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+    int ptype = sys->planets[cur_planet]->type;
+    SDL_BlitSurface(planet[ptype], NULL, screen, &destr);
+    page_update();
+    }
   memset(mo, -1, sizeof(mo));
   update_buttons();
 
@@ -278,6 +290,9 @@ void page_update() {
       SDL_UpdateRect(screen, destr.x, destr.y, destr.w, destr.h);
       }
     }
+  if(page == PAGE_PLANET) {
+    //Do the satellites etc....
+    }
   lasttick = cur_game->tick;
   }
 
@@ -294,7 +309,17 @@ void page_clicked(int mx, int my, int mb) {
 	}
       }
     }
-  else {
-    printf("Unhandled click of button %d on (%d,%d)\n", mb, mx, my);
+  else if(page == PAGE_SYSTEM) {
+    int offx, offy;
+    System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+    for(int plan=0; plan < sys->num_planets; ++plan) {
+      offx = abs(mousex - sys->planets[plan]->XPos(cur_game->tick));
+      offy = abs(mousey - sys->planets[plan]->YPos(cur_game->tick));
+      if(offx < 4 && offy < 4) {
+	cur_planet = plan;
+	page = PAGE_PLANET;
+	break;
+	}
+      }
     }
   }

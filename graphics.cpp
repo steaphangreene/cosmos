@@ -42,10 +42,10 @@ SDL_Surface *get_star_image() {
   return optim;
   }
 
-SDL_Surface *get_intro_image() {
-  FILE *gfl = fopen("graphics/intro.raw", "r");
+SDL_Surface *get_image(const char *filename) {
+  FILE *gfl = fopen(filename, "r");
   if(!gfl) {
-    fprintf(stderr, "Warning: can't open \"graphics/intro.raw\"\n");
+    fprintf(stderr, "Warning: can't open \"%s\"\n", filename);
     return NULL;
     }
   unsigned char *img = new unsigned char[768*800*4];
