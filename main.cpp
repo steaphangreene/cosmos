@@ -16,11 +16,20 @@ SDL_Surface *screen;
 
 int use_sound = 1;
 
+Uint32 ticktock(Uint32 interval, void *param) {
+  SDL_Event ev;
+  ev.type = SDL_USEREVENT;
+  SDL_PushEvent(&ev);
+  return interval;
+  }
+
 int main(int argc, char **argv) {
-  if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO)) {
+  if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER)) {
     fprintf(stderr, "Error initializing SDL!\n");
     exit(1);
     }
+
+  SDL_AddTimer(100, &ticktock, NULL);
 
   Uint32 flags = SDL_HWSURFACE|SDL_FULLSCREEN;
   for(int ctr=1; ctr<argc; ++ctr) {

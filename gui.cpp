@@ -15,7 +15,7 @@ using namespace std;
 int done = 0;
 
 extern SDL_Surface *screen;
-SDL_Surface *intro, *button[BUTTON_MAX][2];
+SDL_Surface *intro, *star, *button[BUTTON_MAX][2];
 SDL_Event event;
 SDL_Rect rect;
 
@@ -33,8 +33,9 @@ int cur_galaxy=0;
 int cur_system=0;
 int cur_planet=0;
 
-void gui_button_pressed(int button);
-void draw_page();
+void gui_button_clicked(int button);
+void page_clicked(int mx, int my, int mb);
+void page_draw();
 
 int update_buttons() {
   int inbutt = 0;
@@ -56,9 +57,7 @@ int update_buttons() {
   }
 
 void page_init() {
-  SDL_FillRect(screen, NULL, 0);
-
-  draw_page();
+  page_draw();
 
   buttlist[PAGE_ROOT][BUTTON_RESUMEGAME] = (cur_game->InProgress())? 6 : 0;
 
@@ -69,17 +68,6 @@ void page_init() {
     cur_amb_num = ambient[page];
     }
 
-  for(int ctr=1; ctr < BUTTON_MAX; ++ctr) if(buttlist[page][ctr]) {
-    int ord = buttlist[page][ctr];
-    mo[ctr] = (mousey >= 64*ord && mousex >= 812
-		&& mousey < 50+64*ord && mousex < 1012);
-    rect.x = 812;  rect.y = 64*ord;
-    SDL_BlitSurface(button[ctr][0], NULL, screen, &rect);
-    }
-  memset(mo, 0, sizeof(mo));
-  update_buttons();
-
-  SDL_UpdateRect(screen, 0, 0, 0, 0);
   lastpage = page;
   }
 
@@ -90,9 +78,24 @@ void gui_main() {
     if(event.type == SDL_QUIT) {
       done = 1;
       }
+    else if(event.type == SDL_VIDEOEXPOSE) {
+      page_draw();
+      }
+    else if(event.type == SDL_USEREVENT) {
+      cur_game->turn += 256;
+      page_draw();
+      }
     else if(event.type == SDL_KEYDOWN) {
       if(event.key.keysym.sym == SDLK_ESCAPE) {
-	done = 1;
+        if(pagemap[page][BUTTON_CANCEL]) {
+	  page = pagemap[page][BUTTON_CANCEL];
+	  }
+        else if(pagemap[page][BUTTON_EXIT]) {
+	  page = pagemap[page][BUTTON_EXIT];
+	  }
+        else if(buttlist[page][BUTTON_QUITGAME]) {
+	  done = 1;
+	  }
 	}
       else if(event.key.keysym.sym == SDLK_RETURN) {
 	if(event.key.keysym.mod & (KMOD_LALT|KMOD_RALT)) {
@@ -108,13 +111,17 @@ void gui_main() {
       curbutt = update_buttons();
       if(curbutt) {
 	audio_play(click, 8, 8);
-	gui_button_pressed(curbutt);
+	}
+      else if(mousex < 800) {
+	page_clicked(mousex, mousey, event.button.button);
 	}
       }
     else if(event.type == SDL_MOUSEBUTTONUP) {
-      if(curbutt == update_buttons() && curbutt && pagemap[page][curbutt]) {
-	if(pagemap[page][curbutt] == -1) done = 1;
-	else page = pagemap[page][curbutt];
+      if(curbutt == update_buttons() && curbutt) {
+	gui_button_clicked(curbutt);
+        if(pagemap[page][curbutt]) {
+	  page = pagemap[page][curbutt];
+	  }
 	}
       }
 
@@ -125,7 +132,8 @@ void gui_main() {
   }
 
 void gui_init() {
-  intro = SDL_DisplayFormat(get_intro_image());
+  intro = get_intro_image();
+  star = get_star_image();
 
   button[BUTTON_RESUMEGAME][0] = build_button0("Resume Game");;
   button[BUTTON_RESUMEGAME][1] = build_button1("Resume Game");
@@ -145,6 +153,8 @@ void gui_init() {
   button[BUTTON_ACCEPT][1] = build_button1("Accept");
   button[BUTTON_OPTIONS][0] = build_button0("Options");;
   button[BUTTON_OPTIONS][1] = build_button1("Options");
+  button[BUTTON_EXIT][0] = build_button0("Exit");;
+  button[BUTTON_EXIT][1] = build_button1("Exit");
   button[BUTTON_RESETALL][0] = build_button0("Reset All");;
   button[BUTTON_RESETALL][1] = build_button1("Reset All");
   button[BUTTON_RANDOMIZE][0] = build_button0("Randomize");
@@ -183,16 +193,22 @@ void gui_init() {
   pagemap[PAGE_SYSOPT][BUTTON_CANCEL] =		PAGE_ROOT;
   ambient[PAGE_SYSOPT] = audio_loadsound("sounds/ambient00.wav");
 
-  buttlist[PAGE_GALAXY][BUTTON_QUITGAME] =	11;
-  pagemap[PAGE_GALAXY][BUTTON_QUITGAME] =	PAGE_ROOT;
+  buttlist[PAGE_GALAXY][BUTTON_EXIT] =		11;
+  pagemap[PAGE_GALAXY][BUTTON_EXIT] =		PAGE_ROOT;
   ambient[PAGE_GALAXY] = audio_loadsound("sounds/ambient00.wav");
+
+  buttlist[PAGE_SYSTEM][BUTTON_EXIT] =		11;
+  pagemap[PAGE_SYSTEM][BUTTON_EXIT] =		PAGE_GALAXY;
+
+  buttlist[PAGE_PLANET][BUTTON_EXIT] =		11;
+  pagemap[PAGE_PLANET][BUTTON_EXIT] =		PAGE_SYSTEM;
 
   click = audio_loadsound("sounds/click.wav");
 
   page_init();
   }
 
-void gui_button_pressed(int button) {
+void gui_button_clicked(int button) {
   switch(page) {
     case(PAGE_ROOT): {
       switch(button) {
@@ -217,16 +233,62 @@ void gui_button_pressed(int button) {
     }
   }
 
-void draw_page() {
+void page_draw() {
+  SDL_FillRect(screen, NULL, 0);
+
   if(page == PAGE_ROOT) SDL_BlitSurface(intro, NULL, screen, NULL);
   if(page == PAGE_NEW) cur_game->Clear();
   if(page == PAGE_GALAXY) {
     cur_game->Fill();
-    SDL_Rect rec = {0, 0, 2, 2};
+    SDL_Rect rec = {0, 0, 3, 3};
     for(int sys=0; sys < cur_game->galaxys[cur_galaxy]->num_systems; ++sys) {
-      rec.x = cur_game->galaxys[cur_galaxy]->systems[sys]->xpos;
-      rec.y = cur_game->galaxys[cur_galaxy]->systems[sys]->ypos;
+      rec.x = cur_game->galaxys[cur_galaxy]->systems[sys]->xpos - 1;
+      rec.y = cur_game->galaxys[cur_galaxy]->systems[sys]->ypos - 1;
       SDL_FillRect(screen, &rec, 0xFFFFFFFF);
       }
+    }
+
+  for(int ctr=1; ctr < BUTTON_MAX; ++ctr) if(buttlist[page][ctr]) {
+    int ord = buttlist[page][ctr];
+    mo[ctr] = (mousey >= 64*ord && mousex >= 812
+		&& mousey < 50+64*ord && mousex < 1012);
+    rect.x = 812;  rect.y = 64*ord;
+    SDL_BlitSurface(button[ctr][0], NULL, screen, &rect);
+    }
+  if(page == PAGE_SYSTEM) {
+    SDL_Rect destr = {(800-32)/2, (768-32)/2, 32, 32};
+    SDL_BlitSurface(star, NULL, screen, &destr);
+    System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+    for(int plan=0; plan < sys->num_planets; ++plan) {
+      int x = sys->planets[plan]->XPos();
+      int y = sys->planets[plan]->YPos();
+      destr.x = x;
+      destr.y = y;
+      destr.w = 3;
+      destr.h = 3;
+      SDL_FillRect(screen, &destr, 0xFFFF00FF);
+      }
+    }
+  memset(mo, 0, sizeof(mo));
+  update_buttons();
+
+  SDL_UpdateRect(screen, 0, 0, 0, 0);
+  }
+
+void page_clicked(int mx, int my, int mb) {
+  if(page == PAGE_GALAXY) {
+    int offx, offy;
+    for(int sys=0; sys < cur_game->galaxys[cur_galaxy]->num_systems; ++sys) {
+      offx = abs(cur_game->galaxys[cur_galaxy]->systems[sys]->xpos - mx);
+      offy = abs(cur_game->galaxys[cur_galaxy]->systems[sys]->ypos - my);
+      if(offx < 4 && offy < 4) {
+	cur_system = sys;
+	page = PAGE_SYSTEM;
+	break;
+	}
+      }
+    }
+  else {
+    printf("Unhandled click of button %d on (%d,%d)\n", mb, mx, my);
     }
   }

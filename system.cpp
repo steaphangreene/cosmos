@@ -3,8 +3,6 @@
 
 #include "system.h"
 
-//Orbital Period = sqrt(Distance From Star ^ 3)
-
 System::System(int xp, int yp, int nump, int minl, int atmosl) {
   num_planets = nump;
   planets = new (Planet*)[nump];

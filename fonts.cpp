@@ -3,11 +3,20 @@
 
 #include <SDL.h>
 
-#include "graphics/font22.h"
+#include "data/font22.h"
 
 SDL_Surface *font;
 int foff[128];
 int flen[128];
+
+static const unsigned char rchanc[] = { 0xFF, 0, 0, 0 };
+static const unsigned int rchan = *((unsigned long *)rchanc);
+static const unsigned char gchanc[] = { 0, 0xFF, 0, 0 };
+static const unsigned int gchan = *((unsigned long *)gchanc);
+static const unsigned char bchanc[] = { 0, 0, 0xFF, 0 };
+static const unsigned int bchan = *((unsigned long *)bchanc);
+static const unsigned char achanc[] = { 0, 0, 0, 0xFF };
+static const unsigned int achan = *((unsigned long *)achanc);
 
 void fonts_init() {
   int xpos = 0;
@@ -58,9 +67,8 @@ void fonts_init() {
   font = SDL_CreateRGBSurfaceFrom((void*)font22_image.pixel_data,
 		font22_image.width, font22_image.height,
 		32, 4*font22_image.width,
-		0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
-//  SDL_SetAlpha(font, SDL_RLEACCEL|SDL_SRCALPHA, SDL_ALPHA_OPAQUE);
-  SDL_SetAlpha(font, SDL_SRCALPHA, SDL_ALPHA_OPAQUE);
+		rchan, gchan, bchan, achan);
+  SDL_SetAlpha(font, SDL_RLEACCEL|SDL_SRCALPHA, SDL_ALPHA_OPAQUE);
   }
 
 int string_len(const char *str) {

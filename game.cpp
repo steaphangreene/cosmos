@@ -14,6 +14,7 @@ void game_init() {
 
 Game::Game() {
   started = 0;
+  turn = 0;
   Reset();
   }
 

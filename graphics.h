@@ -1,28 +1,10 @@
 SDL_Surface *get_intro_image();
-SDL_Surface *get_resumegame0_image();
-SDL_Surface *get_resumegame1_image();
-SDL_Surface *get_loadgame0_image();
-SDL_Surface *get_loadgame1_image();
-SDL_Surface *get_newgame0_image();
-SDL_Surface *get_newgame1_image();
-SDL_Surface *get_networkgame0_image();
-SDL_Surface *get_networkgame1_image();
-SDL_Surface *get_quitgame0_image();
-SDL_Surface *get_quitgame1_image();
-SDL_Surface *get_cancel0_image();
-SDL_Surface *get_cancel1_image();
-SDL_Surface *get_accept0_image();
-SDL_Surface *get_accept1_image();
-SDL_Surface *get_options0_image();
-SDL_Surface *get_options1_image();
-SDL_Surface *get_randomize0_image();
-SDL_Surface *get_randomize1_image();
-SDL_Surface *get_systemoptions0_image();
-SDL_Surface *get_systemoptions1_image();
-SDL_Surface *get_resetall0_image();
-SDL_Surface *get_resetall1_image();
-SDL_Surface *get_blank0_image();
-SDL_Surface *get_blank1_image();
+SDL_Surface *get_star_image();
 
 SDL_Surface *build_button0(const char *);
 SDL_Surface *build_button1(const char *);
+
+extern const unsigned int rchan;
+extern const unsigned int gchan;
+extern const unsigned int bchan;
+extern const unsigned int achan;
