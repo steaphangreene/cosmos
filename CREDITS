@@ -1,24 +1,31 @@
 Primary Developer:
-	Steaphan 'Stea' Greene - FKA Insomnia <stea@core.binghamton.edu>
+	Steaphan 'Stea' Greene - AKA Insomnia <stea@cs.binghamton.edu>
 
 Graphics and Art:
-	Steaphan 'Stea' Greene - FKA Insomnia <stea@core.binghamton.edu>
+	Steaphan 'Stea' Greene - AKA Insomnia <stea@cs.binghamton.edu>
+	Most Images Created by POV-Ray:
+		http://www.povray.org/
+	Other Images Created by The Gimp:
+		http://www.gimp.org/
 
 Music:
 	Wyatt Peterson <wyatt@binghamton.edu>
 
 Intro Screen:
-	Image Courtesy of NASA's JPL: http://jpl.nasa.gov/
-	Touched up by The Gimp: http://www.gimp.org/
+	Image Courtesy of NASA's JPL:
+		http://jpl.nasa.gov/
+	Touched up by The Gimp:
+		http://www.gimp.org/
 
 Testers:
 	Wyatt Peterson <wyatt@binghamton.edu>
 	Sandor Szatmari <inkhead@inkhead.org>
 
 Hardware Access Providers:
-	Steaphan 'Stea' Greene - FKA Insomnia <stea@core.binghamton.edu>
+	Steaphan 'Stea' Greene - AKA Insomnia <stea@cs.binghamton.edu>
 	Sandor Szatmari <inkhead@inkhead.org>
-	Binghamton Univ. Comp. Sci. Dept: http://www.cs.binghamton.edu/
+	Binghamton University Computer Science Dept:
+		http://www.cs.binghamton.edu/
 
 Interface Libraries:
 	SDL: http://www.libsdl.org/

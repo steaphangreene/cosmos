@@ -6,6 +6,7 @@
 
 #include "game.h"
 #include "ship.h"
+#include "dict.h"
 
 int sattp[5][5] = {
 	{ },
@@ -15,10 +16,9 @@ int sattp[5][5] = {
 	{ 2, 2, 2, 2 },
 	};
 
-extern int max_factions;
-
 Planet::Planet(System *s, int ord, int sz, int min, int atmos)
   : SObject(s, (ord+1)*600){
+  name = dict[rand()%dict_size];
   size = sz;
   minerals = min;
   atmosphere = atmos;
@@ -29,7 +29,6 @@ Planet::Planet(System *s, int ord, int sz, int min, int atmos)
   for(int ctr=0; ctr<num_satellites; ++ctr) {
     satellites[ctr] = new Satellite(rand()&65535, sattp[num_satellites][ctr]);
     }
-  explored.resize(max_factions, 0);
   };
 
 Planet::~Planet() {
@@ -91,14 +90,6 @@ int Planet::Minerals() {
 void Planet::TakeTurn() {
   for(int ctr=0; ctr<int(colonies.size()); ++ctr) colonies[ctr]->TakeTurn();
   for(int ctr=0; ctr<num_satellites; ++ctr) satellites[ctr]->TakeTurn();
-  }
-
-int Planet::ExploredBy(int n) {
-  return explored[n];
-  }
-
-void Planet::Explore(int n) {
-  explored[n] = 1;
   }
 
 int Planet::Owner() {

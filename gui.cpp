@@ -35,7 +35,7 @@ font *cur_font[9];
 SDL_Surface *button[BUTTON_MAX][2];
 
 static SDL_Surface *intro;
-//static SDL_Surface *credg;
+static SDL_Surface *credg;
 
 int lastpage = PAGE_INVALID, page = PAGE_ROOT;
 int lastpanel = PANEL_NONE, panel = PANEL_NONE;
@@ -55,9 +55,8 @@ int cur_mus_num=0;
 
 int cur_galaxy=0;
 int cur_system=0;
-int cur_planet=0;
 int cur_ship=0;
-Fleet *cur_fleet=NULL;
+SObject *cur_object=NULL;
 
 static char dialog_message[4096] = {0};
 
@@ -155,10 +154,11 @@ void page_cleanup(int pag) {
     }
   }
 
+static int cred_pos;
+
 void page_init() {
   if(page == PAGE_ROOT) {
-//    set_sprite(1, credg);
-//    move_sprite(1, 10, 128);
+    cred_pos = 0;
     }
   if(page == PAGE_GALAXY) {
     page_init_galaxy();
@@ -330,7 +330,7 @@ void gui_init() {
     }
   string_drawr(intro, 768, 704, cur_font[4], version);
 
-//  credg = get_string(cur_font[4], credits);
+  credg = get_string(cur_font[4], credits);
 
   button[BUTTON_RESUMEGAME][0] = build_button0("Resume Game");
   button[BUTTON_RESUMEGAME][1] = build_button1("Resume Game");
@@ -510,6 +510,8 @@ void panel_draw() {
   }
 
 void page_draw() {
+  cur_game->EmptyTrash(); //Get rid of empty fleet objs, etc....
+
   SDL_Rect pgr = {0, 0, 800, 768};
   SDL_FillRect(screen, &pgr, 0);
 
@@ -572,7 +574,16 @@ void panel_update() {
 
 void page_update() {
   if(page == PAGE_ROOT) {
-    //move_sprite(1, 10, 128);
+    ++cred_pos;
+    if(cred_pos >= credg->h + 110 + 512) cred_pos = 0;
+    if(cred_pos > 110 && (cred_pos % 6) == 0) {
+      int boff = cred_pos-110;
+      SDL_Rect crr = { 0, (-512+boff) >? 0, 768, boff <? 512 };
+      SDL_Rect scr = { 16, (640-boff) >? 128, 768, boff <? 512 };
+      SDL_BlitSurface(intro, &scr, screen, &scr);
+      SDL_BlitSurface(credg, &crr, screen, &scr);
+      update(&scr);
+      }
     }
   else if(page == PAGE_PLANET) {
     page_update_planet();

@@ -48,7 +48,7 @@ void page_cleanup_planet() {
 void page_draw_planet() {
   Planet *plan;
   SDL_Rect destr = {0, 0, 768, 768};
-  plan = (Planet*)cur_game->galaxys[cur_galaxy]->systems[cur_system]->objects[cur_planet];
+  plan = (Planet*)cur_object;
   SDL_BlitSurface(planet[plan->Type()], NULL, screen, &destr);
   lasttick = -1;
   page_update_planet();
@@ -58,8 +58,7 @@ void page_draw_planet() {
 void page_update_planet() {
   SDL_Rect srcr = {0, 0, 64, 64};
   SDL_Rect destr = {0, 0, 64, 64};
-  System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
-  Planet *plan = (Planet*)sys->objects[cur_planet];
+  Planet *plan = (Planet*)cur_object;
   if(lasttick != -1) {
     for(int sctr=0; sctr < plan->num_satellites; ++sctr) {
       Satellite *sat = plan->satellites[sctr];
@@ -128,32 +127,35 @@ void stats_draw_planet(Planet *plan, int upd) {
   int col = 7;
 
   line = 0;
-  if(cheat1 || plan->ExploredBy(local_player))
+  if(cheat1 || plan->KnownTo(local_player))
     sprintf(buf, "Atmosphere: %d", plan->Atmosphere());
   else
     sprintf(buf, "Atmosphere: ?");
   string_draw(screen, 5, 13+24*(line++), cur_font[col], buf);
 
-  if(cheat1 || plan->ExploredBy(local_player))
+  if(cheat1 || plan->KnownTo(local_player))
     sprintf(buf, "Minerals: %d", plan->Minerals());
   else
     sprintf(buf, "Minerals: ?");
   string_draw(screen, 5, 13+24*(line++), cur_font[col], buf);
   
-  if(cheat1 || plan->ExploredBy(local_player))
+  if(cheat1 || plan->KnownTo(local_player))
     sprintf(buf, "Satellites: %d", plan->num_satellites);
   else
     sprintf(buf, "Satellites: ?");
   string_draw(screen, 5, 13+24*(line++), cur_font[col], buf);
 
   line = 0;
-  if(cheat1 || plan->ExploredBy(local_player))
+  sprintf(buf, "Planet %s", plan->Name());
+  string_drawr(screen, 768, 13+24*(line++), cur_font[col], buf);
+
+  if(cheat1 || plan->KnownTo(local_player))
     sprintf(buf, "Avg. Temp: %d", plan->Temperature());
   else
     sprintf(buf, "Avg. Temp: ?");
   string_drawr(screen, 768, 13+24*(line++), cur_font[col], buf);
 
-  if(cheat1 || plan->ExploredBy(local_player))
+  if(cheat1 || plan->KnownTo(local_player))
     sprintf(buf, "Surf. Rad: %d", plan->Radiation());
   else
     sprintf(buf, "Surf. Rad: ?");

@@ -28,6 +28,7 @@ public:
   Ship(int tec, int own);
   const char *Name() { return name.c_str(); }
   SClass Class() { return sclass; }
+  const char *CName();
   int NumItems() { return int(items.size()); }
   ShipItem GetItem(int n) { return items[n]; }
   void AddItem(ShipItem &i) { items.push_back(i); }

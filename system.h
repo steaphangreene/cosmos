@@ -25,7 +25,6 @@ public:
 
 //private:
   vector<SObject*> objects;
-  vector<SObject*> fleets;
   vector<int> explored;
   int xpos;
   int ypos;

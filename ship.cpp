@@ -1,3 +1,4 @@
+#include "dict.h"
 #include "ship.h"
 #include "techtree.h"
 
@@ -14,7 +15,7 @@ Ship::Ship(int tec, int own) {
   owner = own;
   Tech *tc = cur_tree->GetTech(tech);
   sclass = SClass(tc->special);
-  name = sclass_name[sclass];
+  name = dict[rand()%dict_size];
   mincrew = tc->crew;
   maxcrew = tc->crew;
   crew = 0;
@@ -41,4 +42,8 @@ void Ship::TakeTurn() {
 int Ship::CanLand() {
   if(sclass <= SCLASS_COLONIZER || sclass == SCLASS_COLONYSHIP) return 1;
   return 0;
+  }
+
+const char *Ship::CName() {
+  return sclass_name[sclass];
   }

@@ -20,6 +20,7 @@ public:
   ~Planet();
   int Type();
   virtual int Owner();
+  virtual int SType() { return SOBJECT_PLANET; }
 
   int Radiation();
   int Atmosphere();
@@ -32,13 +33,9 @@ public:
   Satellite **satellites;
   vector <Colony *> colonies;
 
-  int ExploredBy(int);
-  void Explore(int);
-
 protected:
   friend class System;
   int order, size, minerals, atmosphere, temperature, radiation;
-  vector<int> explored;
   };
 
 #endif

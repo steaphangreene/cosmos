@@ -40,16 +40,14 @@ void panel_cleanup_colony() {
   }
 
 void panel_draw_colony() {
-  Planet *plan;
-  plan = (Planet*)cur_game->galaxys[cur_galaxy]->systems[cur_system]->objects[cur_planet];
+  Planet *plan = (Planet*)cur_object;
   if(plan->colonies.size() <= 0) return;
   Colony *col = plan->colonies[0];
   stats_draw_colony(col);
   }
 
 void panel_clicked_colony(int mx, int my, int mb) {
-  System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
-  Planet *plan = (Planet*)sys->objects[cur_planet];
+  Planet *plan = (Planet*)cur_object;
   if(plan->colonies.size() <= 0) return;
   Colony *col = plan->colonies[0];
 
@@ -230,8 +228,7 @@ void mouse_released_colony() {
 void mouse_moved_colony(int mx, int my) {
   if(grabbed == -1) return;
 
-  System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
-  Planet *plan = (Planet*)sys->objects[cur_planet];
+  Planet *plan = (Planet*)cur_object;
   if(plan->colonies.size() <= 0) return;
   Colony *col = plan->colonies[0];
 
@@ -318,8 +315,7 @@ char *popstr(int pop, int mpop) {
   }
 
 void button_clicked_colony(int button) {
-  System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
-  Planet *plan = (Planet*)sys->objects[cur_planet];
+  Planet *plan = (Planet*)cur_object;
   if(plan->colonies.size() <= 0) return;
   Colony *col = plan->colonies[0];
 

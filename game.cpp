@@ -4,7 +4,34 @@
 #include <ctime>
 #include <algorithm>
 
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include "game.h"
+
+int MKDIR(const char *fn, int perms) {
+  static char buf[1024] = {0};
+#ifndef HANDLE_MAX
+  if(mkdir(fn, perms)) {
+    if(errno != EEXIST) {
+      sprintf(buf, "Warning - Can't Create \"%s\"", fn);
+      perror(buf);
+      return -1;
+      }
+    }
+#else
+  if(mkdir(fn)) {
+    if(errno != EEXIST) {
+      sprintf(buf, "Warning - Can't Create \"%s\"", fn);
+      perror(buf);
+      return -1;
+      }
+    }
+#endif
+  return 0;
+  }
 
 Game *cur_game = NULL;
 TechTree *cur_tree = NULL;
@@ -36,10 +63,86 @@ Game::~Game() {
   Clear();
   }
 
+int Game::Load(const char *fn) {
+  static char buf[1024] = {0};
+  static char ebuf[1024] = {0};
+  if(getenv("HOME"))
+    sprintf(buf, "%s/.cosmos/saves/%s", getenv("HOME"), fn);
+  else
+    sprintf(buf, "saves/%s", fn);
+
+  FILE *svfl = fopen(buf, "r");
+  if(!svfl) {
+    sprintf(ebuf, "Warning - Can't Load \"%s\"", buf);
+    perror(ebuf);
+    return -1;
+    }
+  for(int ctr=0; ctr < num_configs; ++ctr) {
+    fscanf(svfl, "%d", &setting[ctr]);
+    }
+  for(int ctr=0; ctr < num_configs; ++ctr) {
+    fscanf(svfl, "%d", &game_setting[ctr]);
+    }
+  for(int ctr=0; ctr < num_configs; ++ctr) {
+    fscanf(svfl, "%d", &working_setting[ctr]);
+    }
+  fclose(svfl);
+
+  return 0;
+  }
+
+int Game::Save(const char *fn) {
+  static char buf[1024] = {0};
+  static char ebuf[1024] = {0};
+  if(getenv("HOME")) {
+    sprintf(buf, "%s/.cosmos", getenv("HOME"));
+    if(MKDIR(buf, 0755)) return -1;
+    sprintf(buf, "%s/.cosmos/saves", getenv("HOME"));
+    if(MKDIR(buf, 0755)) return -1;
+    sprintf(buf, "%s/.cosmos/saves/%s", getenv("HOME"), fn);
+    }
+  else {
+    if(MKDIR(buf, 0755)) return -1;
+    sprintf(buf, "saves/%s", fn);
+    }
+
+  FILE *svfl = fopen(buf, "w");
+  if(!svfl) {
+    sprintf(ebuf, "Warning - Can't Save \"%s\"", buf);
+    perror(ebuf);
+    return -1;
+    }
+  for(int ctr=0; ctr < num_configs; ++ctr) {
+    fprintf(svfl, "%d", setting[ctr]);
+    if(ctr != num_configs-1) fprintf(svfl, " ");
+    else fprintf(svfl, "\n");
+    }
+  for(int ctr=0; ctr < num_configs; ++ctr) {
+    fprintf(svfl, "%d", game_setting[ctr]);
+    if(ctr != num_configs-1) fprintf(svfl, " ");
+    else fprintf(svfl, "\n");
+    }
+  for(int ctr=0; ctr < num_configs; ++ctr) {
+    fprintf(svfl, "%d", working_setting[ctr]);
+    if(ctr != num_configs-1) fprintf(svfl, " ");
+    else fprintf(svfl, "\n");
+    }
+  fclose(svfl);
+
+  return 0;
+  }
+
 void Game::TakeTurn() {
+  EmptyTrash();
   turn++;
   for(int ctr=0; ctr<int(players.size()); ++ctr) players[ctr]->TakeTurn();
   for(int ctr=0; ctr<int(galaxys.size()); ++ctr) galaxys[ctr]->TakeTurn();
+  EmptyTrash();
+  }
+
+void Game::EmptyTrash() {
+  for(int ctr=0; ctr<int(junk.size()); ++ctr) delete(junk[ctr]);
+  junk.clear();
   }
 
 void Game::Randomize() {

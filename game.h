@@ -9,6 +9,7 @@ extern Game *cur_game;
 #define GAME_H
 
 #include "galaxy.h"
+#include "sobject.h"
 
 void game_init();
 
@@ -27,6 +28,9 @@ public:
   void Clear();
   void Fill();
 
+  int Save(const char *);
+  int Load(const char *);
+
   int GetTechTree();
   int GetShipCombat();
   int GetBoardCombat();
@@ -44,17 +48,24 @@ public:
 
   void TakeTurn();
 
+  void EmptyTrash();
+
 //private:
   void Finalize();
-  int started;
+
   int setting[num_configs];
   int game_setting[num_configs];
   int working_setting[num_configs];
 
+  int started;
+
   int turn, tick, frame;
 
-  vector<Galaxy *>galaxys;
-  vector<Player *>players;
+  vector<Galaxy*> galaxys;
+
+  vector<Player*> players;
+
+  vector<SObject*> junk;
   };
 
 #endif

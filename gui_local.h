@@ -73,6 +73,5 @@ extern int mo[BUTTON_MAX];
 extern int page, panel;
 extern int cur_galaxy;
 extern int cur_system;
-extern int cur_planet;
 extern int cur_ship;
-extern Fleet *cur_fleet;
+extern SObject *cur_object;

@@ -47,10 +47,12 @@ int main(int argc, char **argv) {
 
   if(use_sound) audio_init();
   game_init();
+  cur_game->Load("autosave.gam");
   SDL_ShowCursor(SDL_DISABLE);
   gui_init();
   gui_main();
   SDL_ShowCursor(SDL_ENABLE);
+  cur_game->Save("autosave.gam");
   SDL_Quit();
 
   exit(0);
