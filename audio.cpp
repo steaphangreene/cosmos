@@ -149,8 +149,10 @@ void audio_play(int snd, int vol, int pan) {
   s->vol = vol;
   s->pan = pan;
   s->flags = 0;
+  SDL_LockAudio();
   s->next = play_blocks;
   play_blocks = s;
+  SDL_UnlockAudio();
   }
 
 Sound *audio_loop(int snd, int vol, int pan) {
@@ -161,24 +163,32 @@ Sound *audio_loop(int snd, int vol, int pan) {
   s->vol = vol;
   s->pan = pan;
   s->flags |= SOUND_LOOP;
+  SDL_LockAudio();
   s->next = play_blocks;
   play_blocks = s;
+  SDL_UnlockAudio();
   return s;
   }
 
 void audio_setvol(Sound *s, int v) {
   if(!audio_initialized) return;
+  SDL_LockAudio();
   if(s) s->vol = v;
+  SDL_UnlockAudio();
   }
 
 void audio_setpan(Sound *s, int p) {
   if(!audio_initialized) return;
+  SDL_LockAudio();
   if(s) s->pan = p;
+  SDL_UnlockAudio();
   }
 
 void audio_stop(Sound *s) {
   if(!audio_initialized) return;
+  SDL_LockAudio();
   if(s) s->flags |= SOUND_TERMINATE;
+  SDL_UnlockAudio();
   }
 
 void audio_init() {

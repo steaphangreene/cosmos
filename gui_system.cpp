@@ -41,13 +41,8 @@ void gui_init_system() {
   pagemap[PAGE_SYSTEM][BUTTON_EXIT] =		PAGE_GALAXY;
   }
 
-void gui_button_clicked_system(int button) {
-  }
-
-void panel_redraw_system(SDL_Rect *area) {
-  }
-
 void page_redraw_system(SDL_Rect *area) {
+/*
   SDL_Rect todo = *area;
   SDL_FillRect(screen, &todo, black);
   SDL_Rect destr = {(768-32)/2, (768-32)/2, 32, 32};
@@ -72,9 +67,13 @@ void page_redraw_system(SDL_Rect *area) {
       SDL_BlitSurface(splanet[0], NULL, screen, &destr);
     }
   todo = *area;
+*/
   }
 
 void page_init_system() {
+  }
+
+void page_cleanup_system() {
   }
 
 void page_draw_system() {
@@ -93,7 +92,13 @@ void page_draw_system() {
     destr.x = sys->planets[plan]->XPos(cur_game->turn) - 1;
     destr.y = sys->planets[plan]->YPos(cur_game->turn) - 1;
     SDL_BlitSurface(splanet[0], NULL, screen, &destr);
-    update(&destr);
+    if(sys->planets[plan]->ships.size() > 0) {
+      SDL_Rect rec2 = {0, 0, 4, 4};
+      rec2.x = sys->planets[plan]->XPos(cur_game->turn) + 6;
+      rec2.y = sys->planets[plan]->YPos(cur_game->turn) - 4;
+      SDL_FillRect(screen, &rec2, color3(cur_game->players[
+		sys->planets[plan]->claimed]->color));
+      }
     }
   }
 
@@ -112,9 +117,6 @@ void page_clicked_system(int mx, int my, int mb) {
       break;
       }
     }
-  }
-
-void panel_clicked_system(int mx, int my, int mb) {
   }
 
 void mouse_released_system() {

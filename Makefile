@@ -9,20 +9,20 @@ DTARU:=	cosmos_data.tar
 DTARD:=	cosmos_data-$(TSTR).tar.gz
 
 # Debugging settings
-#CC:=	gcc -DDEBUG=SDL_INIT_NOPARACHUTE -pipe -Wall `sdl-config --cflags` -g $(COSMOS_FLAGS)
+#CC:=	g++$(COSMOS_CTAIL) -DDEBUG=SDL_INIT_NOPARACHUTE -pipe -Wall `sdl-config --cflags` -g $(COSMOS_FLAGS)
 #LIBS:=	`sdl-config --libs` -lefence $(COSMOS_LIBS)
 #STRIP:=	touch
 
 # Production settings
-CC:=	gcc -O2 -pipe -Wall `sdl-config --cflags` $(COSMOS_FLAGS)
+CC:=	g++$(COSMOS_CTAIL) -O2 -pipe -Wall `sdl-config --cflags` $(COSMOS_FLAGS)
 LIBS:=	`sdl-config --libs` $(COSMOS_LIBS)
 STRIP:=	strip
 
-OBJS:=	main.o gui.o gui_galaxy.o gui_system.o gui_planet.o \
-	game.o galaxy.o system.o planet.o satellite.o player.o \
-	techtree.o tech_tiny.o \
-	audio.o fonts.o graphics.o
-# graphics_intro.o
+OBJS:=	main.o gui.o audio.o fonts.o graphics.o \
+	gui_galaxy.o gui_system.o gui_planet.o \
+	gui_colony.o \
+	ship.o game.o galaxy.o system.o planet.o satellite.o player.o \
+	techtree.o tech_tiny.o
 
 WCC:=   win32-gcc -O2 -pipe -Wall `win32-exec sdl-config --cflags` -s
 WLIBS:= `win32-exec sdl-config --libs` -lstdc++
@@ -32,7 +32,7 @@ basic:	$(BIN)
 
 all:	$(BIN) graphics/*.raw cosmos.exe srctar cosmos.Linux-i586 \
 	cosmos.Linux-sparc64 cosmos.SunOS-sun4 cosmos.Darwin-ppc
-#	cosmos.Linux-ppc
+#	cosmos.Linux-ppc \
 
 cosmos.Linux-i586:	$(OBJS)
 	scp cosmos_src.tar.gz reactor:
@@ -59,10 +59,10 @@ cosmos.Darwin-ppc:	$(OBJS)
 	ssh -p 2222 inkhead.org rm -rf cosmos cosmos_src.tar.gz
 
 cosmos.Linux-ppc:	$(OBJS)
-	scp -P 2222 cosmos_src.tar.gz 10.0.0.164:
-	ssh -p 2222 10.0.0.164 "tar xzf cosmos_src.tar.gz; cd cosmos/; make"
-	scp -P 2222 10.0.0.164:cosmos/$@ .
-	ssh -p 2222 10.0.0.164 rm -rf cosmos cosmos_src.tar.gz
+	scp -P 2222 cosmos_src.tar.gz 128.226.125.100:
+	ssh -p 2222 128.226.125.100 "tar xzf cosmos_src.tar.gz; cd cosmos/; make"
+	scp -P 2222 128.226.125.100:cosmos/$@ .
+	ssh -p 2222 128.226.125.100 rm -rf cosmos cosmos_src.tar.gz
 
 clean:	.
 	rm -f *.o *.win32_o

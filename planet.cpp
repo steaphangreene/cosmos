@@ -5,6 +5,7 @@
 #include "math.h"
 
 #include "game.h"
+#include "ship.h"
 
 //Orbital Period = sqrt(Distance From Star ^ 3)
 
@@ -99,6 +100,20 @@ int Planet::Industry() {
   for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
     ind += cur_tree->Industry(objs[ctr], oqty[ctr], this);
     }
+  long long free;
+  free = FreePop();
+  free *= 1000000;
+  free += FreePopM();
+  if(free < 0) {
+    long long tmp = ind, need, busy;
+    busy = Population();
+    busy *= 1000000;
+    busy += PopulationM();
+    need = busy + (-free);
+    tmp *= busy;
+    tmp /= need;
+    ind = tmp;
+    }
   return 0 >? ind;
   }
 
@@ -127,7 +142,9 @@ int Planet::FreePop() {
   }
 
 int Planet::FreePopM() {
-  return pop_minor;
+  if(pop_minor == 0) return 0;
+  else if(FreePop() < 0) return -1000000 + pop_minor;
+  else return pop_minor;
   }
 
 int Planet::Growth() {
@@ -151,7 +168,7 @@ int Planet::Happiness() {
   for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
     hap += cur_tree->Happiness(objs[ctr], oqty[ctr], this);
     }
-  return hap <? 1000;
+  return 0 >? hap <? 1000;
   }
 
 int Planet::Security() {
@@ -159,7 +176,7 @@ int Planet::Security() {
   for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
     sec += cur_tree->Security(objs[ctr], oqty[ctr], this);
     }
-  return sec <? 1000;
+  return 0 >? sec <? 1000;
   }
 
 int Planet::Loyalty() {
@@ -176,13 +193,26 @@ void Planet::TakeTurn() {
   population += pop_minor / 1000000;
   pop_minor %= 1000000;
   population += Growth();
+
+  int ind = Industry();
+  for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
+    int diff = cur_tree->Upkeep(objs[ctr], oqty[ctr], this);
+    if(diff > ind) {
+      --oqty[ctr];
+      --ctr;
+      continue;
+      }
+    ind -= diff;
+    }
+
   for(int ctr=0; ctr<num_satellites; ++ctr) satellites[ctr]->TakeTurn();
+
   if(SpareIndustry() > 0 && projs.size() > 0) {
     int indus = SpareIndustry(), need, ctr;
     Tech *tc;
     while(projs.size() > 0 && indus > 0) {
       tc = cur_tree->GetTech(projs[0]);
-      need = tc->icost >? 1;
+      need = tc->icost;
       if(prog[0]+indus >= need) {
 	indus -= need-prog[0];
 	for(ctr=0; ctr < (int)objs.size(); ++ctr) {

@@ -5,7 +5,7 @@
 
 #include "system.h"
 
-System::System(int xp, int yp, int nump, int minl, int atmosl, int devl, int pl) {
+System::System(int xp, int yp, int nump, int minl, int atmosl, int *devl, int pl) {
   claimed = pl;
   num_planets = nump;
   planets = new (Planet*)[nump];
@@ -17,28 +17,27 @@ System::System(int xp, int yp, int nump, int minl, int atmosl, int devl, int pl)
       for(int ctr2=0; ctr2<cur_tree->NumTechs(); ++ctr2) {
 	Tech *tc = cur_tree->GetTech(ctr2);
 	if(tc->type == TECH_STRUCTURE && tc->known[pl]) {
-				// && devl/(tc->icost*tc->rcost)) {
 	  planets[ctr]->objs.push_back(ctr2);
-	  planets[ctr]->oqty.push_back(devl/(tc->icost*tc->rcost));
-	  planets[ctr]->population += tc->crew * (devl/(tc->icost*tc->rcost));
-	  }
-	}
-      for(int ctr2=0; ctr2<cur_tree->NumTechs(); ++ctr2) {
-	Tech *tc = cur_tree->GetTech(ctr2);
-	if(tc->type == TECH_SHIP && tc->known[pl]) {
-				// && devl/(tc->icost*tc->rcost)) {
-	  planets[ctr]->objs.push_back(ctr2);
-	  planets[ctr]->oqty.push_back(1);
-	  planets[ctr]->population += tc->crew * (devl/(tc->icost*tc->rcost));
+	  planets[ctr]->oqty.push_back(devl[ctr2]);
+	  planets[ctr]->population += tc->crew * devl[ctr2];
 	  }
 	}
       for(int ctr2=0; ctr2<cur_tree->NumTechs(); ++ctr2) {
 	Tech *tc = cur_tree->GetTech(ctr2);
 	if(tc->type == TECH_PROJECT && tc->known[pl]) {
-				// && devl/(tc->icost*tc->rcost)) {
 	  planets[ctr]->objs.push_back(ctr2);
-	  planets[ctr]->oqty.push_back(1);
-	  planets[ctr]->population += tc->crew * (devl/(tc->icost*tc->rcost));
+	  planets[ctr]->oqty.push_back(devl[ctr2]);
+	  planets[ctr]->population += tc->crew * devl[ctr2];
+	  }
+	}
+      for(int ctr2=0; ctr2<cur_tree->NumTechs(); ++ctr2) {
+	Tech *tc = cur_tree->GetTech(ctr2);
+	if(tc->type == TECH_SHIP) {
+	  for(int shp=0	; shp < devl[ctr2]; ++shp) {
+	    planets[ctr]->ships.push_back(new Ship(tc->special, pl));
+	    (*(planets[ctr]->ships.end()-1))->AddCrew(
+		(*(planets[ctr]->ships.end()-1))->MaxCrew());
+	    }
 	  }
 	}
       }

@@ -34,6 +34,7 @@ SDL_Surface *button[BUTTON_MAX][2];
 static SDL_Surface *intro;
 
 int lastpage = PAGE_INVALID, page = PAGE_ROOT;
+int lastpanel = PANEL_NONE, panel = PANEL_NONE;
 int buttlist[PAGE_MAX][BUTTON_MAX] = {{0}};
 int pagemap[PAGE_MAX][BUTTON_MAX] = {{0}};
 
@@ -54,12 +55,13 @@ static char dialog_message[4096] = {0};
 
 SDL_Surface *build_button0(const char *);
 SDL_Surface *build_button1(const char *);
-void gui_button_clicked(int button);
+void button_clicked(int button);
 void page_clicked(int mx, int my, int mb);
 void panel_clicked(int mx, int my, int mb);
 void mouse_moved(int mx, int my);
 void mouse_released();
 void page_draw();
+void panel_draw();
 void page_update();
 void page_redraw(SDL_Rect *);
 void panel_redraw(SDL_Rect *);
@@ -105,6 +107,36 @@ int update_buttons() {
   return inbutt;
   }
 
+void panel_cleanup(int pan) {
+  if(pan == PANEL_COLONY) {
+    panel_cleanup_colony();
+    }
+  }
+
+void panel_init() {
+  if(panel == PANEL_COLONY) {
+    panel_init_colony();
+    }
+  panel_draw();
+
+  lastpanel = panel;
+  }
+
+void page_cleanup(int pag) {
+  if(pag == PAGE_GALAXY) {
+    page_cleanup_galaxy();
+    }
+  if(pag == PAGE_SYSTEM) {
+    page_cleanup_system();
+    }
+  if(pag == PAGE_PLANET) {
+    page_cleanup_planet();
+    }
+  if(pag == PAGE_SYSOPT) {
+    memcpy(syscnf_back, syscnf, sizeof(syscnf));
+    }
+  }
+
 void page_init() {
   if(page == PAGE_GALAXY) {
     page_init_galaxy();
@@ -118,7 +150,6 @@ void page_init() {
   if(page == PAGE_SYSOPT) {
     memcpy(syscnf_back, syscnf, sizeof(syscnf));
     }
-
   page_draw();
 
   buttlist[PAGE_ROOT][BUTTON_RESUMEGAME] = (cur_game->InProgress())? 6 : 0;
@@ -180,6 +211,7 @@ void gui_main() {
 	  if(cur_game) {
 	    cur_game->TakeTurn();
 	    page_init();
+	    panel_init();
 	    }
 	  }
 //	}
@@ -211,7 +243,7 @@ void gui_main() {
     else if(event.type == SDL_MOUSEBUTTONUP) {
       mouse_released();
       if(event.button.button == 1 && curbutt == update_buttons() && curbutt) {
-	gui_button_clicked(curbutt);
+	button_clicked(curbutt);
         if(pagemap[page][curbutt]) {
 	  page = pagemap[page][curbutt];
 	  }
@@ -219,7 +251,13 @@ void gui_main() {
       }
 
     if(page != lastpage) {
+      page_cleanup(lastpage);
       page_init();
+      }
+
+    if(panel != lastpanel) {
+      page_cleanup(lastpanel);
+      panel_init();
       }
     }
   }
@@ -276,6 +314,8 @@ void gui_init() {
   button[BUTTON_NEWPROJECT][1] = build_button1("New Project");
   button[BUTTON_CANCELPROJECT][0] = build_button0("Cancel Project");
   button[BUTTON_CANCELPROJECT][1] = build_button1("Cancel Project");
+  button[BUTTON_CANCELBUILD][0] = build_button0("Cancel Build");
+  button[BUTTON_CANCELBUILD][1] = build_button1("Cancel Build");
   button[BUTTON_BUILD][0] = build_button0("Build");
   button[BUTTON_BUILD][1] = build_button1("Build");
   button[BUTTON_ABANDON][0] = build_button0("Abandon");
@@ -326,20 +366,20 @@ void gui_init() {
   gui_init_galaxy();
   gui_init_system();
   gui_init_planet();
+
+  gui_init_colony();
+
   page_init();
+  panel_init();
   }
 
-void gui_button_clicked(int button) {
+void button_clicked(int button) {
+  switch(panel) {
+    case(PANEL_COLONY): {
+      button_clicked_colony(button);
+      } break;
+    }
   switch(page) {
-    case(PAGE_GALAXY): {
-      gui_button_clicked_galaxy(button);
-      } break;
-    case(PAGE_SYSTEM): {
-      gui_button_clicked_system(button);
-      } break;
-    case(PAGE_PLANET): {
-      gui_button_clicked_planet(button);
-      } break;
     case(PAGE_ROOT): {
       switch(button) {
 	case(BUTTON_QUITGAME): {
@@ -387,18 +427,9 @@ void panel_redraw(SDL_Rect *area) {
   SDL_FillRect(screen, &todo, black);
   if(area) todo = *area;
 
-  if(page == PAGE_GALAXY) {
-    panel_redraw_galaxy(area);
+  if(panel == PANEL_COLONY) {
+    panel_redraw_colony(area);
     }
-  else if(page == PAGE_SYSTEM) {
-    panel_redraw_system(area);
-    }
-  else if(page == PAGE_PLANET) {
-    panel_redraw_planet(area);
-    }
-  else if(page == PAGE_SYSOPT) {
-    }
-  SDL_SetClipRect(screen, NULL);
 
   memset(mo, -1, sizeof(mo));
   update_buttons();
@@ -468,8 +499,19 @@ void page_redraw(SDL_Rect *area) {
   if(area) update(area);
   }
 
+void panel_draw() {
+  SDL_Rect pgr = {800, 0, 224, 768};
+  SDL_FillRect(screen, &pgr, 0);
+  if(panel == PANEL_COLONY) {
+    panel_draw_colony();
+    }
+  memset(mo, -1, sizeof(mo));
+  update_buttons();
+  }
+
 void page_draw() {
-  SDL_FillRect(screen, NULL, 0);
+  SDL_Rect pgr = {0, 0, 800, 768};
+  SDL_FillRect(screen, &pgr, 0);
 
   if(page == PAGE_ROOT) SDL_BlitSurface(intro, NULL, screen, NULL);
   if(page == PAGE_NEW) {
@@ -504,9 +546,6 @@ void page_draw() {
   if(page == PAGE_PLANET) {
     page_draw_planet();
     }
-  memset(mo, -1, sizeof(mo));
-  update_buttons();
-
   update_all();
   }
 
@@ -519,6 +558,9 @@ void page_update() {
     }
   else if(page == PAGE_SYSTEM) {
     page_update_system();
+    }
+  if(panel == PANEL_COLONY) {
+    panel_update_colony();
     }
   }
 
@@ -534,6 +576,9 @@ void mouse_released() {
     }
   else if(page == PAGE_SYSOPT) {
     grabbed = -1;
+    }
+  if(panel == PANEL_COLONY) {
+    mouse_released_colony();
     }
   }
 
@@ -551,6 +596,9 @@ void mouse_moved(int mx, int my) {
     if(grabbed != -1) {
       page_clicked(360 >? mx <? 759, 24 + grabbed*24, 1);
       }
+    }
+  if(panel == PANEL_COLONY) {
+    mouse_moved_colony(mx, my);
     }
   }
 
@@ -617,17 +665,8 @@ void page_clicked(int mx, int my, int mb) {
   }
 
 void panel_clicked(int mx, int my, int mb) {
-  if(page == PAGE_GALAXY) {
-    panel_clicked_galaxy(mx, my, mb);
-    }
-  else if(page == PAGE_SYSTEM) {
-    panel_clicked_system(mx, my, mb);
-    }
-  else if(page == PAGE_PLANET) {
-    panel_clicked_planet(mx, my, mb);
-    }
-  else if(page == PAGE_DIALOG) {
-    page = pagemap[page][BUTTON_EXIT];
+  if(panel == PANEL_COLONY) {
+    panel_clicked_colony(mx, my, mb);
     }
   }
 
@@ -636,7 +675,7 @@ void do_dialog(const char *fmt, ...) {
   va_start(stuff, fmt);
   vsprintf(dialog_message, fmt, stuff);
   va_end(stuff);
-  pagemap[PAGE_DIALOG][BUTTON_EXIT] = page;
+  if(page != PAGE_DIALOG) pagemap[PAGE_DIALOG][BUTTON_EXIT] = page;
   page = PAGE_DIALOG;
   page_init();
   }

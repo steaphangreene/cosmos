@@ -91,7 +91,7 @@ void Game::Fill() {
   started = 1;
   turn = 0;
 
-  cur_tree = new TechTree(setting[7], setting[8]);
+  cur_tree = new TechTree(setting[7], setting[8], setting[9]);
 
   num_players = setting[6];
   players = new (Player*)[num_players];
@@ -113,11 +113,11 @@ void Game::Fill() {
   num_galaxys = setting[10];
   galaxys = new (Galaxy*)[num_galaxys];
   galaxys[0] = new Galaxy(setting[11]*20,
-	setting[12], setting[13], 2500*(setting[9]+1),
+	setting[12], setting[13], cur_tree->Homeworld(),
 	num_players, players);
   for(int ctr=1; ctr<num_galaxys; ++ctr) {
     galaxys[ctr] = new Galaxy(setting[11]*20,
-	setting[12], setting[13], 5000*(setting[9]+1));
+	setting[12], setting[13], cur_tree->Homeworld());
     }
   }
 

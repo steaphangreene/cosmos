@@ -1,52 +1,79 @@
 #include <cstdio>
 
+#include "ship.h"
 #include "planet.h"
 #include "tech_local.h"
 
 extern int base_tech;
 
-#define	TECH_TINY_CITIES		0
-#define	TECH_TINY_ENTERTAINMENT		1
-#define	TECH_TINY_PROPOGANDA		2
-#define	TECH_TINY_LINARMINING		3
-#define	TECH_TINY_FIGHTERS		4
-#define	TECH_TINY_COLONYSHIPS		5
+enum {	TECH_TINY_CITY = 0,
+	TECH_TINY_ENTERTAINMENT,
+	TECH_TINY_PROPOGANDA,
+	TECH_TINY_LINARMINING,
+	TECH_TINY_COLONIZER,
+	TECH_TINY_FIGHTER,
+	TECH_TINY_COLONYSHIP,
+	TECH_TINY_DESTROYER,
+	TECH_TINY_MAX };
 
-void TechTree::init_tiny(int techl) {
+static int start[TECH_TINY_MAX] = {0};
+
+void TechTree::init_tiny(int techl, int devl) {
   base_tech = 25*(techl+1);
+  devl += 1; //Make it 1-based
+  start[lst.size()] = 3*devl;
   lst.push_back(new Tech(TECH_STRUCTURE, "City", "Cities",
 	"Large, multifunction living and working spaces that require\n"
 	"a population of one billion each to operate.",
-	5, 100, 20, 1000, 0, 0, 0,
+	5, 100, 20, 1000, 0, 0, 0, 0,
 	-1, -1, -1, -1));
+  start[lst.size()] = 1;
   lst.push_back(new Tech(TECH_PROJECT, "Entertainment", "Entertainment",
 	"The use of Industry to make population happier and more at ease.",
-	25, 10, 10, 10, 0, 0, -1,
+	25, 10, 10, 10, 0, 0, -1, 0,
 	-1, -1, -1, -1));
+  start[lst.size()] = 1;
   lst.push_back(new Tech(TECH_PROJECT, "Propoganda", "Propoganda",
 	"The use of Industry to make population feel secure and be more loyal.",
-	25, 10, 10, 10, -1, -1, 0,
+	25, 10, 10, 10, -1, -1, 0, 0,
 	-1, -1, -1, -1));
+  start[lst.size()] = 4;
   lst.push_back(new Tech(TECH_STRUCTURE, "Sat Mine", "Sat Mines",
 	"The mining of the resources of a planet's natural satellites.",
-	30, 100, 10, 100, 0, 0, 0,
+	30, 100, 10, 100, 0, 0, 0, 0,
 	-1, -1, -1, -1));
+  start[lst.size()] = 1;
+  lst.push_back(new Tech(TECH_SHIP, "Colonizer", "Colonizers",
+	"A massive system ship containing a portable self-contained city\n"
+	"which can be sent to another planet in the system to establish a\n"
+	"new colony",
+	75, 200, 4, 1000, 0, 10, 10, SCLASS_COLONIZER,
+	TECH_TINY_CITY, -1, -1, -1));
+  start[lst.size()] = 2;
   lst.push_back(new Tech(TECH_SHIP, "Fighter", "Fighters",
 	"A heavy space fighter able to attack and defend within a star system.",
-	50, 200, 50, 1, 10, 10, 0,
+	50, 200, 1, 1, 10, 10, 0, SCLASS_FIGHTER,
 	-1, -1, -1, -1));
+  start[lst.size()] = 0;
   lst.push_back(new Tech(TECH_SHIP, "Colony Ship", "Colony Ships",
-	"A massive ship containing a portable self-contained city.",
-	150, 500, 100, 1000, 0, 10, 10,
-	TECH_TINY_CITIES, -1, -1, -1));
+	"A massive hyperspace ship containing a portable self-contained city\n"
+	"which can be sent to a planet to establish a new colony",
+	150, 1000, 10, 1000, 0, 10, 10, SCLASS_COLONYSHIP,
+	TECH_TINY_CITY, TECH_TINY_COLONIZER, -1, -1));
+  start[lst.size()] = 0;
+  lst.push_back(new Tech(TECH_SHIP, "Destroyer", "Destroyers",
+	"A light hyperspace warship.",
+	100, 500, 6, 1, 10, 10, 0, SCLASS_DESTROYER,
+	TECH_TINY_FIGHTER, -1, -1, -1));
 
   num_sciences = 0;
   num_techs = 6;
+  homeworld = start;
   }
 
 int min_tiny(int tnum, int tqty, Planet *plan) {
   switch(tnum) {
-    case(TECH_TINY_CITIES): return -tqty;
+    case(TECH_TINY_CITY): return -tqty;
     case(TECH_TINY_LINARMINING): return ((plan->num_satellites ? 4:0) <? tqty);
     }
   return 0;
@@ -54,14 +81,14 @@ int min_tiny(int tnum, int tqty, Planet *plan) {
 
 int atm_tiny(int tnum, int tqty, Planet *plan) {
   switch(tnum) {
-    case(TECH_TINY_CITIES): return -((tqty+2)/3);
+    case(TECH_TINY_CITY): return -((tqty+2)/3);
     }
   return 0;
   }
 
 int ind_tiny(int tnum, int tqty, Planet *plan) {
   switch(tnum) {
-    case(TECH_TINY_CITIES): return plan->Minerals()*tqty;
+    case(TECH_TINY_CITY): return plan->Minerals()*tqty;
     }
   return 0;
   }

@@ -9,19 +9,22 @@ extern int max_factions;
 int base_tech;
 
 Tech::Tech(int tp, const char *nm, const char *nms, const char *ds,
-	int res, int ind, int upk, int crw, int loy, int sec, int hap,
+	int res, int ind, int upk, int crw, int loy, int sec, int hap, int spc,
 	int p1, int p2, int p3, int p4) {
   type = tp;  name = (char *)nm;  names = (char *)nms; desc = (char *)ds;
   rcost = res;  icost = ind;  upkeep = upk;  crew = crw;
-  loyalty = loy;  security = sec;  happiness = hap;
+  loyalty = loy;  security = sec;  happiness = hap;  special = spc;
   prereq1 = p1;  prereq2 = p2;  prereq3 = p3;  prereq4 = p4;
   for(int ctr=0; ctr<max_factions; ++ctr) {
     known.push_back(base_tech/rcost);
     }
   }
 
-TechTree::TechTree(int which, int techl) {
-  init_tiny(techl);
+TechTree::TechTree(int which, int techl, int devl) {
+  init_tiny(techl, devl);
+  for(int ctr=0; ctr<int(lst.size()); ++ctr) {
+    if(lst[ctr]->known[0] == 0) homeworld[ctr] = 0;
+    }
   }
 
 int TechTree::Minerals(int tnum, int tqty, Planet *plan) {

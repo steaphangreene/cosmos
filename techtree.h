@@ -23,7 +23,7 @@ int tech_enhance(int, int);
 class Tech {
 public:
   Tech(int tp, const char *nm, const char *nms, const char *ds,
-	int res, int ind, int upk, int crw, int loy, int sec, int hap,
+	int res, int ind, int upk, int crw, int loy, int sec, int hap, int spc,
 	int p1 = -1, int p2 = -1, int p3 = -1, int p4 = -1);
   int type;
   char *name, *names;
@@ -31,6 +31,7 @@ public:
   int rcost, icost;
   int upkeep, crew;
   int loyalty, security, happiness;
+  int special;
   int prereq1;
   int prereq2;
   int prereq3;
@@ -40,11 +41,14 @@ public:
 
 class TechTree {
 public:
-  TechTree(int which, int level);
+  TechTree(int which, int techl, int devl);
   Tech *GetTech(int w) { return lst[w+num_sciences]; };
   Tech *GetScience(int w) { return lst[w]; };
   int NumSciences() { return num_sciences; };
   int NumTechs() { return num_techs; };
+
+  int *Homeworld() { return homeworld; }
+  int Homeworld(int n) { return homeworld[n]; }
 
   int Industry(int tnum, int tqty, Planet *plan);
 
@@ -61,7 +65,8 @@ public:
   int Happiness(int tnum, int tqty, Planet *plan);
 
 private:
-  void init_tiny(int);
+  int *homeworld;
+  void init_tiny(int, int);
   vector<Tech *> lst;
   int num_sciences;
   int num_techs;
