@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <vector>
 
 using namespace std;
@@ -10,14 +11,17 @@ using namespace std;
 
 class Galaxy {
 public:
+  Galaxy(FILE *);
   Galaxy(int numsys, int minl, int atmosl,
 	const vector<Player *> &pl = vector<Player *>());
+  ~Galaxy();
 
   void TakeTurn();
+  void SaveTo(FILE *);
+  void LoadFrom(FILE *);
 
 //private:
-  System **systems;
-  int num_systems;
+  vector <System*> systems;
   };
 
 #endif

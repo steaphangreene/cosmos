@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <vector>
 
 using namespace std;
@@ -17,6 +18,7 @@ class Planet;
 class Planet : public SObject {
 public:
   Planet(System *s, int ord, int sz, int min, int atmos);
+  Planet(FILE *);
   virtual ~Planet();
   virtual int SType() { return SOBJECT_PLANET; }
 
@@ -39,6 +41,9 @@ public:
   int num_satellites;
   Satellite **satellites;
   vector <Colony *> colonies;
+
+  void SaveTo(FILE *);
+  void LoadFrom(FILE *);
 
 protected:
   string name;

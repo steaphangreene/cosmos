@@ -264,3 +264,8 @@ void Colony::LandShip(Ship *s) {
     }
   population += s->Crew();
   }
+void Colony::SaveTo(FILE *f) {
+  }
+
+void Colony::LoadFrom(FILE *f) {
+  }

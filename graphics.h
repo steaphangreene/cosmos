@@ -2,7 +2,7 @@
 
 void graphics_init(int, int, int, Uint32);
 
-void set_sprite(int, SDL_Surface *);
+void set_sprite(int, SDL_Surface *, int own=1);
 void move_sprite(int, int, int);
 void update_sprite(int);
 void clear_sprites(int s = 1, int e = -1);
@@ -19,6 +19,7 @@ SDL_Surface *get_image(const char *, int, int);
 SDL_Surface *get_alpha_image(const char *, int, int);
 
 SDL_Surface *get_cursor_image();
+SDL_Surface *get_select_image();
 
 SDL_Surface *get_blank0_image();
 SDL_Surface *get_blank1_image();

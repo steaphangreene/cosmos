@@ -4,6 +4,7 @@
 #include "math.h"
 
 #include "dict.h"
+#include "game.h"
 #include "system.h"
 
 extern int max_factions;
@@ -38,6 +39,8 @@ System::System(int xp, int yp, int nump, int minl, int atmosl, int pl)
   }
 
 System::~System() {
+  for(int ctr=0; ctr<int(objects.size()); ++ctr) delete objects[ctr];
+  objects.clear();
   }
 
 void System::TakeTurn() {
@@ -80,4 +83,30 @@ void System::Know(int n) {
   for(int ctr=0; ctr<int(objects.size()); ++ctr) {
     objects[ctr]->See(n);
     }
+  }
+
+System::System(FILE *f) : SObject(0) {
+  LoadFrom(f);
+  }
+
+void System::SaveTo(FILE *f) {
+  SObject::SaveTo(f);
+  fprintf(f, "%s\n", name.c_str());
+  fprintf(f, "Objects: %d\n", int(objects.size()));
+  for(int ctr=0; ctr<int(objects.size()); ++ctr) SaveSObject(f, objects[ctr]);
+  }
+
+void System::LoadFrom(FILE *f) {
+  for(int ctr=0; ctr<int(objects.size()); ++ctr) delete objects[ctr];
+  objects.clear();
+
+  cur_system = this;
+  SObject::LoadFrom(f);
+
+  int tmpsz;
+  system = this;
+  char buf[1024] = {0};
+  fscanf(f, "%[^\n]\n", buf); name = buf;
+  fscanf(f, "Objects: %d\n", &tmpsz);
+  for(int ctr=0; ctr<tmpsz; ++ctr) objects.push_back(LoadSObject(f));
   }

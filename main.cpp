@@ -21,20 +21,11 @@ int use_sound = 1;
 #define DEBUG	0
 #endif
 
-Uint32 ticktock(Uint32 interval, void *param) {
-  SDL_Event ev;
-  ev.type = SDL_USEREVENT;
-  SDL_PushEvent(&ev);
-  return interval;
-  }
-
 int main(int argc, char **argv) {
   if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER|DEBUG)) {
     fprintf(stderr, "Error initializing SDL!\n");
     exit(1);
     }
-
-  SDL_AddTimer(100, &ticktock, NULL);
 
   Uint32 flags = SDL_HWSURFACE|SDL_FULLSCREEN;
   for(int ctr=1; ctr<argc; ++ctr) {
@@ -47,9 +38,9 @@ int main(int argc, char **argv) {
 
   if(use_sound) audio_init();
   game_init();
-  cur_game->Load("autosave.gam");
   SDL_ShowCursor(SDL_DISABLE);
   gui_init();
+  cur_game->Load("autosave.gam");
   gui_main();
   SDL_ShowCursor(SDL_ENABLE);
   cur_game->Save("autosave.gam");

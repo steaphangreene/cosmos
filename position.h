@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <vector>
 
 using namespace std;
@@ -12,11 +13,15 @@ class Position;
 class Position : public SObject {
 public:
   Position();
+  Position(FILE *);
   virtual ~Position();
   virtual void TakeTurn();
   virtual int SType() { return SOBJECT_POSITION; }
   SObject *Represents() { return represents; }
   virtual const char *Name();
+
+  void SaveTo(FILE *);
+  void LoadFrom(FILE *);
 
 protected:
   Position *next;

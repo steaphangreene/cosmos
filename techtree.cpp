@@ -76,3 +76,8 @@ int tech_enhance(int v, int t) {
   return v;
   }
 
+void TechTree::SaveTo(FILE *f) {
+  }
+
+void TechTree::LoadFrom(FILE *f) {
+  }

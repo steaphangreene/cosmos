@@ -57,7 +57,7 @@ void page_draw_galaxy() {
   clear_sprites(spnum);
 
   SDL_Rect rec = {0, 0, 3, 3};
-  for(int snum=0; snum < cur_galaxy->num_systems; ++snum) {
+  for(int snum=0; snum < int(cur_galaxy->systems.size()); ++snum) {
     System *sys = cur_galaxy->systems[snum];
     if((cheat1 || sys->KnownTo(local_player)) && sys->Owner() >= 0) {
       SDL_Rect rec2 = {0, 0, 9, 9};
@@ -80,6 +80,14 @@ void page_draw_galaxy() {
 	SDL_FillRect(screen, &rec2, color3(
 		cur_game->players[sys->objects[obj]->Owner()]->color
 		));
+
+	if(cur_object == sys->objects[obj]) {
+	  update_sprite(1);
+	  set_sprite(1, selectg, 0);
+	  int off = selectg->w/2;
+	  move_sprite(1, cur_object->GXPos() - off, cur_object->GYPos() - off);
+	  update_sprite(1);
+	  }
 
 	if(sys->objects[obj]->Destination()
 		&& sys->objects[obj]->Destination()->Sys()
@@ -114,7 +122,7 @@ void page_clicked_galaxy(int mx, int my, int mb) {
   if(mb != 1 && mb != 3) return;
 
   int offx, offy;
-  for(int snum=0; snum < cur_galaxy->num_systems; ++snum) {
+  for(int snum=0; snum < int(cur_galaxy->systems.size()); ++snum) {
     System *sys = cur_galaxy->systems[snum];
     offx = abs(sys->GXPos() - mx);
     offy = abs(sys->GYPos() - my);
@@ -128,7 +136,7 @@ void page_clicked_galaxy(int mx, int my, int mb) {
       else if(panel == PANEL_FLEET && cur_object->Target()) {
 	audio_play(click2, 8, 8);
 	cur_object->Engage();
-	clear_sprites(1, 10);
+	clear_sprites(2, 10);
 	page_draw();
 	panel_draw();
 	return;
@@ -145,6 +153,13 @@ void page_clicked_galaxy(int mx, int my, int mb) {
 	  cur_object = sys->objects[obj];
 	  panel = PANEL_FLEET;
 	  panel_init();
+
+	  update_sprite(1);
+	  set_sprite(1, selectg, 0);
+	  int off = selectg->w/2;
+	  move_sprite(1, cur_object->GXPos() - off, cur_object->GYPos() - off);
+	  update_sprite(1);
+
 	  return;
 	  }
 	else {
@@ -165,7 +180,7 @@ void mouse_released_galaxy() {
 
 void mouse_moved_galaxy(int mx, int my) {
   int offx, offy;
-  for(int snum=0; snum < cur_galaxy->num_systems; ++snum) {
+  for(int snum=0; snum < int(cur_galaxy->systems.size()); ++snum) {
     System *sys = cur_galaxy->systems[snum];
     offx = abs(sys->GXPos() - mx);
     offy = abs(sys->GYPos() - my);
@@ -181,7 +196,7 @@ void mouse_moved_galaxy(int mx, int my) {
 	if(cur_object->Distance() < 0) col = 0xFF0000FF;
 	else if(cur_object->Distance() >= 0) col = 0xFF00FF00;
 
-	update_sprite(1);
+	update_sprite(2);
 	SDL_Surface *line = getline(
 		cur_object->GXPos(),
 		cur_object->GYPos(),
@@ -189,19 +204,19 @@ void mouse_moved_galaxy(int mx, int my) {
 		sys->GYPos(),
 		col, 0x0F0F0F0F
 		);
-	set_sprite(1, line);
-	move_sprite(1,
+	set_sprite(2, line);
+	move_sprite(2,
 		cur_object->GXPos() <? sys->GXPos(),
 		cur_object->GYPos() <? sys->GYPos()
 		);
-	update_sprite(1);
+	update_sprite(2);
 	}
       return;
       }
     }
   if(panel == PANEL_FLEET) {
     cur_object->SetCourse(NULL);
-    clear_sprites(1, 10);
+    clear_sprites(2, 10);
     panel_draw();
     }
   }

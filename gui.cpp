@@ -29,9 +29,9 @@ int cheat1 = 0;
 static int syscnf[NUM_SYSCNF*2] = {1, 160};
 static int syscnf_back[NUM_SYSCNF*2];
 
-extern SDL_Surface *screen;
 font *cur_font[9];
 
+SDL_Surface *selectg;
 SDL_Surface *button[BUTTON_MAX][2];
 
 static SDL_Surface *intro;
@@ -52,11 +52,6 @@ Sound *cur_amb=NULL;
 int cur_amb_num=0;
 Sound *cur_mus=NULL;
 int cur_mus_num=0;
-
-int cur_ship = 0;
-System *cur_system=NULL;
-Galaxy *cur_galaxy=NULL;
-SObject *cur_object=NULL;
 
 static char dialog_message[4096] = {0};
 
@@ -91,6 +86,13 @@ SDL_Surface *build_button1(const char *label) {
   int len = string_length(label, cur_font[4]);
   string_draw(s, 100-(len/2), 13, cur_font[0], label);
   return s;
+  }
+
+Uint32 ticktock(Uint32 interval, void *param) {
+  SDL_Event ev;
+  ev.type = SDL_USEREVENT;
+  SDL_PushEvent(&ev);
+  return interval;
   }
 
 int update_buttons() {
@@ -176,8 +178,6 @@ void page_init() {
 
   if(panelmap[page] != PANEL_NONE) panel = panelmap[page];
 
-  buttlist[PANEL_ROOT][BUTTON_RESUMEGAME] = (cur_game->InProgress())? 6 : 0;
-
   if(ambient[page] && ambient[page] != cur_amb_num &&
 	ambient[page] != ambient[lastpage]) {
     audio_stop(cur_amb);
@@ -198,6 +198,11 @@ void page_init() {
 void gui_main() {
   int curbutt=0;
   SDL_Event event;
+
+  buttlist[PANEL_ROOT][BUTTON_RESUMEGAME] = (cur_game->InProgress())? 6 : 0;
+
+  SDL_AddTimer(100, &ticktock, NULL);
+
   while(!done) {
     do_updates();
     SDL_WaitEvent(&event);
@@ -300,8 +305,12 @@ void gui_main() {
     }
   }
 
+#define STARTUP ("  Starting Cosmos - Please Wait.  ")
+
 void gui_init() {
   if(cur_game->started) cur_galaxy = cur_game->galaxys[0];
+
+  black = SDL_MapRGB(screen->format, 0x00, 0x00, 0x00);
 
   cur_font[8] = font_init();
   cur_font[7] = font_colored(cur_font[8], color3(7));
@@ -313,12 +322,22 @@ void gui_init() {
   cur_font[1] = font_colored(cur_font[8], color3(1));
   cur_font[0] = font_colored(cur_font[8], color3(0));
 
+  SDL_Rect rec = { 512, 384-12-4, 0, 24+8 };
+  rec.w = string_length(STARTUP, cur_font[4]) + 8;
+  rec.x -= rec.w/2;
+  SDL_FillRect(screen, &rec, color3(4));
+  rec.y += 4;  rec.x += 4;
+  rec.w -= 8;  rec.h -= 8;
+  SDL_FillRect(screen, &rec, black);
+  string_drawc(screen, 512, 384-11, cur_font[4], STARTUP);
+  update_all();
+  do_updates();
+
   grabbed = -1;
 
   check[0] = get_check0_image();
   check[1] = get_check1_image();
 
-  black = SDL_MapRGB(screen->format, 0x00, 0x00, 0x00);
   set_cursor(get_cursor_image());
 
   intro = get_image("graphics/intro.raw", 800, 768);
@@ -333,6 +352,7 @@ void gui_init() {
   string_drawr(intro, 768, 704, cur_font[4], version);
 
   credg = get_string(cur_font[4], credits);
+  selectg = get_select_image();
 
   button[BUTTON_RESUMEGAME][0] = build_button0("Resume Game");
   button[BUTTON_RESUMEGAME][1] = build_button1("Resume Game");

@@ -40,3 +40,8 @@ int Satellite::InFront(int tick) {
 
 void Satellite::TakeTurn() {
   }
+void Satellite::SaveTo(FILE *f) {
+  }
+
+void Satellite::LoadFrom(FILE *f) {
+  }

@@ -9,7 +9,6 @@ class TechTree;
 #include "planet.h"
 #include "colony.h"
 #include "fleet.h"
-#include "ship.h"
 
 using namespace std;
 
@@ -68,6 +67,8 @@ public:
   int Loyalty(int tnum, int tqty, Colony *col);
   int Security(int tnum, int tqty, Colony *col);
   int Happiness(int tnum, int tqty, Colony *col);
+
+  void SaveTo(FILE *);  void LoadFrom(FILE *);
 
 private:
   int *homeworld;

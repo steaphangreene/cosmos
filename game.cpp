@@ -36,6 +36,10 @@ int MKDIR(const char *fn, int perms) {
 
 Game *cur_game = NULL;
 TechTree *cur_tree = NULL;
+int cur_ship = 0;
+System *cur_system=NULL;
+Galaxy *cur_galaxy=NULL;
+SObject *cur_object=NULL;
 
 using namespace std;
 
@@ -66,7 +70,6 @@ Game::~Game() {
 
 int Game::Load(const char *fn) {
   static char buf[1024] = {0};
-  static char ebuf[1024] = {0};
   if(getenv("HOME"))
     sprintf(buf, "%s/.cosmos/saves/%s", getenv("HOME"), fn);
   else
@@ -74,10 +77,24 @@ int Game::Load(const char *fn) {
 
   FILE *svfl = fopen(buf, "r");
   if(!svfl) {
-    sprintf(ebuf, "Warning - Can't Load \"%s\"", buf);
-    perror(ebuf);
+//    char ebuf[1024] = {0};
+//    sprintf(ebuf, "Warning - Can't Load \"%s\"", buf);
+//    perror(ebuf);
     return -1;
     }
+
+  Clear();
+
+  fscanf(svfl, "COSMOS\nSAVEFILE\n");
+  if(ftell(svfl) < 16) {
+    fprintf(stderr, "Warning - Ignoring Invalid/Obsolete Savefile \"%s\"\n", buf);
+    return -1;
+    }
+
+  memset(buf, 0, 1024);
+  fscanf(svfl, "%[^\n]\n", buf);
+  //printf("Reading savefile for version %s\n", buf);
+
   for(int ctr=0; ctr < num_configs; ++ctr) {
     fscanf(svfl, "%d", &setting[ctr]);
     }
@@ -87,6 +104,26 @@ int Game::Load(const char *fn) {
   for(int ctr=0; ctr < num_configs; ++ctr) {
     fscanf(svfl, "%d", &working_setting[ctr]);
     }
+
+	//FIXME - DISABLES LOADS!!!!
+	return 0;
+
+  fscanf(svfl, "%d %d %d %d\n", &started, &turn, &tick, &frame);
+  if(!started) return 0;
+  int tmpsz;
+
+  fscanf(svfl, "Players: %d\n", &tmpsz);
+  //printf("Loading %d Players\n", tmpsz);
+  for(int ctr=0; ctr < tmpsz; ++ctr) {
+    players.push_back(new Player(svfl));
+    }
+
+  fscanf(svfl, "Galaxys: %d\n", &tmpsz);
+  //printf("Loading %d Galaxies\n", tmpsz);
+  for(int ctr=0; ctr < tmpsz; ++ctr) {
+    galaxys.push_back(new Galaxy(svfl));
+    }
+
   fclose(svfl);
 
   return 0;
@@ -114,6 +151,8 @@ int Game::Save(const char *fn) {
     return -1;
     }
 
+  fprintf(svfl, "COSMOS\nSAVEFILE\n%s\n", VERSION);
+
   for(int ctr=0; ctr < num_configs; ++ctr) {
     fprintf(svfl, "%d", setting[ctr]);
     if(ctr != num_configs-1) fprintf(svfl, " ");
@@ -129,6 +168,23 @@ int Game::Save(const char *fn) {
     if(ctr != num_configs-1) fprintf(svfl, " ");
     else fprintf(svfl, "\n");
     }
+
+	//FIXME - DISABLES SAVES!!!!
+	fprintf(svfl, "0 0 0 0\n");
+	return 0;
+
+  fprintf(svfl, "%d %d %d %d\n", started, turn, tick, frame);
+
+  fprintf(svfl, "Players: %d\n", int(players.size()));
+  for(int ctr=0; ctr < int(players.size()); ++ctr) {
+    players[ctr]->SaveTo(svfl);
+    }
+
+  fprintf(svfl, "Galaxys: %d\n", int(galaxys.size()));
+  for(int ctr=0; ctr < int(galaxys.size()); ++ctr) {
+    galaxys[ctr]->SaveTo(svfl);
+    }
+
   fclose(svfl);
 
   return 0;
@@ -173,9 +229,14 @@ void Game::Finalize() {
 
 void Game::Clear() {
   started = 0;
-  players.clear();
+  for(int ctr=0; ctr<int(galaxys.size()); ++ctr) delete galaxys[ctr];
   galaxys.clear();
-  //FIXME!!!
+  for(int ctr=0; ctr<int(players.size()); ++ctr) delete players[ctr];
+  players.clear();
+
+//  FIXME!!
+//  delete cur_tree;
+//  cur_tree = NULL;
   }
 
 void Game::Fill() {
@@ -290,11 +351,13 @@ const char *config10[] = {	"Number of Galaxys",
 
 const char *config11[] = {	"Galaxy Density",
 	"Unknown",
-	"Tiny",
-	"Small",
-	"Medium",
-	"Large",
-	"Huge",
+	"Rare",
+	"Sparse",
+	"Low",
+	"Average",
+	"High",
+	"Dense",
+	"Super Dense",
 //	"Massive",
 //	"Realistic",
 	NULL };

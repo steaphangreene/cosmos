@@ -75,6 +75,9 @@ public:
   static void SetSpace(int t, int s) { space[t] = s; };
   static void SetSqOff(int t, int s) { sqoff[t] = s; };
 
+  virtual void LoadFrom(FILE *);
+  virtual void SaveTo(FILE *);
+
 protected:
   void Init();
 
@@ -102,6 +105,9 @@ protected:
   vector<int> seen;
   vector<int> known;
   };
+
+void SaveSObject(FILE *, SObject *);
+SObject *LoadSObject(FILE *);
 
 #endif
 

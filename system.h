@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <vector>
 
 using namespace std;
@@ -14,6 +15,7 @@ class System;
 class System : public SObject {
 public:
   System(int xp, int yp, int nump, int minl, int atmosl, int pl=-1);
+  System(FILE *f);
   virtual ~System();
   virtual void TakeTurn();
 
@@ -29,6 +31,9 @@ public:
   void FleetArrives(Fleet *);
 
   virtual void Know(int);
+
+  void SaveTo(FILE *);
+  void LoadFrom(FILE *);
 
 //protected:
   string name;

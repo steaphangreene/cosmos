@@ -3,29 +3,30 @@ Primary Developer:
 
 Graphics and Art:
 	Steaphan 'Stea' Greene - AKA Insomnia <stea@cs.binghamton.edu>
-	Most Images Created by POV-Ray:
-		http://www.povray.org/
-	Other Images Created by The Gimp:
-		http://www.gimp.org/
 
 Music:
 	Wyatt Peterson <wyatt@binghamton.edu>
-
-Intro Screen:
-	Image Courtesy of NASA's JPL:
-		http://jpl.nasa.gov/
-	Touched up by The Gimp:
-		http://www.gimp.org/
 
 Testers:
 	Wyatt Peterson <wyatt@binghamton.edu>
 	Sandor Szatmari <inkhead@inkhead.org>
 
+Intro Screen:
+	Original Image Courtesy of NASA's JPL: http://jpl.nasa.gov/
+
+Graphics Software:
+	Most Images Created by POV-Ray: http://www.povray.org/
+	Other Images Created by The Gimp: http://www.gimp.org/
+
+Coding Software:
+	GNU Compiler Collection: http://gcc.gnu.org/
+	GNU Nano: http://www.nano-editor.org/
+	Various GNU Utils: http://www.gnu.org/
+
+Interface Libraries:
+	LibSDL: http://www.libsdl.org/
+
 Hardware Access Providers:
 	Steaphan 'Stea' Greene - AKA Insomnia <stea@cs.binghamton.edu>
 	Sandor Szatmari <inkhead@inkhead.org>
-	Binghamton University Computer Science Dept:
-		http://www.cs.binghamton.edu/
-
-Interface Libraries:
-	SDL: http://www.libsdl.org/
+	Binghamton Comp. Sci. Dept: http://www.cs.binghamton.edu/

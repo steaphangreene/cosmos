@@ -5,7 +5,6 @@
 #include "math.h"
 
 #include "game.h"
-#include "ship.h"
 #include "dict.h"
 
 int sattp[5][5] = {
@@ -103,4 +102,23 @@ int Planet::SMove() {
 
 int Planet::GMove() {
   return 0;
+  }
+
+Planet::Planet(FILE *f) : SObject(1) {
+  LoadFrom(f);
+  }
+
+void Planet::SaveTo(FILE *f) {
+  SObject::SaveTo(f);
+  fprintf(f, "%s\n", name.c_str());
+  fprintf(f, "%d %d %d %d %d %d\n",
+	order, size, minerals, atmosphere, temperature, radiation);
+  }
+
+void Planet::LoadFrom(FILE *f) {
+  SObject::LoadFrom(f);
+  char buf[1024] = {0};
+  fscanf(f, "%[^\n]\n", buf);  name = buf;
+  fscanf(f, "%d %d %d %d %d %d\n",
+	&order, &size, &minerals, &atmosphere, &temperature, &radiation);
   }

@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <vector>
 
 using namespace std;
@@ -8,13 +9,15 @@ class Fleet;
 #define FLEET_H
 
 #include "sobject.h"
-#include "ship.h"
 #include "planet.h"
 #include "system.h"
+
+class Ship;
 
 class Fleet : public SObject {
 public:
   Fleet(SObject *, const char *nm = "Some Fleet");
+  Fleet(FILE *);
   virtual ~Fleet();
   virtual void TakeTurn();
 
@@ -38,6 +41,9 @@ public:
   int Offense();
   int Defense();
   void Attack(Fleet *);
+
+  void SaveTo(FILE *);
+  void LoadFrom(FILE *);
 
 private:
   vector<Ship*> ships;

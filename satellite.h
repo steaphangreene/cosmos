@@ -1,3 +1,7 @@
+#include <cstdio>
+
+using namespace std;
+
 class Satellite;
 
 #ifndef SATELLITE_H
@@ -13,6 +17,8 @@ public:
   int InFront(int);
 
   void TakeTurn();
+
+  void SaveTo(FILE *);  void LoadFrom(FILE *);
 
 private:
   int startpos, angle, type;

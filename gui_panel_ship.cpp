@@ -13,6 +13,8 @@ using namespace std;
 #include "fonts.h"
 #include "graphics.h"
 #include "gui_local.h"
+#include "ship.h"
+#include "fleet.h"
 
 #define SKIP 3
 

@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <vector>
 
 using namespace std;
@@ -45,6 +46,9 @@ public:
   Planet *Plan() { return planet; };
 
   int Owner() { return owner; };
+
+  void SaveTo(FILE *);
+  void LoadFrom(FILE *);
 
 private:
   int owner;

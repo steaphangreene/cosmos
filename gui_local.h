@@ -66,19 +66,15 @@ void page_init();
 void panel_draw();
 void page_draw();
 
-extern unsigned long black;
 extern SDL_Surface *screen;
+extern SDL_Surface *selectg;
+extern unsigned long black;
 extern font *cur_font[9];
 extern int click1, click2;
 extern int buttlist[PANEL_MAX][BUTTON_MAX];
 extern int pagemap[PAGE_MAX][BUTTON_MAX];
 extern int mo[BUTTON_MAX];
 extern int page, panel;
-
-extern int cur_ship;
-extern Galaxy *cur_galaxy;
-extern System *cur_system;
-extern SObject *cur_object;
 
 //#define FLEET_SIZE	4
 //#define FLEET_SPACE	6

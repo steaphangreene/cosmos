@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <vector>
 #include <string>
 
@@ -25,6 +26,7 @@ struct ShipItem {
 
 class Ship {
 public:
+  Ship(FILE *);
   Ship(int tec, int own);
   const char *Name() { return name.c_str(); }
   SClass Class() { return sclass; }
@@ -48,12 +50,14 @@ public:
   int Offense();
   int Defense();
 
+  void SaveTo(FILE *);
+  void LoadFrom(FILE *);
+
 //private:
   int tech;
   string name;
   SClass sclass;
   vector<ShipItem> items;
-  int xpos, ypos;
   int mincrew, maxcrew, crew;
   int owner;
   };

@@ -1,8 +1,16 @@
-struct Player {
+#include <cstdio>
+
+class Player {
+public:
+  Player();
+  Player(FILE *);
+
   void TakeTurn();
 
+  void SaveTo(FILE *);
+  void LoadFrom(FILE *);
+
   int color;
-  int number;
   };
 
 extern int local_player;

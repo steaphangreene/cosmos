@@ -1,9 +1,9 @@
-//#include <cstdio> //FIXME - NOT NEEDED
 #include <cmath>
 
 using namespace std;
 
 #include "game.h"
+#include "ship.h"
 #include "fleet.h"
 #include "gui.h"
 
@@ -83,7 +83,6 @@ Ship *Fleet::GetShip(int n) {
 
 //FIXME - HAXXOR
 extern int panel;  // From gui.cpp
-extern SObject *cur_object;  // From gui.cpp
 void panel_draw();  // From gui.cpp
 
 void Fleet::RemoveShip(int n) {
@@ -159,13 +158,32 @@ void Fleet::Attack(Fleet *f) {
   if((d2+o1-1)/o1 <= (d1+o2-1)/o2) {
     f->DestroyShips(0);
     int losses = NumShips() <? o2 * rounds * NumShips() / d1;
-    //printf("Win, lose %d/%d\n", losses, NumShips());
     DestroyShips(NumShips()-losses);
     }
   else {
     DestroyShips(0);
     int losses = f->NumShips() <? o1 * rounds * f->NumShips() / d2;
-    //printf("Lose, took out %d/%d\n", losses, f->NumShips());
     f->DestroyShips(f->NumShips()-losses);
     }
+  }
+
+Fleet::Fleet(FILE *f) : SObject(0) {
+  LoadFrom(f);
+  }
+
+void Fleet::SaveTo(FILE *f) {
+  SObject::SaveTo(f);
+  fprintf(f, "%s\n", name.c_str());
+  fprintf(f, "Ships: %d\n", int(ships.size()));
+  for(int ctr=0; ctr<int(ships.size()); ++ctr) ships[ctr]->SaveTo(f);
+  }
+
+void Fleet::LoadFrom(FILE *f) {
+  SObject::LoadFrom(f);
+
+  int tmpsz;
+  char buf[1024] = {0};
+  fscanf(f, "%[^\n]\n", buf);  name = buf;
+  fscanf(f, "Ships :%d\n", &tmpsz);
+  for(int ctr=0; ctr<tmpsz; ++ctr) ships.push_back(new Ship(f));
   }

@@ -1,10 +1,12 @@
-#include <cstdio> // FIXME - NOT NEEDED
-
 #include "game.h"
 #include "position.h"
 
 Position::Position() : SObject(1) {
   next = NULL;
+  }
+
+Position::Position(FILE *f) : SObject(1) {
+  LoadFrom(f);
   }
 
 Position::~Position() {
@@ -67,7 +69,6 @@ Position *GetPosition(SObject *s) {
 
   if(!unused_pos) {
     int ctr;
-    //printf("Creating new Position Block.\n");
     unused_pos = new Position[POS_BLOCKSIZE];
     for(ctr=0; ctr < (POS_BLOCKSIZE - 1); ++ctr) {
       unused_pos[ctr].next = &unused_pos[ctr+1];
@@ -111,4 +112,12 @@ void CleanPositions(vector <SObject*> &objs) {
   for(int obj = 0; obj < int(objs.size()); ++obj) {
     RemapPositions(objs[obj], NULL);
     }
+  }
+
+void Position::SaveTo(FILE *f) {
+  SObject::SaveTo(f);
+  }
+
+void Position::LoadFrom(FILE *f) {
+  SObject::LoadFrom(f);
   }

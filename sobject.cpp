@@ -106,12 +106,14 @@ void SObject::ComputeSPos() {
   int collide = 1;
   while(collide) {
     collide = 0; 
+    int prior = (SType() != SOBJECT_PLANET);
     for(int ctr=0; ctr < int(system->objects.size()); ++ctr) {
-      if(system->objects[ctr] == this) break;
+      if(system->objects[ctr] == this) { continue; prior = 0; }
       int space = (Space() + system->objects[ctr]->Space()) / 2;
       if(system->objects[ctr]->frame == cur_game->frame
-		&& abs(system->objects[ctr]->sxpos - sxpos) < space
-		&& abs(system->objects[ctr]->sypos - sypos) < space) {
+		&& (system->objects[ctr]->SType() == SOBJECT_PLANET || prior)
+		&& abs(system->objects[ctr]->SXPos() - sxpos) < space
+		&& abs(system->objects[ctr]->SYPos() - sypos) < space) {
 	sypos += space;
 	collide = 1;
 	break;
@@ -224,7 +226,6 @@ void SObject::TakeTurn() {
 
 //FIXME - HAXXOR
 void panel_draw();  // From gui.cpp
-extern SObject *cur_object;  // From gui.cpp
 
 void SObject::Arrive() {
   SObject *truedest = destination->Represents();
@@ -403,4 +404,50 @@ int SObject::KnownTo(int n) {
 
 void SObject::Know(int n) {
   known[n] = 1;
+  }
+
+void SaveSObject(FILE *f, SObject *s) {
+  if(s->SType() == SOBJECT_FLEET) fprintf(f, "Fleet\n");
+  else if(s->SType() == SOBJECT_PLANET) fprintf(f, "Planet\n");
+  else if(s->SType() == SOBJECT_POSITION) fprintf(f, "Position\n");
+  else if(s->SType() == SOBJECT_SYSTEM) fprintf(f, "System\n");
+  s->SaveTo(f);
+  }
+
+SObject *LoadSObject(FILE *f) {
+  char buf[1024] = {0};
+  fscanf(f, "%s\n", buf);
+  if(!strcmp(buf, "Fleet")) return new Fleet(f);
+  if(!strcmp(buf, "Planet")) return new Planet(f);
+  if(!strcmp(buf, "Position")) return new Position(f);
+//  if(!strcmp(buf, "System")) return new System(f);
+
+  fprintf(stderr, "Load Failed - Bad SObject Type \"%s\"\n", buf);
+  return NULL;
+  }
+
+void SObject::SaveTo(FILE *f) {
+  fprintf(f, "%d %d %d\n", orbit, startpos, period);
+  fprintf(f, "%d %d %d %d %d\n", frame, sxpos, sypos, gxpos, gypos);
+  fprintf(f, "%d %d %d\n", sturn, sxloc, syloc);
+  fprintf(f, "%d %d %d\n", gturn, gxloc, gyloc);
+  fprintf(f, "%d %d %d\n", depart_turn, arrive_turn, distance);
+  for(int ctr=0; ctr<max_factions; ++ctr) {
+    fprintf(f, "%d %d", seen[ctr], known[ctr]);
+    if(ctr < max_factions-1) fprintf(f, " ");
+    }
+  fprintf(f, "\n");
+  }
+
+void SObject::LoadFrom(FILE *f) {
+  Init();
+  fscanf(f, "%d %d %d\n", &orbit, &startpos, &period);
+  fscanf(f, "%d %d %d %d %d\n", &frame, &sxpos, &sypos, &gxpos, &gypos);
+  fscanf(f, "%d %d %d\n", &sturn, &sxloc, &syloc);
+  fscanf(f, "%d %d %d\n", &gturn, &gxloc, &gyloc);
+  fscanf(f, "%d %d %d\n", &depart_turn, &arrive_turn, &distance);
+  for(int ctr=0; ctr<max_factions; ++ctr) {
+    fscanf(f, "%d %d ", &(seen[ctr]), &(known[ctr]));
+    }
+  system = cur_system;
   }

@@ -95,3 +95,21 @@ int Ship::Defense() {
     }
   return 1;
   }
+
+Ship::Ship(FILE *f) {
+  LoadFrom(f);
+  }
+
+void Ship::SaveTo(FILE *f) {
+  fprintf(f, "%s\n", name.c_str());
+  fprintf(f, "%d %d %d %d %d %d\n",
+	tech, (int)sclass, mincrew, maxcrew, crew, owner);
+  }
+
+void Ship::LoadFrom(FILE *f) {
+  char buf[1024] = {0};
+  fscanf(f, "%[^\n]\n", buf);  name = buf;
+  fscanf(f, "%d %d %d %d %d %d\n",
+	&tech, (int*)&sclass, &mincrew, &maxcrew, &crew, &owner);
+  }
+

@@ -104,6 +104,13 @@ void page_draw_system() {
 	update_sprite(spnum++);
 	}
       }
+    if(cur_object == sys->objects[obj]) {
+      update_sprite(1);
+      set_sprite(1, selectg, 0);
+      int off = selectg->w/2;
+      move_sprite(1, cur_object->SXPos() - off, cur_object->SYPos() - off);
+      update_sprite(1);
+      }
     }
   }
 
@@ -115,7 +122,7 @@ void page_clicked_system(int mx, int my, int mb) {
   if(mb != 1 && mb != 3) return;
 
   if(mb == 1) {  // Deselect
-    if(panel == PANEL_FLEET)  cur_object->SetCourse(NULL);
+    if(panel == PANEL_FLEET) cur_object->SetCourse(NULL);
     clear_sprites(1, 10);
     panel = PANEL_GAME;
     }
@@ -129,9 +136,15 @@ void page_clicked_system(int mx, int my, int mb) {
     sqd = offx*offx + offy*offy;
     if(sqd <= sys->objects[obj]->SqOff()) {
       if(mb == 1) {
-	clear_sprites(1, 10);
 	audio_play(click2, 8, 8);
 	cur_object = sys->objects[obj];
+
+	update_sprite(1);
+	set_sprite(1, selectg, 0);
+	int off = selectg->w/2;
+	move_sprite(1, cur_object->SXPos() - off, cur_object->SYPos() - off);
+	update_sprite(1);
+
 	if(cur_object->SType() == SOBJECT_PLANET) {
 	  page = PAGE_PLANET;
 	  panel = PANEL_COLONY;
@@ -196,7 +209,7 @@ void mouse_moved_system(int mx, int my) {
 
       SDL_Surface *line;
 
-      update_sprite(1);
+      update_sprite(2);
       line = getline(
 	cur_object->SXPos(),
 	cur_object->SYPos(),
@@ -204,19 +217,19 @@ void mouse_moved_system(int mx, int my) {
 	((Planet*)sys->objects[obj])->SYPos(),
 	col, 0x0F0F0F0F
 	);
-      set_sprite(1, line);
-      move_sprite(1,
+      set_sprite(2, line);
+      move_sprite(2,
 	cur_object->SXPos()
 		<? ((Planet*)sys->objects[obj])->SXPos(),
 	cur_object->SYPos()
 		<? ((Planet*)sys->objects[obj])->SYPos()
 	);
-      update_sprite(1);
+      update_sprite(2);
       return;
       }
     }
 
   cur_object->SetCourse(NULL);
-  clear_sprites(1, 10);
+  clear_sprites(2, 10);
   panel_draw();
   }

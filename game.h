@@ -13,6 +13,11 @@ extern Game *cur_game;
 
 void game_init();
 
+extern int cur_ship;
+extern Galaxy *cur_galaxy;
+extern System *cur_system;
+extern SObject *cur_object;
+
 const int num_configs = 15;
 extern int num_options[];
 extern const char **config[];

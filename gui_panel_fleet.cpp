@@ -13,6 +13,8 @@ using namespace std;
 #include "fonts.h"
 #include "graphics.h"
 #include "gui_local.h"
+#include "ship.h"
+#include "fleet.h"
 #include "position.h"
 
 #define SKIP 3
@@ -66,7 +68,7 @@ void panel_draw_fleet() {
   else if((!flt->Location()) && (!flt->Destination())) {
     sprintf(buf, "Orbiting Star");
     string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
-    sprintf(buf, "%d-Day Orbit", flt->Period());
+    sprintf(buf, "%d-Day Orbit", (flt->Period()+255)/256);
     string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
     }
   else if(!flt->Destination()) {
