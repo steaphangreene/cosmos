@@ -19,8 +19,8 @@ LIBS:=	`sdl-config --libs` $(COSMOS_LIBS)
 STRIP:=	strip
 
 OBJS:=	main.o gui.o audio.o fonts.o graphics.o \
-	gui_galaxy.o gui_system.o gui_planet.o \
-	gui_colony.o gui_fleet.o gui_ship.o \
+	gui_page_galaxy.o gui_page_system.o gui_page_planet.o \
+	gui_panel_colony.o gui_panel_fleet.o gui_panel_ship.o \
 	ship.o fleet.o game.o galaxy.o system.o planet.o satellite.o player.o \
 	techtree.o tech_tiny.o
 

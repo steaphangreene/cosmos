@@ -1,7 +1,10 @@
 #include <fcntl.h>
 #include <cstring>
+#include <vector>
 //#include <unistd.h>
 //#include <sys/mman.h>
+
+using namespace std;
 
 #include <SDL.h>
 
@@ -26,8 +29,11 @@ const unsigned int bchan = *((unsigned long *)bchanc);
 const unsigned char achanc[] = { 0, 0, 0, 0xFF };
 const unsigned int achan = *((unsigned long *)achanc);
 
-static SDL_Surface *cursor = NULL, *cursorb = NULL;
-static SDL_Rect mouser = { -1, -1, 0, 0 };
+static vector<SDL_Surface *> sprite, spriteb;
+static vector<SDL_Rect> spriter;
+static vector<unsigned long> spritef;
+
+#define SPRITE_UPDATE	1
 
 SDL_Surface *get_blank0_image() {
   SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)blank0_image.pixel_data,
@@ -184,22 +190,33 @@ void update(int x, int y, unsigned int w, unsigned int h) {
   }
 
 void do_updates() {
-  int x, y, moved = 0;
-  static SDL_Rect cursorr;
-  SDL_GetMouseState(&x, &y);
-  if(x != mouser.x || y != mouser.y) {
-    update(&mouser);
-    moved = 1;
-    mouser.x = x;
-    mouser.y = y;
+  static SDL_Rect wholer = {0, 0, 0, 0};
+  for(int ctr=0; ctr<int(sprite.size()); ++ctr) if(sprite[ctr]) {
+    if(ctr == 0) {
+      int x, y;
+      SDL_GetMouseState(&x, &y);
+      if(x != spriter[ctr].x || y != spriter[ctr].y) {
+	update(&spriter[ctr]);
+	spriter[ctr].x = x;
+	spriter[ctr].y = y;
+	spriter[ctr].w = sprite[ctr]->w;
+	spriter[ctr].h = sprite[ctr]->h;
+	update(&spriter[ctr]);
+	}
+      }
+    else {
+      spriter[ctr].w = sprite[ctr]->w;
+      spriter[ctr].h = sprite[ctr]->h;
+      if(spritef[ctr] & SPRITE_UPDATE) {
+	update(&spriter[ctr]);
+	spritef[ctr] &= (~(SPRITE_UPDATE));
+	}
+      }
+    SDL_BlitSurface(screen, &spriter[ctr], spriteb[ctr], &wholer);
     }
-  mouser.w = cursor->w;
-  mouser.h = cursor->h;
-  cursorr = mouser;
-  cursorr.x = 0; cursorr.y = 0;
-  SDL_BlitSurface(screen, &mouser, cursorb, &cursorr);
-  SDL_BlitSurface(cursor, NULL, screen, &mouser);
-  if(moved) update(&mouser);
+  for(int ctr=0; ctr<int(sprite.size()); ++ctr) if(sprite[ctr]) {
+    SDL_BlitSurface(sprite[ctr], NULL, screen, &spriter[ctr]);
+    }
 
   if(num_updaterecs < 0) {
     SDL_BlitSurface(screen, NULL, framebuffer, NULL);
@@ -212,7 +229,9 @@ void do_updates() {
     }
   num_updaterecs = 0;
 
-  SDL_BlitSurface(cursorb, &cursorr, screen, &mouser);
+  for(int ctr=0; ctr<int(sprite.size()); ++ctr) if(sprite[ctr]) {
+    SDL_BlitSurface(spriteb[ctr], NULL, screen, &spriter[ctr]);
+    }
   }
 
 unsigned int color3(int c) {
@@ -230,7 +249,72 @@ void toggle_fullscreen() {
   SDL_WM_ToggleFullScreen(framebuffer);
   }
 
-void set_cursor(SDL_Surface *c) {
-  cursor = c;
-  cursorb = SDL_DisplayFormat(cursor);
+void set_cursor(SDL_Surface *s) {
+  set_sprite(0, s);
+  }
+
+void set_sprite(int n, SDL_Surface *c) {
+  while(int(sprite.size()) < n+1) {
+    sprite.push_back(NULL);
+    spriteb.push_back(NULL);
+    SDL_Rect nullr = {-1, -1, 0, 0};
+    spriter.push_back(nullr);
+    spritef.push_back(0);
+    }
+  sprite[n] = c;
+  if(c == NULL) {
+    spriteb[n] = NULL;
+    }
+  else {
+    spriteb[n] = SDL_DisplayFormat(sprite[n]);
+    SDL_SetAlpha(spriteb[n], 0, 255);
+    }
+  }
+
+void update_sprite(int n) {
+  spritef[n] |= (SPRITE_UPDATE);
+  }
+
+void move_sprite(int n, int x, int y) {
+  if(spritef[n] & SPRITE_UPDATE) {
+    update(&spriter[n]);
+    spritef[n] &= (~(SPRITE_UPDATE));
+    }
+  spriter[n].x = x;
+  spriter[n].y = y;
+  }
+
+SDL_Surface *getline(int x1, int y1, int x2, int y2, Uint32 col, Uint32 pat) {
+  SDL_Surface *tmp = SDL_CreateRGBSurface(SDL_SWSURFACE|SDL_SRCALPHA,
+	abs(x1-x2)+1, abs(y1-y2)+1, 32,
+	0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+  SDL_FillRect(tmp, NULL, 0);
+
+  int rot = 0, slp = 0;
+  if(abs(y1-y2) > abs(x1-x2)) rot = 1;
+  int rng = (abs(y1-y2) >? abs(x1-x2));
+  int div = (abs(y1-y2) <? abs(x1-x2));
+  if((x1 < x2 && y2 < y1) || (x2 < x1 && y1 < y2)) slp = 1;
+
+  for(int ind=0; ind <= rng; ++ind) {
+    if(!(pat & (1<<(ind&31)))) continue;
+    int bas = ind;
+    int sub = ind*div/rng;
+    if(slp) sub = div-sub;
+    SDL_LockSurface(tmp);
+    if(!rot) ((long*)(tmp->pixels))[tmp->pitch/4*sub+bas] = col;
+    else ((long*)(tmp->pixels))[tmp->pitch/4*bas+sub] = col;
+    SDL_UnlockSurface(tmp);
+    }
+  SDL_Surface *ret = SDL_DisplayFormatAlpha(tmp);
+  SDL_FreeSurface(tmp);
+  return ret;
+  }
+
+void drawline(SDL_Surface *s, int x1, int y1, int x2, int y2, Uint32 col, Uint32 pat) {
+  SDL_Surface *tmp = getline(x1, y1, x2, y2, col, pat);
+  SDL_Rect destr = {x1<?x2, y1<?y2, abs(x1-x2)+1, abs(y1-y2)+1};
+  SDL_BlitSurface(tmp, NULL, s, &destr);
+  SDL_FreeSurface(tmp);
+  update(&destr);
   }

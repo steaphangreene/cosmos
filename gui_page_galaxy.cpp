@@ -17,6 +17,7 @@ using namespace std;
 #include "gui_local.h"
 
 static SDL_Surface *gstar;
+static int bpanel = -1, bfleet = -1;
 
 void gui_init_galaxy() {
   gstar = get_gstar_image();
@@ -35,9 +36,12 @@ void gui_init_galaxy() {
 
 void page_init_galaxy() {
   if(panel < PANEL_GAME) panel = PANEL_GAME;
+  bfleet = cur_fleet;
+  bpanel = panel;
   }
 
 void page_cleanup_galaxy() {
+  set_sprite(1, NULL);
   }
 
 void page_draw_galaxy() {
@@ -96,6 +100,8 @@ void page_clicked_galaxy(int mx, int my, int mb) {
     offx = abs(cur_game->fleets[flt]->XPos() - mx);
     offy = abs(cur_game->fleets[flt]->YPos() - my);
     if(offx*offx + offy*offy <= 9) {
+      bfleet = flt;
+      bpanel = PANEL_FLEET;
       cur_fleet = flt;
       panel = PANEL_FLEET;
       panel_init();
@@ -107,5 +113,46 @@ void page_clicked_galaxy(int mx, int my, int mb) {
 void mouse_released_galaxy() {
   }
 
-void mouse_moved_galaxy(int xp, int yp) {
+void mouse_moved_galaxy(int mx, int my) {
+  static int mouse_over = 0;
+  int offx, offy;
+  for(int flt=0; flt < int(cur_game->fleets.size()); ++flt) {
+    offx = abs(cur_game->fleets[flt]->XPos() - mx);
+    offy = abs(cur_game->fleets[flt]->YPos() - my);
+    if(offx*offx + offy*offy <= 9) {
+      if(cur_fleet != flt || panel != PANEL_FLEET) {
+	if(!mouse_over) {
+	  bfleet = cur_fleet;
+	  bpanel = panel;
+	  mouse_over = 1;
+	  }
+	if(bpanel == PANEL_FLEET && panel == PANEL_FLEET && bfleet != flt) {
+	  update_sprite(1);
+	  SDL_Surface *line = getline(
+		cur_game->fleets[bfleet]->XPos(),
+		cur_game->fleets[bfleet]->YPos(),
+		cur_game->fleets[flt]->XPos(),
+		cur_game->fleets[flt]->YPos(),
+		0xFFFFFFFF, 0x0F0F0F0F
+		);
+	  set_sprite(1, line);
+	  move_sprite(1,
+		cur_game->fleets[bfleet]->XPos() <? cur_game->fleets[flt]->XPos(),
+		cur_game->fleets[bfleet]->YPos() <? cur_game->fleets[flt]->YPos()
+		);
+	  update_sprite(1);
+	  }
+	cur_fleet = flt;
+	panel = PANEL_FLEET;
+	panel_init();
+	}
+      return;
+      }
+    }
+  if(mouse_over) {
+    panel = bpanel;
+    cur_fleet = bfleet;
+    panel_init();
+    mouse_over = 0;
+    }
   }
