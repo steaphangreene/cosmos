@@ -10,15 +10,6 @@ using namespace std;
 #include <SDL.h>
 
 #include "graphics.h"
-#include "data/cursor.h"
-#include "data/select.h"
-#include "data/blank0.h"
-#include "data/blank1.h"
-#include "data/check0.h"
-#include "data/check1.h"
-#include "data/star00.h"
-#include "data/gstar00.h"
-#include "data/splanet00.h"
 
 #include "fonts.h"
 
@@ -37,105 +28,6 @@ static vector<unsigned long> spritef;
 static vector<int> spriteown;
 
 #define SPRITE_UPDATE	1
-
-SDL_Surface *get_blank0_image() {
-  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)blank0_image.pixel_data,
-	blank0_image.width, blank0_image.height,
-	32, 4*blank0_image.width,
-	rchan, gchan, bchan, achan);
-  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
-  SDL_FreeSurface(orig);
-  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
-  return optim;
-  }
-
-SDL_Surface *get_blank1_image() {
-  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)blank1_image.pixel_data,
-	blank1_image.width, blank1_image.height,
-	32, 4*blank1_image.width,
-	rchan, gchan, bchan, achan);
-  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
-  SDL_FreeSurface(orig);
-  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
-  return optim;
-  }
-
-SDL_Surface *get_check0_image() {
-  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)check0_image.pixel_data,
-	check0_image.width, check0_image.height,
-	32, 4*check0_image.width,
-	rchan, gchan, bchan, achan);
-  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
-  SDL_FreeSurface(orig);
-  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
-  return optim;
-  }
-
-SDL_Surface *get_check1_image() {
-  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)check1_image.pixel_data,
-	check1_image.width, check1_image.height,
-	32, 4*check1_image.width,
-	rchan, gchan, bchan, achan);
-  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
-  SDL_FreeSurface(orig);
-  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
-  return optim;
-  }
-
-SDL_Surface *get_cursor_image() {
-  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)cursor_image.pixel_data,
-	cursor_image.width, cursor_image.height,
-	32, 4*cursor_image.width,
-	rchan, gchan, bchan, achan);
-  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
-  SDL_FreeSurface(orig);
-  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
-  return optim;
-  }
-
-SDL_Surface *get_select_image() {
-  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)select_image.pixel_data,
-	select_image.width, select_image.height,
-	32, 4*select_image.width,
-	rchan, gchan, bchan, achan);
-  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
-  SDL_FreeSurface(orig);
-  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
-  return optim;
-  }
-
-SDL_Surface *get_star_image() {
-  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)star00_image.pixel_data,
-	star00_image.width, star00_image.height,
-	32, 4*star00_image.width,
-	rchan, gchan, bchan, achan);
-  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
-  SDL_FreeSurface(orig);
-  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
-  return optim;
-  }
-
-SDL_Surface *get_gstar_image() {
-  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)gstar00_image.pixel_data,
-	gstar00_image.width, gstar00_image.height,
-	32, 4*gstar00_image.width,
-	rchan, gchan, bchan, achan);
-  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
-  SDL_FreeSurface(orig);
-  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
-  return optim;
-  }
-
-SDL_Surface *get_splanet_image() {
-  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)splanet00_image.pixel_data,
-	splanet00_image.width, splanet00_image.height,
-	32, 4*splanet00_image.width,
-	rchan, gchan, bchan, achan);
-  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
-  SDL_FreeSurface(orig);
-  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
-  return optim;
-  }
 
 SDL_Surface *get_image(const char *filename, int xs, int ys) {
   FILE *gfl = fopen(filename, "r");

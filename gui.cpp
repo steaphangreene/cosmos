@@ -19,6 +19,16 @@ using namespace std;
 #include "data/click01.h"
 #include "data/click02.h"
 
+#include "data/cursor.h"
+#include "data/select.h"
+#include "data/blank0.h"
+#include "data/blank1.h"
+#include "data/check0.h"
+#include "data/check1.h"
+#include "data/star00.h"
+#include "data/gstar00.h"
+#include "data/splanet00.h"
+
 unsigned long black;
 
 int done = 0;
@@ -55,8 +65,6 @@ int cur_mus_num=0;
 
 static char dialog_message[4096] = {0};
 
-SDL_Surface *build_button0(const char *);
-SDL_Surface *build_button1(const char *);
 void button_clicked(int button);
 void page_clicked(int mx, int my, int mb);
 void panel_clicked(int mx, int my, int mb);
@@ -66,27 +74,7 @@ void page_draw();
 void panel_draw();
 void page_update();
 
-static SDL_Surface *base0 = NULL;
-static SDL_Surface *base1 = NULL;
 static SDL_Surface *check[2] = { NULL, NULL };
-
-SDL_Surface *build_button0(const char *label) { 
-  if(!base0) base0 = get_blank0_image();
-  SDL_Surface *s = SDL_DisplayFormat(base0);
-
-  int len = string_length(label, cur_font[4]);
-  string_draw(s, 100-(len/2), 13, cur_font[4], label);
-  return s;
-  }
-
-SDL_Surface *build_button1(const char *label) {
-  if(!base1) base1 = get_blank1_image();
-  SDL_Surface *s = SDL_DisplayFormat(base1);
-
-  int len = string_length(label, cur_font[4]);
-  string_draw(s, 100-(len/2), 13, cur_font[0], label);
-  return s;
-  }
 
 Uint32 ticktock(Uint32 interval, void *param) {
   SDL_Event ev;
@@ -199,8 +187,6 @@ void gui_main() {
   int curbutt=0;
   SDL_Event event;
 
-  buttlist[PANEL_ROOT][BUTTON_RESUMEGAME] = (cur_game->InProgress())? 6 : 0;
-
   SDL_AddTimer(100, &ticktock, NULL);
 
   while(!done) {
@@ -305,12 +291,132 @@ void gui_main() {
     }
   }
 
-#define STARTUP ("Starting Cosmos - Please Wait.")
-
 static void p() {
   static int prog = 0;
   ++prog;
   show_progress(prog, COUNTPS);
+  }
+
+static SDL_Surface *base0 = NULL;
+static SDL_Surface *base1 = NULL;
+
+SDL_Surface *get_blank0_image() {
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)blank0_image.pixel_data,
+        blank0_image.width, blank0_image.height,
+        32, 4*blank0_image.width,
+        rchan, gchan, bchan, achan);p();
+  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);p();
+  SDL_FreeSurface(orig);p();
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);p();
+  return optim;
+  }
+
+SDL_Surface *get_blank1_image() {
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)blank1_image.pixel_data,
+        blank1_image.width, blank1_image.height,
+        32, 4*blank1_image.width,
+        rchan, gchan, bchan, achan);p();
+  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);p();
+  SDL_FreeSurface(orig);p();
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);p();
+  return optim;
+  }
+
+SDL_Surface *get_check0_image() {
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)check0_image.pixel_data,
+        check0_image.width, check0_image.height,
+        32, 4*check0_image.width,
+        rchan, gchan, bchan, achan);p();
+  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);p();
+  SDL_FreeSurface(orig);p();
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);p();
+  return optim;
+  }
+
+SDL_Surface *get_check1_image() {
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)check1_image.pixel_data,
+        check1_image.width, check1_image.height,
+        32, 4*check1_image.width,
+        rchan, gchan, bchan, achan);p();
+  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);p();
+  SDL_FreeSurface(orig);p();
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);p();
+  return optim;
+  }
+
+SDL_Surface *get_cursor_image() {
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)cursor_image.pixel_data,
+        cursor_image.width, cursor_image.height,
+        32, 4*cursor_image.width,
+        rchan, gchan, bchan, achan);p();
+  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);p();
+  SDL_FreeSurface(orig);p();
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);p();
+  return optim;
+  }
+
+SDL_Surface *get_select_image() {
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)select_image.pixel_data,
+        select_image.width, select_image.height,
+        32, 4*select_image.width,
+        rchan, gchan, bchan, achan);p();
+  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);p();
+  SDL_FreeSurface(orig);p();
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);p();
+  return optim;
+  }
+
+SDL_Surface *get_star_image() {
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)star00_image.pixel_data,
+        star00_image.width, star00_image.height,
+        32, 4*star00_image.width,
+        rchan, gchan, bchan, achan);p();
+  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);p();
+  SDL_FreeSurface(orig);p();
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);p();
+  return optim;
+  }
+
+SDL_Surface *get_gstar_image() {
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)gstar00_image.pixel_data,
+        gstar00_image.width, gstar00_image.height,
+        32, 4*gstar00_image.width,
+        rchan, gchan, bchan, achan);p();
+  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);p();
+  SDL_FreeSurface(orig);p();
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);p();
+  return optim;
+  }
+
+SDL_Surface *get_splanet_image() {
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)splanet00_image.pixel_data,
+        splanet00_image.width, splanet00_image.height,
+        32, 4*splanet00_image.width,
+        rchan, gchan, bchan, achan);p();
+  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);p();
+  SDL_FreeSurface(orig);p();
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);p();
+  return optim;
+  }
+
+#define STARTUP ("Starting Cosmos - Please Wait.")
+
+SDL_Surface *build_button0(const char *label) { 
+  if(!base0) base0 = get_blank0_image();
+  SDL_Surface *s = SDL_DisplayFormat(base0);
+
+  int len = string_length(label, cur_font[4]);
+  string_draw(s, 100-(len/2), 13, cur_font[4], label);
+  return s;
+  }
+
+SDL_Surface *build_button1(const char *label) {
+  if(!base1) base1 = get_blank1_image();
+  SDL_Surface *s = SDL_DisplayFormat(base1);
+
+  int len = string_length(label, cur_font[4]);
+  string_draw(s, 100-(len/2), 13, cur_font[0], label);
+  return s;
   }
 
 void gui_init() {
@@ -548,6 +654,7 @@ void page_draw() {
   SDL_FillRect(screen, &pgr, 0);
 
   if(page == PAGE_ROOT) {
+    buttlist[PANEL_ROOT][BUTTON_RESUMEGAME] = (cur_game->InProgress())? 6 : 0;
     SDL_BlitSurface(intro, NULL, screen, NULL);
     }
   if(page == PAGE_NEW) {

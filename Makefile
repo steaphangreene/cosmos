@@ -11,8 +11,8 @@ DTARD:=	cosmos_data-$(TSTR).tar.gz
 BINS:=	        cosmos.exe cosmos.Linux-i686 cosmos.Linux-i586 \
 	cosmos.Linux-ppc cosmos.Linux-sparc64 \
 	cosmos.SunOS-sun4 cosmos.Darwin-ppc
-COUNTPS:=	$(shell grep ';p();' *.cpp | grep -v '//.*;p();' | wc -l | sed 's- --g')
 
+COUNTPS:=	$(shell grep ';p();' gui.cpp | grep -v '//.*;p();' | wc -l | sed 's- --g')
 
 # Debugging settings
 #CC:=	gcc$(COSMOS_CTAIL) -DVERSION=\"$(VERSION)\" -DCOUNTPS=$(COUNTPS) -DDEBUG=SDL_INIT_NOPARACHUTE -pipe -Wall `sdl-config --cflags` -g $(COSMOS_FLAGS)
