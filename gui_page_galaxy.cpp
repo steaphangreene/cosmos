@@ -194,7 +194,9 @@ void mouse_moved_galaxy(int mx, int my) {
 		&& cur_object->Destination()->Sys() != cur_object->Sys())
 	  continue;
 
-	if((SObject*)(cur_object->Target()) == (SObject*)sys) return;
+	if(cur_object->Target()
+	    &&((SObject*)(cur_object->Target()->Represents()) == (SObject*)sys))
+	  return;
 
 	cur_object->SetCourse(sys);
 	panel_draw();

@@ -2,6 +2,7 @@
 #include <cstring>
 #include <cmath>
 #include <vector>
+#include <map>
 //#include <unistd.h>
 //#include <sys/mman.h>
 
@@ -26,6 +27,8 @@ static vector<SDL_Surface *> sprite, spriteb;
 static vector<SDL_Rect> spriter;
 static vector<unsigned long> spritef;
 static vector<int> spriteown;
+static map <SDL_Surface *, vector<int> *> sprite_ss;
+static map <SDL_Surface *, vector<int> *> sprite_es;
 
 #define SPRITE_UPDATE	1
 
@@ -96,7 +99,14 @@ void update(int x, int y, unsigned int w, unsigned int h) {
   }
 
 void do_updates() {
+
+//	Uint32 inittm;
+//	inittm = SDL_GetTicks();
+//	printf("Start.\n");
+
   static SDL_Rect wholer = {0, 0, 0, 0};
+  int needed[sprite.size()];
+  memset(needed, 0, sizeof(int)*sprite.size());
   for(int ctr=0; ctr<int(sprite.size()); ++ctr) if(sprite[ctr]) {
     if(ctr == 0) {
       int x, y;
@@ -119,31 +129,105 @@ void do_updates() {
 	}
       }
 
-    int needed = (num_updaterecs < 0);
-    for(int rec=0; (!needed) && rec<num_updaterecs; ++rec)
-      needed = overlaps(updaterecs[rec], spriter[ctr]);
-    if(!needed) continue;
+    needed[ctr] = (num_updaterecs < 0);
+    for(int rec=0; (!needed[ctr]) && rec<num_updaterecs; ++rec)
+      needed[ctr] = overlaps(updaterecs[rec], spriter[ctr]);
 
-    SDL_BlitSurface(screen, &spriter[ctr], spriteb[ctr], &wholer);
+    if(needed[ctr]) {
+      if(sprite_ss.count(sprite[ctr])) {
+	SDL_Rect scanline = {0,0,0,1}, scr = {0,0,0,1};
+	for(int y=0; y<sprite[ctr]->h; ++y) {
+	  if((*(sprite_ss[sprite[ctr]]))[y] < (*(sprite_es[sprite[ctr]]))[y]) {
+	    scanline.y = y;
+	    scanline.x = (*(sprite_ss[sprite[ctr]]))[y];
+	    scanline.w = (*(sprite_es[sprite[ctr]]))[y] - scanline.x;
+	    scr.y = spriter[ctr].y + scanline.y;
+	    scr.x = spriter[ctr].x + scanline.x;
+	    scr.w = scanline.w;
+	    SDL_BlitSurface(screen, &scr, spriteb[ctr], &scanline);
+	    }
+	  }
+	}
+      else {
+	SDL_BlitSurface(screen, &spriter[ctr], spriteb[ctr], &wholer);
+	}
+      }
     }
+
+//	printf("Time Taken = %d\n", SDL_GetTicks() - inittm);
+
   for(int ctr=int(sprite.size())-1; ctr >= 0; --ctr) if(sprite[ctr]) {
-    SDL_BlitSurface(sprite[ctr], NULL, screen, &spriter[ctr]);
+    if(needed[ctr]) {
+      if(sprite_ss.count(sprite[ctr])) {
+	SDL_Rect scanline = {0,0,0,1}, scr = {0,0,0,1};
+	for(int y=0; y<sprite[ctr]->h; ++y) {
+	  if((*(sprite_ss[sprite[ctr]]))[y] < (*(sprite_es[sprite[ctr]]))[y]) {
+	    scanline.y = y;
+	    scanline.x = (*(sprite_ss[sprite[ctr]]))[y];
+	    scanline.w = (*(sprite_es[sprite[ctr]]))[y] - scanline.x;
+	    scr.y = spriter[ctr].y + scanline.y;
+	    scr.x = spriter[ctr].x + scanline.x;
+	    scr.w = scanline.w;
+	    SDL_BlitSurface(sprite[ctr], &scanline, screen, &scr);
+	    }
+	  }
+	}
+      else {
+	SDL_BlitSurface(sprite[ctr], NULL, screen, &spriter[ctr]);
+	}
+      }
     }
 
+//	printf("Time Taken = %d\n", SDL_GetTicks() - inittm);
+
+  int success = 1;
   if(num_updaterecs < 0) {
-    SDL_BlitSurface(screen, NULL, framebuffer, NULL);
-    SDL_UpdateRect(framebuffer, 0, 0, 0, 0);
+    if(SDL_BlitSurface(screen, NULL, framebuffer, NULL) == -2) success = 0;
+    else SDL_UpdateRect(framebuffer, 0, 0, 0, 0);
     }
   else {
-    for(int ctr=0; ctr<num_updaterecs; ++ctr)
-      SDL_BlitSurface(screen, updaterecs+ctr, framebuffer, updaterecs+ctr);
-    SDL_UpdateRects(framebuffer, num_updaterecs, updaterecs);
+    for(int ctr=0; success && ctr<num_updaterecs; ++ctr)
+      if(SDL_BlitSurface(
+		screen, updaterecs+ctr, framebuffer, updaterecs+ctr
+		) == 2)
+	success = 0;
+    if(success) SDL_UpdateRects(framebuffer, num_updaterecs, updaterecs);
+    }
+  if(!success) {
+    while(SDL_BlitSurface(screen, NULL, framebuffer, NULL) == -2) {
+      SDL_Delay(5000);
+      }
+    SDL_UpdateRect(framebuffer, 0, 0, 0, 0);
     }
   num_updaterecs = 0;
 
+//	printf("Time Taken = %d\n", SDL_GetTicks() - inittm);
+
   for(int ctr=0; ctr<int(sprite.size()); ++ctr) if(sprite[ctr]) {
-    SDL_BlitSurface(spriteb[ctr], NULL, screen, &spriter[ctr]);
+    if(needed[ctr]) {
+      if(sprite_ss.count(sprite[ctr])) {
+	SDL_Rect scanline = {0,0,0,1}, scr = {0,0,0,1};
+	for(int y=0; y<sprite[ctr]->h; ++y) {
+	  if((*(sprite_ss[sprite[ctr]]))[y] < (*(sprite_es[sprite[ctr]]))[y]) {
+	    scanline.y = y;
+	    scanline.x = (*(sprite_ss[sprite[ctr]]))[y];
+	    scanline.w = (*(sprite_es[sprite[ctr]]))[y] - scanline.x;
+	    scr.y = spriter[ctr].y + scanline.y;
+	    scr.x = spriter[ctr].x + scanline.x;
+	    scr.w = scanline.w;
+	    SDL_BlitSurface(spriteb[ctr], &scanline, screen, &scr);
+	    }
+	  }
+	}
+      else {
+	SDL_BlitSurface(spriteb[ctr], NULL, screen, &spriter[ctr]);
+	}
+      }
     }
+
+//	printf("Time Taken = %d\n", SDL_GetTicks() - inittm);
+//	printf("Done.\n");
+
   }
 
 unsigned int color3(int c) {
@@ -178,7 +262,15 @@ void set_sprite(int n, SDL_Surface *c, int own) {
     update(&spriter[n]);
     spritef[n] &= (~(SPRITE_UPDATE));
     }
-  if(spriteown[n]) SDL_FreeSurface(sprite[n]);
+  if(spriteown[n]) {
+    if(sprite_ss.count(sprite[n])) {
+      delete sprite_ss[sprite[n]];
+      sprite_ss.erase(sprite[n]);
+      delete sprite_es[sprite[n]];
+      sprite_es.erase(sprite[n]);
+      }
+    SDL_FreeSurface(sprite[n]);
+    }
   spriteown[n] = own;
   sprite[n] = c;
   if(c == NULL) {
@@ -215,7 +307,8 @@ void move_sprite(int n, int x, int y) {
 SDL_Surface *getline(int x1, int y1, int x2, int y2, Uint32 col, Uint32 pat) {
   if(abs(x1-x2) == 0 && abs(y1-y2) == 0) return NULL;
 
-  SDL_Surface *tmp = SDL_CreateRGBSurface(SDL_SWSURFACE|SDL_SRCALPHA,
+  SDL_Surface *tmp = SDL_CreateRGBSurface(
+	SDL_SWSURFACE|SDL_SRCALPHA|SDL_RLEACCEL,
 	abs(x1-x2)+1, abs(y1-y2)+1, 32,
 	0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
   SDL_FillRect(tmp, NULL, 0);
@@ -225,6 +318,12 @@ SDL_Surface *getline(int x1, int y1, int x2, int y2, Uint32 col, Uint32 pat) {
   int rng = (abs(y1-y2) >? abs(x1-x2));
   int div = (abs(y1-y2) <? abs(x1-x2));
   if((x1 < x2 && y2 < y1) || (x2 < x1 && y1 < y2)) slp = -1;
+
+  // Special Case to optimize sprite as line.
+  sprite_ss[tmp] = new vector<int>;
+  sprite_es[tmp] = new vector<int>;
+  sprite_ss[tmp]->resize(abs(y1-y2)+1, 10000);
+  sprite_es[tmp]->resize(abs(y1-y2)+1, 0);
 
   for(int ind=0; ind <= rng; ++ind) {
     if(!(pat & (1<<(ind&31)))) continue;
@@ -237,18 +336,36 @@ SDL_Surface *getline(int x1, int y1, int x2, int y2, Uint32 col, Uint32 pat) {
     SDL_LockSurface(tmp);
     if(!rot) {
       ((long*)(tmp->pixels))[tmp->pitch/4*sub+bas] = c1;
-      if(rem) ((long*)(tmp->pixels))[tmp->pitch/4*(sub+slp)+bas] = c2;
+      (*(sprite_ss[tmp]))[sub] = (*(sprite_ss[tmp]))[sub] <? bas;
+      (*(sprite_es[tmp]))[sub] = (*(sprite_es[tmp]))[sub] >? (bas+1);
+      if(rem) {
+	((long*)(tmp->pixels))[tmp->pitch/4*(sub+slp)+bas] = c2;
+	(*(sprite_ss[tmp]))[sub+slp] = (*(sprite_ss[tmp]))[sub+slp] <? bas;
+	(*(sprite_es[tmp]))[sub+slp] = (*(sprite_es[tmp]))[sub+slp] >? (bas+1);
+	}
       }
     else {
       ((long*)(tmp->pixels))[tmp->pitch/4*bas+sub] = c1;
-      if(rem) ((long*)(tmp->pixels))[tmp->pitch/4*bas+(sub+slp)] = c2;
+      (*(sprite_ss[tmp]))[bas] = (*(sprite_ss[tmp]))[bas] <? sub;
+      (*(sprite_es[tmp]))[bas] = (*(sprite_es[tmp]))[bas] >? (sub+1);
+      if(rem) {
+	((long*)(tmp->pixels))[tmp->pitch/4*bas+(sub+slp)] = c2;
+	(*(sprite_ss[tmp]))[bas] = (*(sprite_ss[tmp]))[bas] <? (sub+slp);
+	(*(sprite_es[tmp]))[bas] = (*(sprite_es[tmp]))[bas] >? (sub+1+slp);
+	}
       }
     SDL_UnlockSurface(tmp);
     }
-  SDL_Surface *ret = SDL_DisplayFormatAlpha(tmp);
-  SDL_FreeSurface(tmp);
-  SDL_SetAlpha(ret, SDL_SRCALPHA|SDL_RLEACCEL, 255);
-  return ret;
+
+  return tmp;
+
+// FIXME - Do I even need this?
+//
+//  SDL_Surface *ret = SDL_DisplayFormatAlpha(tmp);
+//  SDL_FreeSurface(tmp);
+//  SDL_SetAlpha(ret, SDL_SRCALPHA|SDL_RLEACCEL, 255);
+//
+//  return ret;
   }
 
 void drawline(SDL_Surface *s, int x1, int y1, int x2, int y2, Uint32 col, Uint32 pat) {
