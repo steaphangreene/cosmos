@@ -14,6 +14,7 @@ Planet::Planet(int ord, int sz, int min, int atmos) {
   size = sz;
   minerals = min;
   atmosphere = atmos;
+  claimed = -1;
   int dist = (ord+1)*700;
   period = int(sqrt(double(dist)*double(dist)*double(dist)));
   startpos = rand()&65535;

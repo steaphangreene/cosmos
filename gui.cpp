@@ -12,13 +12,20 @@ using namespace std;
 #include "audio.h"
 #include "fonts.h"
 #include "graphics.h"
+#include "gui_local.h"
+
+unsigned long black;
 
 int done = 0;
 
 extern SDL_Surface *screen;
-static SDL_Rect mouser = {-1, -1, 0, 0};
-static SDL_Surface *intro, *cursor, *button[BUTTON_MAX][2];
-static SDL_Surface *planet[4], *satellite[4], *star;
+font *cur_font[9];
+
+SDL_Rect mouser = {-1, -1, 0, 0};
+SDL_Surface *cursor, *button[BUTTON_MAX][2];
+
+static SDL_Surface *intro;
+static SDL_Surface *planet[4], *satellite[4];
 
 int lastpage = PAGE_INVALID, page = PAGE_ROOT;
 int buttlist[PAGE_MAX][BUTTON_MAX] = {{0}};
@@ -34,12 +41,35 @@ int cur_galaxy=0;
 int cur_system=0;
 int cur_planet=0;
 
+SDL_Surface *build_button0(const char *);
+SDL_Surface *build_button1(const char *);
 void gui_button_clicked(int button);
 void cursor_draw();
 void page_clicked(int mx, int my, int mb);
 void page_draw();
 void page_update();
 void page_redraw(SDL_Rect *);
+
+static SDL_Surface *base0 = NULL;
+static SDL_Surface *base1 = NULL;
+
+SDL_Surface *build_button0(const char *label) { 
+  if(!base0) base0 = get_blank0_image();
+  SDL_Surface *s = SDL_DisplayFormat(base0);
+
+  int len = string_len(label, cur_font[4]);
+  string_draw(s, 100-(len/2), 13, cur_font[4], label);
+  return s;
+  }
+
+SDL_Surface *build_button1(const char *label) {
+  if(!base1) base1 = get_blank1_image();
+  SDL_Surface *s = SDL_DisplayFormat(base1);
+
+  int len = string_len(label, cur_font[4]);
+  string_draw(s, 100-(len/2), 13, cur_font[4], label);
+  return s;
+  }
 
 int update_buttons() {
   int inbutt = 0;
@@ -141,6 +171,17 @@ void gui_main() {
   }
 
 void gui_init() {
+  cur_font[8] = font_init();
+  cur_font[7] = font_colored(cur_font[8], color3(7));
+  cur_font[6] = font_colored(cur_font[8], color3(6));
+  cur_font[5] = font_colored(cur_font[8], color3(5));
+  cur_font[4] = font_colored(cur_font[8], color3(4));
+  cur_font[3] = font_colored(cur_font[8], color3(3));
+  cur_font[2] = font_colored(cur_font[8], color3(2));
+  cur_font[1] = font_colored(cur_font[8], color3(1));
+  cur_font[0] = font_colored(cur_font[8], color3(0));
+
+  black = SDL_MapRGB(screen->format, 0x00, 0x00, 0x00);
   cursor = get_cursor_image();
   intro = get_image("graphics/intro.raw", 800, 768);
 
@@ -148,7 +189,6 @@ void gui_init() {
   satellite[0] = get_alpha_image("graphics/moon00.raw", 64, 64);
   satellite[1] = get_alpha_image("graphics/moon01.raw", 64, 64);
   satellite[2] = get_alpha_image("graphics/satellite00.raw", 8, 8);
-  star = get_star_image();
 
   button[BUTTON_RESUMEGAME][0] = build_button0("Resume Game");;
   button[BUTTON_RESUMEGAME][1] = build_button1("Resume Game");
@@ -211,24 +251,25 @@ void gui_init() {
   pagemap[PAGE_SYSOPT][BUTTON_CANCEL] =		PAGE_ROOT;
 //  ambient[PAGE_SYSOPT] = audio_loadsound("sounds/ambient00.wav");
 
-  buttlist[PAGE_GALAXY][BUTTON_EXIT] =		11;
-  pagemap[PAGE_GALAXY][BUTTON_EXIT] =		PAGE_ROOT;
-//  ambient[PAGE_GALAXY] = audio_loadsound("sounds/ambient00.wav");
-
-  buttlist[PAGE_SYSTEM][BUTTON_EXIT] =		11;
-  pagemap[PAGE_SYSTEM][BUTTON_EXIT] =		PAGE_GALAXY;
-
   buttlist[PAGE_PLANET][BUTTON_EXIT] =		11;
   pagemap[PAGE_PLANET][BUTTON_EXIT] =		PAGE_SYSTEM;
 
   click1 = audio_loadsound("sounds/click01.wav");
   click2 = audio_loadsound("sounds/click02.wav");
 
+  gui_init_galaxy();
+  gui_init_system();
   page_init();
   }
 
 void gui_button_clicked(int button) {
   switch(page) {
+    case(PAGE_GALAXY): {
+      gui_button_clicked_galaxy(button);
+      } break;
+    case(PAGE_SYSTEM): {
+      gui_button_clicked_system(button);
+      } break;
     case(PAGE_ROOT): {
       switch(button) {
 	case(BUTTON_QUITGAME): {
@@ -284,47 +325,38 @@ void page_redraw(SDL_Rect *area) {
       todo = *area;
       }
     else if(page == PAGE_NEW) {
-      SDL_FillRect(screen, &todo, SDL_MapRGB(screen->format, 0x00, 0x00, 0x00));
+      SDL_FillRect(screen, &todo, black);
       todo = *area;
       for(int set=0; set<num_configs; ++set) {
-	int xp = 256-string_len(config[set][0]);
-	SDL_Rect lrec = {xp, 12+24*set, string_len(config[set][0]), 24};
+	int xp = 256-string_len(config[set][0], cur_font[4]);
+	SDL_Rect lrec = {xp, 12+24*set, string_len(config[set][0], cur_font[4]), 24};
 	SDL_Rect rrec = {270, 12+24*set,
-		string_len(config[set][cur_game->working_setting[set]+1]), 24};
-	unsigned long red = SDL_MapRGB(screen->format, 0x7F, 0x00, 0x00);
+		string_len(config[set][cur_game->working_setting[set]+1], cur_font[4]),
+		24};
 
 	if(overlaps(lrec, todo))
-	  string_draw(screen, xp, 12+24*set, red, config[set][0]);
-	if(overlaps(rrec, todo))
-	  string_draw(screen, 270, 12+24*set, red,
+	  string_draw(screen, xp, 12+24*set, cur_font[4], config[set][0]);
+	if(overlaps(rrec, todo)) {
+	  if(config[set][cur_game->working_setting[set]+1][0] != '@') {
+	    string_draw(screen, 270, 12+24*set, cur_font[4],
 		config[set][cur_game->working_setting[set]+1]);
+	    }
+	  else {
+	    string_draw(screen, 270, 12+24*set,
+		cur_font[cur_game->working_setting[set]+1],
+		config[set][cur_game->working_setting[set]+1]+1);
+	    }
+	  }
 	}
       }
     else if(page == PAGE_GALAXY) {
-      SDL_FillRect(screen, &todo, SDL_MapRGB(screen->format, 0x00, 0x00, 0x00));
-      todo = *area;
-      SDL_Rect rec = {0, 0, 3, 3};
-      for(int sys=0; sys < cur_game->galaxys[cur_galaxy]->num_systems; ++sys) {
-	rec.x = cur_game->galaxys[cur_galaxy]->systems[sys]->xpos - 1;
-	rec.y = cur_game->galaxys[cur_galaxy]->systems[sys]->ypos - 1;
-	if(overlaps(rec, todo)) SDL_FillRect(screen, &rec, SDL_MapRGB(screen->format, 0xFF, 0xFF, 0xFF));
-	}
+      page_redraw_galaxy(area);
       }
     else if(page == PAGE_SYSTEM) {
-      SDL_FillRect(screen, &todo, SDL_MapRGB(screen->format, 0x00, 0x00, 0x00));
-      SDL_Rect destr = {(768-32)/2, (768-32)/2, 32, 32};
-      if(overlaps(destr, todo)) SDL_BlitSurface(star, NULL, screen, &destr);
-      destr.w = 3;  destr.h = 3;
-      System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
-      for(int plan=0; plan < sys->num_planets; ++plan) {
-	destr.x = sys->planets[plan]->XPos(cur_game->turn) - 1;
-	destr.y = sys->planets[plan]->YPos(cur_game->turn) - 1;
-	if(overlaps(destr, todo)) SDL_FillRect(screen, &destr, SDL_MapRGB(screen->format, 0xFF, 0x00, 0xFF));
-	}
-      todo = *area;
+      page_redraw_system(area);
       }
     else if(page == PAGE_PLANET) {
-      SDL_FillRect(screen, &todo, SDL_MapRGB(screen->format, 0x00, 0x00, 0x00));
+      SDL_FillRect(screen, &todo, black);
       System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
       Planet *plan = sys->planets[cur_planet];
       SDL_BlitSurface(planet[plan->type], &todo, screen, &todo);
@@ -359,13 +391,13 @@ void page_redraw(SDL_Rect *area) {
       todo = *area;
       }
     else {
-      SDL_FillRect(screen, &todo, SDL_MapRGB(screen->format, 0x00, 0x00, 0x00));
+      SDL_FillRect(screen, &todo, black);
       todo = *area;
       }
     }
   if((area->x + area->w) > 800) {
     SDL_SetClipRect(screen, &todo);
-    SDL_FillRect(screen, &todo, SDL_MapRGB(screen->format, 0x00, 0x00, 0x00));
+    SDL_FillRect(screen, &todo, black);
     todo = *area;
     memset(mo, -1, sizeof(mo));
     update_buttons();
@@ -380,32 +412,24 @@ void page_draw() {
   if(page == PAGE_ROOT) SDL_BlitSurface(intro, NULL, screen, NULL);
   if(page == PAGE_NEW) {
     for(int set=0; set<num_configs; ++set) {
-      int xp = 256-string_len(config[set][0]);
-      unsigned long red = SDL_MapRGB(screen->format, 0x7F, 0x00, 0x00);
-      string_draw(screen, xp, 12+24*set, red, config[set][0]);
-      string_draw(screen, 270, 12+24*set, red,
-	config[set][cur_game->working_setting[set]+1]);
+      int xp = 256-string_len(config[set][0], cur_font[4]);
+      string_draw(screen, xp, 12+24*set, cur_font[4], config[set][0]);
+      if(config[set][cur_game->working_setting[set]+1][0] != '@') {
+	string_draw(screen, 270, 12+24*set, cur_font[4],
+		config[set][cur_game->working_setting[set]+1]);
+	}
+      else {
+	string_draw(screen, 270, 12+24*set,
+		cur_font[cur_game->working_setting[set]+1],
+		config[set][cur_game->working_setting[set]+1]+1);
+	}
       }
     }
   if(page == PAGE_GALAXY) {
-    SDL_Rect rec = {0, 0, 3, 3};
-    for(int sys=0; sys < cur_game->galaxys[cur_galaxy]->num_systems; ++sys) {
-      rec.x = cur_game->galaxys[cur_galaxy]->systems[sys]->xpos - 1;
-      rec.y = cur_game->galaxys[cur_galaxy]->systems[sys]->ypos - 1;
-      SDL_FillRect(screen, &rec, SDL_MapRGB(screen->format, 0xFF, 0xFF, 0xFF));
-      }
+    page_draw_galaxy();
     }
   if(page == PAGE_SYSTEM) {
-    SDL_Rect destr = {(768-32)/2, (768-32)/2, 32, 32};
-    SDL_BlitSurface(star, NULL, screen, &destr);
-    destr.w = 3;  destr.h = 3;
-    System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
-    for(int plan=0; plan < sys->num_planets; ++plan) {
-      destr.x = sys->planets[plan]->XPos(cur_game->turn) - 1;
-      destr.y = sys->planets[plan]->YPos(cur_game->turn) - 1;
-      SDL_FillRect(screen, &destr, SDL_MapRGB(screen->format, 0xFF, 0x00, 0xFF));
-      update(&destr);
-      }
+    page_draw_system();
     }
   if(page == PAGE_PLANET) {
     SDL_Rect destr = {0, 0, 768, 768};
@@ -434,7 +458,7 @@ void page_update() {
 	srcr.y = sat->YPos(lasttick) - 32;
 	destr.x = sat->XPos(lasttick) - 32;
 	destr.y = sat->YPos(lasttick) - 32;
-	SDL_FillRect(screen, &destr, SDL_MapRGB(screen->format, 0x00, 0x00, 0x00));
+	SDL_FillRect(screen, &destr, black);
 	SDL_BlitSurface(planet[plan->type], &srcr, screen, &destr);
 	if(overlaps(destr, mouser)) cursor_draw();
 	update(&destr);
@@ -466,6 +490,12 @@ void page_update() {
 	}
       }
     }
+  else if(page == PAGE_GALAXY) {
+    page_update_galaxy();
+    }
+  else if(page == PAGE_SYSTEM) {
+    page_update_system();
+    }
   lasttick = cur_game->tick;
   }
 
@@ -490,28 +520,9 @@ void page_clicked(int mx, int my, int mb) {
       }
     }
   else if(page == PAGE_GALAXY) {
-    int offx, offy;
-    for(int sys=0; sys < cur_game->galaxys[cur_galaxy]->num_systems; ++sys) {
-      offx = abs(cur_game->galaxys[cur_galaxy]->systems[sys]->xpos - mx);
-      offy = abs(cur_game->galaxys[cur_galaxy]->systems[sys]->ypos - my);
-      if(offx*offx + offy*offy <= 36) {
-	cur_system = sys;
-	page = PAGE_SYSTEM;
-	break;
-	}
-      }
+    page_clicked_galaxy(mx, my, mb);
     }
   else if(page == PAGE_SYSTEM) {
-    int offx, offy;
-    System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
-    for(int plan=0; plan < sys->num_planets; ++plan) {
-      offx = abs(mousex - sys->planets[plan]->XPos(cur_game->turn));
-      offy = abs(mousey - sys->planets[plan]->YPos(cur_game->turn));
-      if(offx*offx + offy*offy <= 36) {
-	cur_planet = plan;
-	page = PAGE_PLANET;
-	break;
-	}
-      }
+    page_clicked_system(mx, my, mb);
     }
   }

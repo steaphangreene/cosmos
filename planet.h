@@ -9,5 +9,6 @@ public:
   int order, size, minerals, atmosphere, type;
   int startpos, period;
   int num_satellites;
+  int claimed;
   Satellite **satellites;
   };

@@ -2,7 +2,7 @@
 
 void game_init();
 
-const int num_configs = 13;
+const int num_configs = 14;
 extern int num_options[];
 extern const char **config[];
 
@@ -40,8 +40,12 @@ public:
   int working_setting[num_configs];
 
   int turn, tick;
+
   int num_galaxys;
   Galaxy **galaxys;
+
+  int num_players;
+  Player **players;
   };
 
 extern Game *cur_game;

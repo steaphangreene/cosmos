@@ -41,7 +41,6 @@ int main(int argc, char **argv) {
 
   if(use_sound) audio_init();
   game_init();
-  fonts_init();
   SDL_ShowCursor(SDL_DISABLE);
   gui_init();
   gui_main();

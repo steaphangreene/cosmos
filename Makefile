@@ -1,12 +1,12 @@
 TSTR:=  $(shell date +"%Y%m%d%H%M")
 
 # Debugging settings
-#CC:=	g++ -O2 -pipe -Wall `sdl-config --cflags` -g
-#LIBS:=	`sdl-config --libs` -lefence
+CC:=	g++ -O2 -pipe -Wall `sdl-config --cflags` -g
+LIBS:=	`sdl-config --libs` -lefence
 
-CC:=	g++ -O2 -pipe -Wall `sdl-config --cflags` -s
-LIBS:=	`sdl-config --libs`
-OBJS:=	main.o gui.o \
+#CC:=	g++ -O2 -pipe -Wall `sdl-config --cflags` -s
+#LIBS:=	`sdl-config --libs`
+OBJS:=	main.o gui.o gui_galaxy.o gui_system.o \
 	game.o galaxy.o system.o planet.o satellite.o \
 	audio.o fonts.o graphics.o
 # graphics_intro.o
@@ -59,14 +59,17 @@ audio.o: audio.cpp
 fonts.o: fonts.cpp data/font22_black.h data/font22_blue.h \
  data/font22_red.h data/font22_green.h data/font22_white.h
 galaxy.o: galaxy.cpp galaxy.h system.h planet.h satellite.h
-game.o: game.cpp game.h galaxy.h system.h planet.h satellite.h
+game.o: game.cpp game.h player.h galaxy.h system.h planet.h \
+ satellite.h
 graphics.o: graphics.cpp graphics.h data/cursor.h data/blank0.h \
- data/blank1.h data/star00.h fonts.h
-gui.o: gui.cpp gui.h game.h galaxy.h system.h planet.h satellite.h \
- audio.h fonts.h graphics.h
-main.o: main.cpp gui.h game.h galaxy.h system.h planet.h satellite.h \
- fonts.h audio.h graphics.h
-planet.o: planet.cpp math.h game.h galaxy.h system.h planet.h \
+ data/blank1.h data/star00.h data/gstar00.h data/splanet00.h fonts.h
+gui.o: gui.cpp gui.h game.h player.h galaxy.h system.h planet.h \
+ satellite.h audio.h fonts.h graphics.h gui_local.h
+gui_galaxy.o: gui_galaxy.cpp gui.h game.h player.h galaxy.h system.h \
+ planet.h satellite.h audio.h fonts.h graphics.h gui_local.h
+main.o: main.cpp gui.h game.h player.h galaxy.h system.h planet.h \
+ satellite.h fonts.h audio.h graphics.h
+planet.o: planet.cpp math.h game.h player.h galaxy.h system.h planet.h \
  satellite.h
 satellite.o: satellite.cpp math.h satellite.h
 system.o: system.cpp system.h planet.h satellite.h

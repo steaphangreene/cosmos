@@ -7,6 +7,8 @@
 #include "data/blank0.h"
 #include "data/blank1.h"
 #include "data/star00.h"
+#include "data/gstar00.h"
+#include "data/splanet00.h"
 
 #include "fonts.h"
 
@@ -63,6 +65,28 @@ SDL_Surface *get_star_image() {
   return optim;
   }
 
+SDL_Surface *get_gstar_image() {
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)gstar00_image.pixel_data,
+	gstar00_image.width, gstar00_image.height,
+	32, 4*gstar00_image.width,
+	rchan, gchan, bchan, achan);
+  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
+  SDL_FreeSurface(orig);
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
+  return optim;
+  }
+
+SDL_Surface *get_splanet_image() {
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)splanet00_image.pixel_data,
+	splanet00_image.width, splanet00_image.height,
+	32, 4*splanet00_image.width,
+	rchan, gchan, bchan, achan);
+  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
+  SDL_FreeSurface(orig);
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
+  return optim;
+  }
+
 SDL_Surface *get_image(const char *filename, int xs, int ys) {
   FILE *gfl = fopen(filename, "r");
   if(!gfl) {
@@ -95,28 +119,6 @@ SDL_Surface *get_alpha_image(const char *filename, int xs, int ys) {
   SDL_FreeSurface(s);
   return ret;
   }
-
-static SDL_Surface *base0 = NULL;
-static SDL_Surface *base1 = NULL;
-
-SDL_Surface *build_button0(const char *label) {
-  if(!base0) base0 = get_blank0_image();
-  SDL_Surface *s = SDL_DisplayFormat(base0);
-
-  int len = string_len(label);
-  string_draw(s, 100-(len/2), 13, 0x0000007F, label);
-  return s;
-  }
-
-SDL_Surface *build_button1(const char *label) {
-  if(!base1) base1 = get_blank1_image();
-  SDL_Surface *s = SDL_DisplayFormat(base1);
-
-  int len = string_len(label);
-  string_draw(s, 100-(len/2), 13, 0x0000007F, label);
-  return s;
-  }
-
 
 //Double-buffering system
 static int num_updaterecs = 0;
@@ -159,6 +161,14 @@ void do_updates() {
     SDL_UpdateRects(framebuffer, num_updaterecs, updaterecs);
     }
   num_updaterecs = 0;
+  }
+
+unsigned int color3(int c) {
+  return (0xFF000000 |
+	((c&4)? 0x007F0000 : 0x000000) |
+	((c&2)? 0x00007F00 : 0x000000) |
+	((c&1)? 0x0000007F : 0x000000)
+	);
   }
 
 void toggle_fullscreen() {

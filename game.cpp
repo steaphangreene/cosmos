@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <algorithm>
 
 #include "game.h"
 
@@ -23,6 +24,8 @@ Game::Game() {
   memset(working_setting, 0, sizeof(working_setting));
   memset(game_setting, 0, sizeof(game_setting));
   memset(setting, 0, sizeof(setting));
+  num_players = 0;
+  players = NULL;
   num_galaxys = 0;
   galaxys = NULL;
   started = 0;
@@ -64,6 +67,10 @@ void Game::Finalize() {
 
 void Game::Clear() {
   started = 0;
+  for(int ctr=0; ctr<num_players; ++ctr) delete players[ctr];
+  if(players) delete [] players;
+  num_players = 0;
+  players = NULL;
   for(int ctr=0; ctr<num_galaxys; ++ctr) delete galaxys[ctr];
   if(galaxys) delete [] galaxys;
   num_galaxys = 0;
@@ -75,9 +82,28 @@ void Game::Fill() {
   Finalize();
   started = 1;
 
+  num_players = setting[6];
+  players = new (Player*)[num_players];
+  for(int ctr=0; ctr<num_players; ++ctr) {
+    players[ctr] = new Player;
+    }
+  players[0]->color = setting[13]+1;
+  int numcol = 6;
+  int colors[7] = {1, 2, 3, 4, 5, 6, 7};
+  colors[setting[13]] = 20;
+  for(int ctr=1; ctr<num_players; ++ctr) {
+    sort(colors, colors+8);
+    int pick = rand()%numcol;
+    players[ctr]->color = colors[pick];
+    colors[pick] = 20;
+    --numcol;
+    }
+
   num_galaxys = setting[9];
   galaxys = new (Galaxy*)[num_galaxys];
-  for(int ctr=0; ctr<num_galaxys; ++ctr) {
+  galaxys[0] = new Galaxy(setting[10]*20, setting[11], setting[12],
+	num_players, players);
+  for(int ctr=1; ctr<num_galaxys; ++ctr) {
     galaxys[ctr] = new Galaxy(setting[10]*20, setting[11], setting[12]);
     }
   }
@@ -126,7 +152,7 @@ const char *config06[] = {	"Number of Races",
 	"5",
 	"6",
 	"7",
-	"8",
+//	"8",
 	NULL };
 
 const char *config07[] = {	"Tech Tree",
@@ -177,6 +203,16 @@ const char *config12[] = {	"Planetary Atmosphere",
 	"Thick",
 	NULL };
 
+const char *config13[] = {	"Player Color",
+	"@Blue",
+	"@Green",
+	"@Cyan",
+	"@Red",
+	"@Purple",
+	"@Yellow",
+	"@White",
+	NULL };
+
 int num_options[num_configs] = {0};
 const char **config[num_configs] = {
   config00,
@@ -191,5 +227,6 @@ const char **config[num_configs] = {
   config09,
   config10,
   config11,
-  config12
+  config12,
+  config13
   };
