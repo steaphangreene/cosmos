@@ -11,7 +11,7 @@ class Position;
 
 class Position : public SObject {
 public:
-  Position(SObject *);
+  Position();
   virtual ~Position();
   virtual void TakeTurn();
   virtual int SType() { return SOBJECT_POSITION; }

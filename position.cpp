@@ -1,12 +1,10 @@
+#include <cstdio> // FIXME - NOT NEEDED
+
 #include "game.h"
 #include "position.h"
 
-static Position *unused_pos = NULL;
-static Position *used_pos = NULL;
-
-Position::Position(SObject *o) : SObject(1) {
+Position::Position() : SObject(1) {
   next = NULL;
-  AssignTo(o);
   }
 
 Position::~Position() {
@@ -60,6 +58,49 @@ void Position::ComputeGPos() {
     }
   }
 
+#define POS_BLOCKSIZE 1024
+static Position *unused_pos = NULL;
+static Position *used_pos = NULL;
+
+Position *GetPosition(SObject *s) {
+  Position *ret;
+
+  if(!unused_pos) {
+    int ctr;
+    //printf("Creating new Position Block.\n");
+    unused_pos = new Position[POS_BLOCKSIZE];
+    for(ctr=0; ctr < (POS_BLOCKSIZE - 1); ++ctr) {
+      unused_pos[ctr].next = &unused_pos[ctr+1];
+      }
+    unused_pos[ctr].next = NULL;
+    }
+
+  ret = unused_pos;
+  unused_pos = unused_pos->next;
+  ret->next = used_pos;
+  used_pos = ret;
+
+  ret->AssignTo(s);
+
+  return ret;
+  }
+
+void RecyclePosition(Position *p) {
+  if(!p) return;
+
+  Position **cur = &used_pos;
+  while(*cur) {
+    if((*cur) == p) {
+      *cur = (*cur)->next;
+      break;
+      }
+    cur = &((*cur)->next);
+    }
+
+  p->next = unused_pos;
+  unused_pos = p;
+  }
+
 void RemapPositions(SObject *oldo, SObject *newo) {
   for(Position *pos = used_pos; pos; pos = pos->next) {
     if(pos->represents == oldo) pos->represents = newo;
@@ -70,37 +111,4 @@ void CleanPositions(vector <SObject*> &objs) {
   for(int obj = 0; obj < int(objs.size()); ++obj) {
     RemapPositions(objs[obj], NULL);
     }
-  }
-
-Position *GetPosition(SObject *s) {
-  Position *ret = unused_pos;
-  if(ret) {
-    unused_pos = unused_pos->next;
-    ret->AssignTo(s);
-    }
-  else {
-    ret = new Position(s);
-    /* WE LEAVE ALL IN THE USED LIST NOW! */
-    ret->next = used_pos;
-    used_pos = ret;
-    }
-  return ret;
-  }
-
-void RecyclePosition(Position *p) {
-  if(!p) return;
-
-/* WE LEAVE ALL IN THE USED LIST NOW!
-  Position **cur = &used_pos;
-  while(*cur) {
-    if((*cur) == p) {
-      *cur = (*cur)->next;
-      break;
-      }
-    cur = &((*cur)->next);
-    }
-*/
-
-  p->next = unused_pos;
-  unused_pos = p;
   }

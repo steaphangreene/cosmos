@@ -103,7 +103,7 @@ int Game::Save(const char *fn) {
     sprintf(buf, "%s/.cosmos/saves/%s", getenv("HOME"), fn);
     }
   else {
-    if(MKDIR(buf, 0755)) return -1;
+    if(MKDIR("saves", 0755)) return -1;
     sprintf(buf, "saves/%s", fn);
     }
 
@@ -113,6 +113,7 @@ int Game::Save(const char *fn) {
     perror(ebuf);
     return -1;
     }
+
   for(int ctr=0; ctr < num_configs; ++ctr) {
     fprintf(svfl, "%d", setting[ctr]);
     if(ctr != num_configs-1) fprintf(svfl, " ");

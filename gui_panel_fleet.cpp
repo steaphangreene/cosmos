@@ -100,7 +100,7 @@ void panel_draw_fleet() {
     buttlist[PANEL_FLEET][BUTTON_SPLIT] =		0;
     }
 
-  if(flt->CanLand() && page == PAGE_SYSTEM && (!flt->Destination())) {
+  if(flt->CanLand() && (!flt->Destination())) {
     buttlist[PANEL_FLEET][BUTTON_LAND] =	10;
     mo[BUTTON_LAND] = -1;
     }

@@ -53,9 +53,9 @@ int cur_amb_num=0;
 Sound *cur_mus=NULL;
 int cur_mus_num=0;
 
-int cur_galaxy=0;
-int cur_ship=0;
+int cur_ship = 0;
 System *cur_system=NULL;
+Galaxy *cur_galaxy=NULL;
 SObject *cur_object=NULL;
 
 static char dialog_message[4096] = {0};
@@ -301,6 +301,8 @@ void gui_main() {
   }
 
 void gui_init() {
+  if(cur_game->started) cur_galaxy = cur_game->galaxys[0];
+
   cur_font[8] = font_init();
   cur_font[7] = font_colored(cur_font[8], color3(7));
   cur_font[6] = font_colored(cur_font[8], color3(6));
@@ -472,6 +474,7 @@ void button_clicked(int button) {
 	case(BUTTON_ACCEPT): {
 	  cur_game->Clear();
 	  cur_game->Fill();
+	  cur_galaxy = cur_game->galaxys[0];
 	  page_draw();
 	  } break;
 	}

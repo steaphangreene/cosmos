@@ -14,6 +14,10 @@ extern int max_factions;
 
 //Orbital Period = sqrt(Distance From Star ^ 3)
 
+vector<int> SObject::size(SOBJECT_MAX, 4);
+vector<int> SObject::space(SOBJECT_MAX, 6);
+vector<int> SObject::sqoff(SOBJECT_MAX, 9);
+
 void SObject::Init() {
   location = NULL;
   destination = NULL;
@@ -89,9 +93,14 @@ void SObject::ComputeSPos() {
   sxpos = (sxloc+10)/20 + 384;
   sypos = (syloc+10)/20 + 384;
 
-  if(location && abs(location->SXPos() - sxpos) < 6
-	&& abs(location->SYPos() - sypos) < 6) {
-    sxpos += 8; sypos -= 2;
+  if(location && location->Represents()) {
+    int space = (Space() + location->Represents()->Space()) / 2;
+    if(abs(location->SXPos() - sxpos) < space
+	&& abs(location->SYPos() - sypos) < space) {
+      sxpos += space;
+      sypos -= location->Represents()->Size()/2;
+      sypos += Size()/2;
+      }
     }
 
   int collide = 1;
@@ -99,10 +108,11 @@ void SObject::ComputeSPos() {
     collide = 0; 
     for(int ctr=0; ctr < int(system->objects.size()); ++ctr) {
       if(system->objects[ctr] == this) break;
+      int space = (Space() + system->objects[ctr]->Space()) / 2;
       if(system->objects[ctr]->frame == cur_game->frame
-		&& abs(system->objects[ctr]->sxpos - sxpos) < 6
-		&& abs(system->objects[ctr]->sypos - sypos) < 6) {
-	sypos += 6;
+		&& abs(system->objects[ctr]->sxpos - sxpos) < space
+		&& abs(system->objects[ctr]->sypos - sypos) < space) {
+	sypos += space;
 	collide = 1;
 	break;
 	}
@@ -161,10 +171,14 @@ void SObject::ComputeGPos() {
   gxpos = (gxloc+10)/20;
   gypos = (gyloc+10)/20;
 
-  if(system && system != this
-	&& abs(system->GXPos() - gxpos) < 6
-	&& abs(system->GYPos() - gypos) < 6) {
-    gxpos += 8; gypos -= 2;
+  if(system && system != this) {
+    int space = (Space() + system->Space()) / 2;
+    if(abs(system->GXPos() - gxpos) < space
+	&& abs(system->GYPos() - gypos) < space) {
+      gxpos += space;
+      gypos -= system->Size()/2;
+      gypos += Size()/2;
+      }
     }
 
   int collide = 1;
@@ -172,15 +186,20 @@ void SObject::ComputeGPos() {
     collide = 0; 
     for(int ctr=0; ctr < int(system->objects.size()); ++ctr) {
       if(system->objects[ctr] == this) break;
+      int space = (Space() + system->objects[ctr]->Space()) / 2;
       if(system->objects[ctr]->frame == cur_game->frame
-		&& abs(system->objects[ctr]->gxpos - gxpos) < 6
-		&& abs(system->objects[ctr]->gypos - gypos) < 6) {
-	gypos += 6;
+		&& abs(system->objects[ctr]->gxpos - gxpos) < space
+		&& abs(system->objects[ctr]->gypos - gypos) < space) {
+	gypos += space;
 	collide = 1;
 	break;
 	}
       }
     }
+
+
+
+
   }
 
 int SObject::GXPos() {

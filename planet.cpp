@@ -22,7 +22,7 @@ Planet::Planet(System *s, int ord, int sz, int min, int atmos)
   size = sz;
   minerals = min;
   atmosphere = atmos;
-  temperature = (10-ord)*(10-ord)*4-240;
+  temperature = (10-ord)*(10-ord)*4+33;
   radiation = (10-ord)*(10-ord)/2;
   num_satellites = (rand()%4)+1;
   satellites = new (Satellite*)[num_satellites];
@@ -62,7 +62,7 @@ int Planet::Temperature() {
 		colonies[col]->oqty[ctr], colonies[col]);
       }
     }
-  return 0 >? tmp;
+  return tmp;
   }
 
 int Planet::Atmosphere() {

@@ -150,7 +150,7 @@ void stats_draw_planet(Planet *plan, int upd) {
   string_drawr(screen, 768, 13+24*(line++), cur_font[col], buf);
 
   if(cheat1 || plan->KnownTo(local_player))
-    sprintf(buf, "Avg. Temp: %d", plan->Temperature());
+    sprintf(buf, "Avg. Temp: %dC", plan->Temperature()-273);
   else
     sprintf(buf, "Avg. Temp: ?");
   string_drawr(screen, 768, 13+24*(line++), cur_font[col], buf);

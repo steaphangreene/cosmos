@@ -67,8 +67,20 @@ public:
   virtual int KnownTo(int);
   virtual void Know(int);
 
+  int Size() { return size[SType()]; }
+  int Space() { return space[SType()]; }
+  int SqOff() { return sqoff[SType()]; }
+
+  static void SetSize(int t, int s) { size[t] = s; };
+  static void SetSpace(int t, int s) { space[t] = s; };
+  static void SetSqOff(int t, int s) { sqoff[t] = s; };
+
 protected:
   void Init();
+
+  static vector<int> size;
+  static vector<int> space;
+  static vector<int> sqoff;
 
   System *system;
   int orbit, startpos, period;

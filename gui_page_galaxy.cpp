@@ -28,6 +28,18 @@ void gui_init_galaxy() {
   buttlist[PANEL_GAME][BUTTON_EXIT] =		11;
   pagemap[PAGE_GALAXY][BUTTON_EXIT] =		PAGE_ROOT;
 //  ambient[PAGE_GALAXY] = audio_loadsound("sounds/ambient00.wav");
+
+  Fleet::SetSize(SOBJECT_FLEET, FLEET_SIZE);
+  Fleet::SetSpace(SOBJECT_FLEET, FLEET_SPACE);
+  Fleet::SetSqOff(SOBJECT_FLEET, FLEET_SQOFF);
+
+  Planet::SetSize(SOBJECT_PLANET, PLANET_SIZE);
+  Planet::SetSpace(SOBJECT_PLANET, PLANET_SPACE);
+  Planet::SetSqOff(SOBJECT_PLANET, PLANET_SQOFF);
+
+  System::SetSize(SOBJECT_SYSTEM, SYSTEM_SIZE);
+  System::SetSpace(SOBJECT_SYSTEM, SYSTEM_SPACE);
+  System::SetSqOff(SOBJECT_SYSTEM, SYSTEM_SQOFF);
   }
 
 void page_init_galaxy() {
@@ -45,8 +57,8 @@ void page_draw_galaxy() {
   clear_sprites(spnum);
 
   SDL_Rect rec = {0, 0, 3, 3};
-  for(int snum=0; snum < cur_game->galaxys[cur_galaxy]->num_systems; ++snum) {
-    System *sys = cur_game->galaxys[cur_galaxy]->systems[snum];
+  for(int snum=0; snum < cur_galaxy->num_systems; ++snum) {
+    System *sys = cur_galaxy->systems[snum];
     if((cheat1 || sys->KnownTo(local_player)) && sys->Owner() >= 0) {
       SDL_Rect rec2 = {0, 0, 9, 9};
       rec2.x = sys->GXPos() - 4;
@@ -62,9 +74,9 @@ void page_draw_galaxy() {
     for(int obj = 0; obj < int(sys->objects.size()); ++obj) {
       if(sys->objects[obj]->GMove() && sys->objects[obj]->Owner() >= 0
 		&& (cheat1 || sys->objects[obj]->SeenBy(local_player))) {
-	SDL_Rect rec2 = {0, 0, 4, 4};
-	rec2.x = sys->objects[obj]->GXPos() - 2;
-	rec2.y = sys->objects[obj]->GYPos() - 2;
+	SDL_Rect rec2 = {0, 0, FLEET_SIZE, FLEET_SIZE};
+	rec2.x = sys->objects[obj]->GXPos() - sys->objects[obj]->Size()/2;
+	rec2.y = sys->objects[obj]->GYPos() - sys->objects[obj]->Size()/2;
 	SDL_FillRect(screen, &rec2, color3(
 		cur_game->players[sys->objects[obj]->Owner()]->color
 		));
@@ -102,11 +114,11 @@ void page_clicked_galaxy(int mx, int my, int mb) {
   if(mb != 1 && mb != 3) return;
 
   int offx, offy;
-  for(int snum=0; snum < cur_game->galaxys[cur_galaxy]->num_systems; ++snum) {
-    System *sys = cur_game->galaxys[cur_galaxy]->systems[snum];
+  for(int snum=0; snum < cur_galaxy->num_systems; ++snum) {
+    System *sys = cur_galaxy->systems[snum];
     offx = abs(sys->GXPos() - mx);
     offy = abs(sys->GYPos() - my);
-    if(offx*offx + offy*offy <= 36) {
+    if(offx*offx + offy*offy <= sys->SqOff()) {
       if(mb == 1) {
 	audio_play(click2, 8, 8);
 	cur_system = sys;
@@ -126,7 +138,7 @@ void page_clicked_galaxy(int mx, int my, int mb) {
       if(sys->objects[obj]->OnFrame() != cur_game->frame) continue;
       offx = abs(sys->objects[obj]->GXPos() - mx);
       offy = abs(sys->objects[obj]->GYPos() - my);
-      if(offx*offx + offy*offy <= 9
+      if(offx*offx + offy*offy <= sys->objects[obj]->SqOff()
 		&& (cheat1 || sys->objects[obj]->SeenBy(local_player))) {
 	if(mb == 1) {
 	  audio_play(click2, 8, 8);
@@ -153,11 +165,11 @@ void mouse_released_galaxy() {
 
 void mouse_moved_galaxy(int mx, int my) {
   int offx, offy;
-  for(int snum=0; snum < cur_game->galaxys[cur_galaxy]->num_systems; ++snum) {
-    System *sys = cur_game->galaxys[cur_galaxy]->systems[snum];
+  for(int snum=0; snum < cur_galaxy->num_systems; ++snum) {
+    System *sys = cur_galaxy->systems[snum];
     offx = abs(sys->GXPos() - mx);
     offy = abs(sys->GYPos() - my);
-    if(offx*offx + offy*offy <= 36) {
+    if(offx*offx + offy*offy <= sys->SqOff()) {
       if(panel == PANEL_FLEET && cur_object->OnFrame() == cur_game->frame) {
 	if(cur_object->Destination()
 		&& cur_object->Destination()->Sys() != cur_object->Sys())

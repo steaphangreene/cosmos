@@ -16,7 +16,6 @@ using namespace std;
 #include "position.h"
 
 static SDL_Surface *splanet[4], *star;
-static int click_margin[SOBJECT_MAX] = {0};
 
 extern int cheat1;
 
@@ -26,8 +25,13 @@ void gui_init_system() {
 
   pagemap[PAGE_SYSTEM][BUTTON_EXIT] =		PAGE_GALAXY;
 
-  click_margin[SOBJECT_PLANET] = 36;
-  click_margin[SOBJECT_FLEET] = 9;
+  Fleet::SetSize(SOBJECT_FLEET, FLEET_SIZE);
+  Fleet::SetSpace(SOBJECT_FLEET, FLEET_SPACE);
+  Fleet::SetSqOff(SOBJECT_FLEET, FLEET_SQOFF);
+
+  Planet::SetSize(SOBJECT_PLANET, PLANET_SIZE);
+  Planet::SetSpace(SOBJECT_PLANET, PLANET_SPACE);
+  Planet::SetSqOff(SOBJECT_PLANET, PLANET_SQOFF);
   }
 
 void page_init_system() {
@@ -51,9 +55,9 @@ void page_draw_system() {
 
   int spnum = 10;
   clear_sprites(spnum);
-  SDL_Rect fleetrec = {0, 0, 4, 4};
+  SDL_Rect fleetrec = {0, 0, FLEET_SIZE, FLEET_SIZE};
   SDL_Rect planrec = {0, 0, 3, 3};
-  SDL_Rect claimrec = {0, 0, 9, 9};
+  SDL_Rect claimrec = {0, 0, PLANET_SIZE, PLANET_SIZE};
 
   for(int obj=0; obj < int(sys->objects.size()); ++obj) {
     if((!cheat1) && (!sys->objects[obj]->SeenBy(local_player))) continue;
@@ -65,8 +69,8 @@ void page_draw_system() {
     if(sys->objects[obj]->SType() == SOBJECT_PLANET) {
       Planet *plan = (Planet*)sys->objects[obj];
       if((plan)->colonies.size() > 0) {
-	claimrec.x = (plan)->SXPos() - 4;
-	claimrec.y = (plan)->SYPos() - 4;
+	claimrec.x = plan->SXPos() - plan->Size()/2;
+	claimrec.y = plan->SYPos() - plan->Size()/2;
 	SDL_FillRect(screen, &claimrec, color3(cur_game->players[
 		(plan)->colonies[0]->Owner()]->color));
 	}
@@ -76,8 +80,8 @@ void page_draw_system() {
       }
     else if(sys->objects[obj]->SType() == SOBJECT_FLEET) {
       Fleet *flt = (Fleet*)sys->objects[obj];
-      fleetrec.x = flt->SXPos() - 2;
-      fleetrec.y = flt->SYPos() - 2;
+      fleetrec.x = flt->SXPos() - flt->Size()/2;
+      fleetrec.y = flt->SYPos() - flt->Size()/2;
       SDL_FillRect(screen, &fleetrec,
 	color3(cur_game->players[flt->Owner()]->color));
       if(flt->Destination()) {
@@ -123,7 +127,7 @@ void page_clicked_system(int mx, int my, int mb) {
     offx = abs(sys->objects[obj]->SXPos() - mx);
     offy = abs(sys->objects[obj]->SYPos() - my);
     sqd = offx*offx + offy*offy;
-    if(sqd <= click_margin[sys->objects[obj]->SType()]) {
+    if(sqd <= sys->objects[obj]->SqOff()) {
       if(mb == 1) {
 	clear_sprites(1, 10);
 	audio_play(click2, 8, 8);
@@ -182,7 +186,7 @@ void mouse_moved_system(int mx, int my) {
     offx = abs(sys->objects[obj]->SXPos() - mx);
     offy = abs(sys->objects[obj]->SYPos() - my);
     sqd = offx*offx + offy*offy;
-    if(sqd <= click_margin[sys->objects[obj]->SType()]) {
+    if(sqd <= sys->objects[obj]->SqOff()) {
       cur_object->SetCourse(sys->objects[obj]);
       panel_draw();
 
