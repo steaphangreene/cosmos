@@ -44,7 +44,7 @@ void panel_draw_fleet() {
   sprintf(buf, "Fleet: %s", flt->name.c_str());
   string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
 
-  for(int ctr=0; ctr < int(flt->ships.size()); ++ctr) {
+  for(int ctr=0; ctr < (int(flt->ships.size()) <? 22); ++ctr) {
     int clr = col;
     if(ctr == selection) clr = 8;
     sprintf(buf, "  %s", flt->ships[ctr]->name.c_str());
@@ -137,21 +137,22 @@ void mouse_moved_fleet(int mx, int my) {
 void button_clicked_fleet(int button) {
   Fleet *flt = cur_fleet;
   if(button == BUTTON_LAND) {
+    if(!flt->CanLand()) return;
     if(flt->Location()->colonies.size() < 1) {
       flt->Location()->colonies.push_back(
 	new Colony(flt->Owner(), flt->Location())
 	);
       }
-    flt->Location()->colonies[0]->LandShip(flt->ships[0]);
 
-    flt->ships.erase(flt->ships.begin());
+    int which = 0;
+    while(!flt->ships[which]->CanLand()) ++which;
+    flt->Location()->colonies[0]->LandShip(flt->ships[which]);
+    flt->ships.erase(flt->ships.begin()+which);
     if(flt->ships.size() < 1) {
       delete flt;
       panel = PANEL_GAME;
       cur_fleet = NULL;
       }
-
-    set_sprite(1, NULL);
     panel_draw();
     page_draw();
     }

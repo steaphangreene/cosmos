@@ -125,6 +125,11 @@ void Planet::FleetLeaves(Fleet *f) {
   }
 
 void Planet::FleetArrives(Fleet *f) {
+  vector<Fleet *>::iterator cur = fleets.begin();
+  while(cur < fleets.end()) {
+    if(*cur == f) return;      
+    ++cur;
+    }
   fleets.push_back(f);
   Explore(f->Owner());
   }

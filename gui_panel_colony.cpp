@@ -212,7 +212,7 @@ void stats_draw_colony(Colony *col, int upd) {
     tc = cur_tree->GetTech(col->projs[ctr]);
     need = tc->icost >? 1;
     indus += col->prog[ctr];
-    used = 0 >? (indus <? need);
+    used = col->prog[ctr] >? (indus <? need);
     indus -= need;
     if(line >= 0) {
       int clr = color;

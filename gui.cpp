@@ -210,8 +210,7 @@ void gui_main() {
     else if(event.type == SDL_KEYUP) {
       if(event.key.keysym.sym == SDLK_F5) {
 	cheat1 = 0;
-	set_sprite(1, NULL);
-	set_sprite(2, NULL);
+	clear_sprites(1);
 	page_draw();
 	panel_draw();
 	}
@@ -237,9 +236,7 @@ void gui_main() {
       else if(event.key.keysym.sym == SDLK_TAB) {
 //	if(event.key.keysym.mod & (KMOD_LCTRL|KMOD_RCTRL)) {
 	  if(cur_game) {
-	    update_sprite(1);
-	    set_sprite(1, NULL);
-	    set_sprite(2, NULL);
+	    clear_sprites(1);
 	    cur_game->TakeTurn();
 	    page_init();
 	    panel_init();
@@ -480,9 +477,7 @@ void button_clicked(int button) {
       }
     case(PANEL_GAME): {
       if(button == BUTTON_TURN) {
-	update_sprite(1);
-	set_sprite(1, NULL);
-	set_sprite(2, NULL);
+	clear_sprites(1);
 	cur_game->TakeTurn();
 	page_draw();
 	}

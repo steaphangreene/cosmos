@@ -121,7 +121,8 @@ int Colony::Growth() {
   long long ret = population;
   ret *= Happiness();
   ret *= Security();
-  ret /= 100000000;
+  ret /= 100;
+  ret /= 1000000;
   return ret;
   }
 
@@ -129,7 +130,8 @@ int Colony::GrowthM() {
   long long ret = population;
   ret *= Happiness();
   ret *= Security();
-  ret %= 100000000;
+  ret /= 100;
+  ret %= 1000000;
   return ret;
   }
 

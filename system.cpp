@@ -56,7 +56,13 @@ void System::FleetLeaves(Fleet *f) {
   }
 
 void System::FleetArrives(Fleet *f) {
+  vector<Fleet *>::iterator cur = fleets.begin();
+  while(cur < fleets.end()) {
+    if(*cur == f) return;
+    ++cur;
+    }
   fleets.push_back(f);
+  Explore(f->Owner());
   }
 
 int System::Owner() {

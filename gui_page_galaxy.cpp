@@ -38,7 +38,7 @@ void page_init_galaxy() {
   }
 
 void page_cleanup_galaxy() {
-  set_sprite(1, NULL);
+  clear_sprites(1);
   }
 
 void page_draw_galaxy() {
