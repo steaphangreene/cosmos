@@ -3,6 +3,7 @@
 #include <SDL.h>
 
 #include "graphics.h"
+#include "data/cursor.h"
 #include "data/blank0.h"
 #include "data/blank1.h"
 #include "data/star.h"
@@ -32,6 +33,16 @@ SDL_Surface *get_blank1_image() {
 	rchan, gchan, bchan, achan);
   }
 
+SDL_Surface *get_cursor_image() {
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)cursor_image.pixel_data,
+	cursor_image.width, cursor_image.height,
+	32, 4*cursor_image.width,
+	rchan, gchan, bchan, achan);
+  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
+  SDL_FreeSurface(orig);
+  return optim;
+  }
+
 SDL_Surface *get_star_image() {
   SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)star_image.pixel_data,
 	star_image.width, star_image.height,
@@ -42,18 +53,34 @@ SDL_Surface *get_star_image() {
   return optim;
   }
 
-SDL_Surface *get_image(const char *filename) {
+SDL_Surface *get_image(const char *filename, int xs, int ys) {
   FILE *gfl = fopen(filename, "r");
   if(!gfl) {
     fprintf(stderr, "Warning: can't open \"%s\"\n", filename);
     return NULL;
     }
-  unsigned char *img = new unsigned char[768*800*4];
-  fread(img, 800*4, 768, gfl);
+  unsigned char *img = new unsigned char[xs*ys*4];
+  fread(img, xs*4, ys, gfl);  // Stupid Windows not letting me mmap()!
 
-  SDL_Surface *s = SDL_CreateRGBSurfaceFrom(img, 800, 768, 32, 4*800,
+  SDL_Surface *s = SDL_CreateRGBSurfaceFrom(img, xs, ys, 32, 4*xs,
 				bchan, gchan, rchan, achan);
   SDL_Surface *ret = SDL_DisplayFormat(s);
+  SDL_FreeSurface(s);
+  return ret;
+  }
+
+SDL_Surface *get_alpha_image(const char *filename, int xs, int ys) {
+  FILE *gfl = fopen(filename, "r");
+  if(!gfl) {
+    fprintf(stderr, "Warning: can't open \"%s\"\n", filename);
+    return NULL;
+    }
+  unsigned char *img = new unsigned char[xs*ys*4];
+  fread(img, xs*4, ys, gfl);  // Stupid Windows not letting me mmap()!
+
+  SDL_Surface *s = SDL_CreateRGBSurfaceFrom(img, xs, ys, 32, 4*xs,
+				bchan, gchan, rchan, achan);
+  SDL_Surface *ret = SDL_DisplayFormatAlpha(s);
   SDL_FreeSurface(s);
   return ret;
   }

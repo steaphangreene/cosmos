@@ -14,3 +14,10 @@ System::System(int xp, int yp, int nump, int minl, int atmosl) {
   ypos = yp;
   }
 
+System::~System() {
+  for(int ctr=0; ctr < num_planets; ++ctr) {
+    delete planets[ctr];
+    }
+  delete [] planets;
+  planets = NULL;
+  }

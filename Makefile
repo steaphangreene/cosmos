@@ -1,13 +1,17 @@
 TSTR:=  $(shell date +"%Y%m%d%H%M")
 
-CC:=	g++ -O2 -pipe -Wall `sdl-config --cflags`
+# Debugging settings
+#CC:=	g++ -O2 -pipe -Wall `sdl-config --cflags` -g
+#LIBS:=	`sdl-config --libs` -lefence
+
+CC:=	g++ -O2 -pipe -Wall `sdl-config --cflags` -s
 LIBS:=	`sdl-config --libs`
 OBJS:=	main.o gui.o \
-	game.o galaxy.o system.o planet.o \
+	game.o galaxy.o system.o planet.o satellite.o \
 	audio.o fonts.o graphics.o
 # graphics_intro.o
 
-WCC:=   win32-gcc -O2 -pipe -Wall `win32-exec sdl-config --cflags`
+WCC:=   win32-gcc -O2 -pipe -Wall `win32-exec sdl-config --cflags` -s
 WLIBS:= `win32-exec sdl-config --libs`
 WOBJS:= $(shell echo $(OBJS) | sed 's-\.o-.win32_o-g')
 
@@ -26,6 +30,7 @@ distrib:	all
 	cd .. ; tar czhvf cosmos_i386.tar.gz cosmos/cosmos \
 		cosmos/sounds cosmos/graphics
 	cd .. ; tar czhvf cosmos_win32.tar.gz cosmos/cosmos.exe \
+		cosmos/README-SDL.txt cosmos/sdl.dll \
 		cosmos/sounds cosmos/graphics
 
 upload:	distrib
@@ -38,10 +43,10 @@ archive:	.
 		cosmos/sounds cosmos/graphics cosmos/*.csh
 
 cosmos:	$(OBJS)
-	$(CC) -s -o cosmos $(OBJS) $(LIBS)
+	$(CC) -o cosmos $(OBJS) $(LIBS)
 
 cosmos.exe:	$(WOBJS)
-	$(WCC) -s -o cosmos.exe $(WOBJS) $(WLIBS)
+	$(WCC) -o cosmos.exe $(WOBJS) $(WLIBS)
 
 %.o:	%.cpp 
 	$(CC) -c $<
@@ -52,13 +57,15 @@ cosmos.exe:	$(WOBJS)
 #AUTO-GENERATED DEPS BELOW (gcc -MM `sdl-config --cflags` *.cpp to regen)
 audio.o: audio.cpp
 fonts.o: fonts.cpp data/font22.h
-galaxy.o: galaxy.cpp galaxy.h system.h planet.h
-game.o: game.cpp game.h galaxy.h system.h planet.h
-graphics.o: graphics.cpp graphics.h data/blank0.h data/blank1.h \
- data/star.h fonts.h
-gui.o: gui.cpp gui.h game.h galaxy.h system.h planet.h audio.h \
- graphics.h
-main.o: main.cpp gui.h game.h galaxy.h system.h planet.h fonts.h \
- audio.h
-planet.o: planet.cpp planet.h
-system.o: system.cpp system.h planet.h
+galaxy.o: galaxy.cpp galaxy.h system.h planet.h satellite.h
+game.o: game.cpp game.h galaxy.h system.h planet.h satellite.h
+graphics.o: graphics.cpp graphics.h data/cursor.h data/blank0.h \
+ data/blank1.h data/star.h fonts.h
+gui.o: gui.cpp gui.h game.h galaxy.h system.h planet.h satellite.h \
+ audio.h graphics.h
+main.o: main.cpp gui.h game.h galaxy.h system.h planet.h satellite.h \
+ fonts.h audio.h
+planet.o: planet.cpp math.h game.h galaxy.h system.h planet.h \
+ satellite.h
+satellite.o: satellite.cpp math.h satellite.h
+system.o: system.cpp system.h planet.h satellite.h

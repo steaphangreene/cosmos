@@ -93,6 +93,7 @@ enum {	SATMOSPHERE_UNKNOWN=0,
 class Game {
 public:
   Game();
+  ~Game();
   bool InProgress() { return (started != 0); };
   void Randomize();
   void Reset();

@@ -1,9 +1,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#ifndef	M_PI
-#define	M_PI	3.14159
-#endif
+
+#include "math.h"
 
 #include "game.h"
 
@@ -18,19 +17,32 @@ Planet::Planet(int ord, int sz, int min, int atmos) {
   int dist = (ord+1)*700;
   period = int(sqrt(double(dist)*double(dist)*double(dist)));
   startpos = rand()&65535;
-  type = rand()%5;
+  type = rand()%4;
+  num_satellites = rand()%7;
+  satellites = new (Satellite*)[num_satellites];
+  for(int ctr=0; ctr<num_satellites; ++ctr) {
+    satellites[ctr] = new Satellite(rand()&65535);
+    }
   };
+
+Planet::~Planet() {
+  for(int ctr=0; ctr < num_satellites; ++ctr) {
+    delete satellites[ctr];
+    }
+  delete [] satellites;
+  satellites = NULL;
+  }
 
 int Planet::XPos(int turn) {
   double ang = double(startpos) + double(turn)*double(256*256*256) / double(period);
   double dist = double(order+1) * double(30);
-  double xpos = dist * cos(ang * 2.0 * M_PI / double(65536));
-  return int(400+xpos);
+  double xpos = dist * cos(ang * 2.0 * M_PIl / double(65536));
+  return int(384+xpos);
   };
 
 int Planet::YPos(int turn) {
   double ang = double(startpos) + double(turn)*double(256*256*256) / double(period);
   double dist = double(order+1) * double(30);
-  double ypos = dist * sin(ang * 2.0 * M_PI / double(65536));
+  double ypos = dist * sin(ang * 2.0 * M_PIl / double(65536));
   return int(384+ypos);
   };

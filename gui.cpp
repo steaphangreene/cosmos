@@ -15,9 +15,9 @@ using namespace std;
 int done = 0;
 
 extern SDL_Surface *screen;
-SDL_Surface *intro, *planet[5], *star, *button[BUTTON_MAX][2];
-SDL_Event event;
-SDL_Rect rect;
+static SDL_Rect mouser = {-1, -1, 0, 0};
+static SDL_Surface *intro, *cursor, *button[BUTTON_MAX][2];
+static SDL_Surface *planet[4], *star;
 
 int lastpage = PAGE_INVALID, page = PAGE_ROOT;
 int buttlist[PAGE_MAX][BUTTON_MAX] = {{0}};
@@ -34,9 +34,11 @@ int cur_system=0;
 int cur_planet=0;
 
 void gui_button_clicked(int button);
+void cursor_draw();
 void page_clicked(int mx, int my, int mb);
 void page_draw();
 void page_update();
+void page_redraw(SDL_Rect *);
 
 int update_buttons() {
   int inbutt = 0;
@@ -47,7 +49,7 @@ int update_buttons() {
 	&& mousey < 50+64*ord && mousex < 1012 && !(mouseb));
     if(m != mo[ctr]) {
       mo[ctr] = m;
-      rect.x = 812;  rect.y = 64*ord;
+      SDL_Rect rect = { 812, 64*ord, 200, 50 };
       SDL_BlitSurface(button[ctr][mo[ctr]], NULL, screen, &rect);
       SDL_UpdateRect(screen, 812, 64*ord, 200, 50);
       }
@@ -74,6 +76,7 @@ void page_init() {
 
 void gui_main() {
   int curbutt=0;
+  SDL_Event event;
   while(!done) {
     SDL_WaitEvent(&event);
     if(event.type == SDL_QUIT) {
@@ -108,13 +111,15 @@ void gui_main() {
       }
     else if(event.type == SDL_MOUSEMOTION) {
       if(curbutt != update_buttons()) curbutt = 0;
+      if(mouser.x != -1) page_redraw(&mouser);
+      cursor_draw();
       }
     else if(event.type == SDL_MOUSEBUTTONDOWN) {
       curbutt = update_buttons();
       if(curbutt) {
 	audio_play(click, 8, 8);
 	}
-      else if(mousex < 800) {
+      else if(mousex < 768) {
 	page_clicked(mousex, mousey, event.button.button);
 	}
       }
@@ -134,12 +139,13 @@ void gui_main() {
   }
 
 void gui_init() {
-  intro = get_image("graphics/intro.raw");
-  planet[0] = get_image("graphics/planet00.raw");
-  planet[1] = get_image("graphics/planet01.raw");
-  planet[2] = get_image("graphics/planet02.raw");
-  planet[3] = get_image("graphics/planet03.raw");
-  planet[4] = get_image("graphics/planet04.raw");
+  cursor = get_cursor_image();
+  intro = get_image("graphics/intro.raw", 800, 768);
+
+  planet[0] = get_alpha_image("graphics/planet00.raw", 768, 768);
+  planet[1] = get_alpha_image("graphics/planet01.raw", 768, 768);
+  planet[2] = get_alpha_image("graphics/planet02.raw", 768, 768);
+  planet[3] = get_alpha_image("graphics/planet03.raw", 768, 768);
   star = get_star_image();
 
   button[BUTTON_RESUMEGAME][0] = build_button0("Resume Game");;
@@ -198,11 +204,11 @@ void gui_init() {
   buttlist[PAGE_SYSOPT][BUTTON_CANCEL] =	11;
   pagemap[PAGE_SYSOPT][BUTTON_ACCEPT] =		PAGE_ROOT;
   pagemap[PAGE_SYSOPT][BUTTON_CANCEL] =		PAGE_ROOT;
-  ambient[PAGE_SYSOPT] = audio_loadsound("sounds/ambient00.wav");
+//  ambient[PAGE_SYSOPT] = audio_loadsound("sounds/ambient00.wav");
 
   buttlist[PAGE_GALAXY][BUTTON_EXIT] =		11;
   pagemap[PAGE_GALAXY][BUTTON_EXIT] =		PAGE_ROOT;
-  ambient[PAGE_GALAXY] = audio_loadsound("sounds/ambient00.wav");
+//  ambient[PAGE_GALAXY] = audio_loadsound("sounds/ambient00.wav");
 
   buttlist[PAGE_SYSTEM][BUTTON_EXIT] =		11;
   pagemap[PAGE_SYSTEM][BUTTON_EXIT] =		PAGE_GALAXY;
@@ -220,7 +226,6 @@ void gui_button_clicked(int button) {
     case(PAGE_ROOT): {
       switch(button) {
 	case(BUTTON_QUITGAME): {
-	  SDL_Delay(500);
 	  done = 1;
 	  } break;
 	}
@@ -240,6 +245,87 @@ void gui_button_clicked(int button) {
     }
   }
 
+void cursor_draw() {
+  mouser.x = mousex;
+  mouser.y = mousey;
+  mouser.w = cursor->w <? (1024-mousex);
+  mouser.h = cursor->h <? (768-mousey);
+  SDL_Rect cursorr = {0, 0, mouser.w, mouser.h};
+
+  SDL_BlitSurface(cursor, &cursorr, screen, &mouser);
+  SDL_UpdateRects(screen, 1, &mouser);
+  }
+
+void page_redraw(SDL_Rect *area) {
+//  MUST NOT CALL "page_update" - MOUSE CURSOR LOOP!!!!
+//  printf("Drawing (%d,%d) %dx%d\n", area->x, area->y, area->w, area->h);
+  SDL_Rect todo = *area;
+  if(area->x < 800) {
+    if(page == PAGE_ROOT) {
+      SDL_BlitSurface(intro, &todo, screen, &todo);
+      todo = *area;
+      }
+    else if(page == PAGE_GALAXY) {
+      SDL_FillRect(screen, &todo, 0x00000000);
+      todo = *area;
+      SDL_Rect rec = {0, 0, 3, 3};
+      for(int sys=0; sys < cur_game->galaxys[cur_galaxy]->num_systems; ++sys) {
+	rec.x = cur_game->galaxys[cur_galaxy]->systems[sys]->xpos - 1;
+	rec.y = cur_game->galaxys[cur_galaxy]->systems[sys]->ypos - 1;
+	if(overlaps(rec, todo)) SDL_FillRect(screen, &rec, 0xFFFFFFFF);
+	}
+      }
+    else if(page == PAGE_SYSTEM) {
+      SDL_FillRect(screen, &todo, 0x00000000);
+      SDL_Rect destr = {(768-32)/2, (768-32)/2, 32, 32};
+      if(overlaps(destr, todo)) SDL_BlitSurface(star, NULL, screen, &destr);
+      destr.w = 3;  destr.h = 3;
+      System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+      for(int plan=0; plan < sys->num_planets; ++plan) {
+	destr.x = sys->planets[plan]->XPos(cur_game->turn) - 1;
+	destr.y = sys->planets[plan]->YPos(cur_game->turn) - 1;
+	if(overlaps(destr, todo)) SDL_FillRect(screen, &destr, 0xFFFF00FF);
+	}
+      todo = *area;
+      }
+    else if(page == PAGE_PLANET) {
+      SDL_FillRect(screen, &todo, 0x00000000);
+      System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+      int ptype = sys->planets[cur_planet]->type;
+      SDL_BlitSurface(planet[ptype], &todo, screen, &todo);
+
+      SDL_Rect srcr = {0, 0, 3, 3};
+      SDL_Rect destr = {0, 0, 3, 3};
+      Planet *plan = sys->planets[cur_planet];
+      for(int sat=0; sat < plan->num_satellites; ++sat) {
+	srcr.x = plan->satellites[sat]->XPos(cur_game->tick) - 1;
+	srcr.y = plan->satellites[sat]->YPos(cur_game->tick) - 1;
+	destr.x = plan->satellites[sat]->XPos(cur_game->tick) - 1;
+	destr.y = plan->satellites[sat]->YPos(cur_game->tick) - 1;
+	if(overlaps(destr, todo)) {
+	  SDL_FillRect(screen, &destr, 0xFFFFFF00);
+	  if(plan->satellites[sat]->InFront(cur_game->tick))
+	    SDL_BlitSurface(planet[ptype], &srcr, screen, &destr);
+	  }
+	}
+      todo = *area;
+      }
+    else {
+      SDL_FillRect(screen, &todo, 0x00000000);
+      todo = *area;
+      }
+    }
+  if((area->x + area->w) > 800) {
+    SDL_SetClipRect(screen, &todo);
+    SDL_FillRect(screen, &todo, 0x00000000);
+    todo = *area;
+    memset(mo, -1, sizeof(mo));
+    update_buttons();
+    SDL_SetClipRect(screen, NULL);
+    }
+  SDL_UpdateRects(screen, 1, area);
+  }
+
 void page_draw() {
   SDL_FillRect(screen, NULL, 0);
 
@@ -255,12 +341,19 @@ void page_draw() {
       }
     }
   if(page == PAGE_SYSTEM) {
-    SDL_Rect destr = {(800-32)/2, (768-32)/2, 32, 32};
+    SDL_Rect destr = {(768-32)/2, (768-32)/2, 32, 32};
     SDL_BlitSurface(star, NULL, screen, &destr);
-    page_update();
+    destr.w = 3;  destr.h = 3;
+    System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+    for(int plan=0; plan < sys->num_planets; ++plan) {
+      destr.x = sys->planets[plan]->XPos(cur_game->turn) - 1;
+      destr.y = sys->planets[plan]->YPos(cur_game->turn) - 1;
+      SDL_FillRect(screen, &destr, 0xFFFF00FF);
+      SDL_UpdateRects(screen, 1, &destr);
+      }
     }
   if(page == PAGE_PLANET) {
-    SDL_Rect destr = {0, 0, 800, 768};
+    SDL_Rect destr = {0, 0, 768, 768};
     System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
     int ptype = sys->planets[cur_planet]->type;
     SDL_BlitSurface(planet[ptype], NULL, screen, &destr);
@@ -274,24 +367,34 @@ void page_draw() {
 
 void page_update() {
   static int lasttick = -1;
-  if(page == PAGE_SYSTEM) {
-    SDL_Rect destr = {0, 0, 3, 3};
-    System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
-    for(int plan=0; plan < sys->num_planets; ++plan) {
-      if(lasttick >= 0) {
-	destr.x = sys->planets[plan]->XPos(lasttick) - 1;
-	destr.y = sys->planets[plan]->YPos(lasttick) - 1;
-	SDL_FillRect(screen, &destr, 0x00000000);
-	SDL_UpdateRect(screen, destr.x, destr.y, destr.w, destr.h);
-	}
-      destr.x = sys->planets[plan]->XPos(cur_game->tick) - 1;
-      destr.y = sys->planets[plan]->YPos(cur_game->tick) - 1;
-      SDL_FillRect(screen, &destr, 0xFFFF00FF);
-      SDL_UpdateRect(screen, destr.x, destr.y, destr.w, destr.h);
-      }
-    }
   if(page == PAGE_PLANET) {
-    //Do the satellites etc....
+    SDL_Rect srcr = {0, 0, 3, 3};
+    SDL_Rect destr = {0, 0, 3, 3};
+    Planet *plan = cur_game->galaxys[cur_galaxy]->systems[cur_system]->planets[cur_planet];
+    int ptype = plan->type;
+    if(lasttick != -1) {
+      for(int sat=0; sat < plan->num_satellites; ++sat) {
+	srcr.x = plan->satellites[sat]->XPos(lasttick) - 1;
+	srcr.y = plan->satellites[sat]->YPos(lasttick) - 1;
+	destr.x = plan->satellites[sat]->XPos(lasttick) - 1;
+	destr.y = plan->satellites[sat]->YPos(lasttick) - 1;
+	SDL_FillRect(screen, &destr, 0x00000000);
+	SDL_BlitSurface(planet[ptype], &srcr, screen, &destr);
+	if(overlaps(destr, mouser)) cursor_draw();
+	SDL_UpdateRects(screen, 1, &destr);
+	}
+      }
+    for(int sat=0; sat < plan->num_satellites; ++sat) {
+      srcr.x = plan->satellites[sat]->XPos(cur_game->tick) - 1;
+      srcr.y = plan->satellites[sat]->YPos(cur_game->tick) - 1;
+      destr.x = plan->satellites[sat]->XPos(cur_game->tick) - 1;
+      destr.y = plan->satellites[sat]->YPos(cur_game->tick) - 1;
+      SDL_FillRect(screen, &destr, 0xFFFFFF00);
+      if(plan->satellites[sat]->InFront(cur_game->tick))
+	SDL_BlitSurface(planet[ptype], &srcr, screen, &destr);
+      if(overlaps(destr, mouser)) cursor_draw();
+      SDL_UpdateRects(screen, 1, &destr);
+      }
     }
   lasttick = cur_game->tick;
   }
@@ -313,8 +416,8 @@ void page_clicked(int mx, int my, int mb) {
     int offx, offy;
     System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
     for(int plan=0; plan < sys->num_planets; ++plan) {
-      offx = abs(mousex - sys->planets[plan]->XPos(cur_game->tick));
-      offy = abs(mousey - sys->planets[plan]->YPos(cur_game->tick));
+      offx = abs(mousex - sys->planets[plan]->XPos(cur_game->turn));
+      offy = abs(mousey - sys->planets[plan]->YPos(cur_game->turn));
       if(offx < 4 && offy < 4) {
 	cur_planet = plan;
 	page = PAGE_PLANET;

@@ -42,7 +42,11 @@ void audio_callback(void *userdata, Uint8 *stream, int len) {
   for(int ctr=0; ctr<len; ctr+=4) {
     long buf_l = 0, buf_r = 0;
     Sound **sptr = &play_blocks;
-    while((*sptr) != NULL && (*sptr)->pos+(ctr>>1) < (*sptr)->length) {
+    while((*sptr) != NULL) {
+      if((*sptr)->pos+(ctr>>1) >= (*sptr)->length) {
+	sptr = &((*sptr)->next);
+	continue;
+	}
       if((*sptr)->flags & SOUND_TERMINATE) {
 	Sound *it = (*sptr);
 	(*sptr) = (*sptr)->next;
@@ -89,8 +93,8 @@ int audio_loadsound(const char *fn) {
   if(!audio_initialized) return 0;
   SDL_AudioSpec spec;
   if(!SDL_LoadWAV(fn, &spec, &SFX[num_sounds].data, &SFX[num_sounds].length)) {
-    fprintf(stderr, "Error loading \"%s\"!\n", fn);
-    exit(1);
+    fprintf(stderr, "Warning: Can't load \"%s\"!\n", fn);
+    return 0;
     }
   ++num_sounds;
   return num_sounds;
@@ -104,7 +108,7 @@ Sound *get_block() {
   }
 
 void audio_play(int snd, int vol, int pan) {
-  if(!audio_initialized) return;
+  if((!audio_initialized) || snd < 1) return;
   Sound *s = get_block();
   *s = SFX[snd-1];
   s->pos = 0;
@@ -116,7 +120,7 @@ void audio_play(int snd, int vol, int pan) {
   }
 
 Sound *audio_loop(int snd, int vol, int pan) {
-  if(!audio_initialized) return NULL;
+  if((!audio_initialized) || snd < 1) return NULL;
   Sound *s = get_block();
   *s = SFX[snd-1];
   s->pos = 0;

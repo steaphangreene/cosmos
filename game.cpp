@@ -13,9 +13,15 @@ void game_init() {
   }
 
 Game::Game() {
+  num_galaxys = 0;
+  galaxys = NULL;
   started = 0;
   turn = 0;
   Reset();
+  }
+
+Game::~Game() {
+  Clear();
   }
 
 void Game::Randomize() {
@@ -60,6 +66,9 @@ void Game::Finalize() {
 
 void Game::Clear() {
   started = 0;
+  for(int ctr=0; ctr<num_galaxys; ++ctr) delete galaxys[ctr];
+  if(galaxys) delete [] galaxys;
+  galaxys = NULL;
   num_galaxys = 0;
   }
 
