@@ -33,33 +33,43 @@ Sound *free_blocks = NULL;
 Sound *play_blocks = NULL;
 
 void audio_callback(void *userdata, Uint8 *stream, int len) {
-  static long mix_buf_l[4096];
-  static long mix_buf_r[4096];
-  assert(len <= 8192);
 
   if(play_blocks == NULL)  {
     memset(stream, 0, len);
     return;
     }
 
-  Sound **sptr = &play_blocks;
-  memset(mix_buf_l, 0, len*2);
-  memset(mix_buf_r, 0, len*2);
-  while((*sptr) != NULL) {
-    if((*sptr)->flags & SOUND_TERMINATE) {
-      Sound *it = (*sptr);
-      (*sptr) = (*sptr)->next;
-      it->next = free_blocks;
-      free_blocks = it;
-      continue;
-      }
-    for(int ctr=0; ctr<(len>>1) && (*sptr)->pos+ctr < (*sptr)->length; ctr+=2) {
-      long val = Sint8((*sptr)->data[(*sptr)->pos+ctr+1]);
+  for(int ctr=0; ctr<len; ctr+=4) {
+    long buf_l = 0, buf_r = 0;
+    Sound **sptr = &play_blocks;
+    while((*sptr) != NULL && (*sptr)->pos+(ctr>>1) < (*sptr)->length) {
+      if((*sptr)->flags & SOUND_TERMINATE) {
+	Sound *it = (*sptr);
+	(*sptr) = (*sptr)->next;
+	it->next = free_blocks;
+	free_blocks = it;
+	continue;
+	}
+      long val = Sint8((*sptr)->data[(*sptr)->pos+(ctr>>1)+1]);
       val <<= 8;
-      val |= (*sptr)->data[(*sptr)->pos+ctr+0] & 0xFF;
-      mix_buf_l[ctr>>1] += val * (*sptr)->vol * (16-(*sptr)->pan);
-      mix_buf_r[ctr>>1] += val * (*sptr)->vol * (16+(*sptr)->pan);
+      val |= (*sptr)->data[(*sptr)->pos+(ctr>>1)+0] & 0xFF;
+      buf_l += val * (*sptr)->vol * (16-(*sptr)->pan);
+      buf_r += val * (*sptr)->vol * (16+(*sptr)->pan);
+
+      sptr = &((*sptr)->next);
       }
+    if(buf_l > SHRT_MAX<<8) buf_l = SHRT_MAX<<8;
+    if(buf_l < SHRT_MIN<<8) buf_l = SHRT_MIN<<8;
+    if(buf_r > SHRT_MAX<<8) buf_r = SHRT_MAX<<8;
+    if(buf_r < SHRT_MIN<<8) buf_r = SHRT_MIN<<8;
+    stream[ctr+0] = (buf_l >> 8);
+    stream[ctr+1] = (buf_l >> 16);
+    stream[ctr+2] = (buf_r >> 8);
+    stream[ctr+3] = (buf_r >> 16);
+    }
+
+  Sound **sptr = &play_blocks;
+  while((*sptr) != NULL) {
     (*sptr)->pos += len>>1;
     if((*sptr)->pos >= (*sptr)->length) {
       if((*sptr)->flags & SOUND_LOOP) (*sptr)->pos = 0;
@@ -72,16 +82,6 @@ void audio_callback(void *userdata, Uint8 *stream, int len) {
 	}
       }
     sptr = &((*sptr)->next);
-    }
-  for(int ctr=0; ctr<len; ctr+=4) {
-    if(mix_buf_l[ctr>>2] > SHRT_MAX<<8) mix_buf_l[ctr>>2] = SHRT_MAX<<8;
-    if(mix_buf_l[ctr>>2] < SHRT_MIN<<8) mix_buf_l[ctr>>2] = SHRT_MIN<<8;
-    if(mix_buf_r[ctr>>2] > SHRT_MAX<<8) mix_buf_r[ctr>>2] = SHRT_MAX<<8;
-    if(mix_buf_r[ctr>>2] < SHRT_MIN<<8) mix_buf_r[ctr>>2] = SHRT_MIN<<8;
-    stream[ctr+0] = (mix_buf_l[ctr>>2] >> 8);
-    stream[ctr+1] = (mix_buf_l[ctr>>2] >> 16);
-    stream[ctr+2] = (mix_buf_r[ctr>>2] >> 8);
-    stream[ctr+3] = (mix_buf_r[ctr>>2] >> 16);
     }
   }
 

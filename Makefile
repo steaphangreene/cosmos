@@ -29,8 +29,7 @@ distrib:	all
 		cosmos/sounds cosmos/graphics
 
 upload:	distrib
-	scp ../cosmos_i386.tar.gz warp:public_html/cosmos/
-	scp ../cosmos_win32.tar.gz warp:public_html/cosmos/
+	scp ../cosmos_*.tar.gz warp:public_html/cosmos/
 
 tar:	archive
 archive:	.

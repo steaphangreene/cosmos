@@ -250,6 +250,8 @@ void page_draw() {
       }
     }
   if(page == PAGE_SYSTEM) {
+    SDL_Rect destr = {(800-32)/2, (768-32)/2, 32, 32};
+    SDL_BlitSurface(star, NULL, screen, &destr);
     page_update();
     }
   memset(mo, -1, sizeof(mo));
@@ -261,27 +263,17 @@ void page_draw() {
 void page_update() {
   static int lasttick = -1;
   if(page == PAGE_SYSTEM) {
-    if(lasttick >= 0) {
-      SDL_Rect destr = {(800-32)/2, (768-32)/2, 32, 32};
-      SDL_BlitSurface(star, NULL, screen, &destr);
-      System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
-      for(int plan=0; plan < sys->num_planets; ++plan) {
+    SDL_Rect destr = {0, 0, 3, 3};
+    System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+    for(int plan=0; plan < sys->num_planets; ++plan) {
+      if(lasttick >= 0) {
 	destr.x = sys->planets[plan]->XPos(lasttick) - 1;
 	destr.y = sys->planets[plan]->YPos(lasttick) - 1;
-	destr.w = 3;
-	destr.h = 3;
 	SDL_FillRect(screen, &destr, 0x00000000);
 	SDL_UpdateRect(screen, destr.x, destr.y, destr.w, destr.h);
 	}
-      }
-    SDL_Rect destr = {(800-32)/2, (768-32)/2, 32, 32};
-    SDL_BlitSurface(star, NULL, screen, &destr);
-    System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
-    for(int plan=0; plan < sys->num_planets; ++plan) {
       destr.x = sys->planets[plan]->XPos(cur_game->tick) - 1;
       destr.y = sys->planets[plan]->YPos(cur_game->tick) - 1;
-      destr.w = 3;
-      destr.h = 3;
       SDL_FillRect(screen, &destr, 0xFFFF00FF);
       SDL_UpdateRect(screen, destr.x, destr.y, destr.w, destr.h);
       }
