@@ -38,7 +38,7 @@ void panel_draw_fleet() {
   Fleet *flt = (Fleet*)cur_object;
   int col = cur_game->players[flt->Owner()]->color;
   SDL_Rect screenrec = {800, 12, 224, 24*23};
-  screenrec.h = screenrec.h <? 24*(flt->ships.size()+SKIP);
+  screenrec.h = screenrec.h <? 24*(flt->NumShips()+SKIP);
   SDL_FillRect(screen, &screenrec, black);
 
   sprintf(buf, "Fleet: %s", flt->Name());
@@ -62,7 +62,7 @@ void panel_draw_fleet() {
     else sprintf(buf, "Would Arrive Today");
     string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
     }
-  else if(!flt->Location()) {
+  else if((!flt->Location()) && (!flt->Destination())) {
     sprintf(buf, "Orbiting Star");
     string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
     sprintf(buf, "%d-Day Orbit", flt->Period());
@@ -84,14 +84,15 @@ void panel_draw_fleet() {
     string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
     }
 
-  for(int ctr=0; ctr < (int(flt->ships.size()) <? 22); ++ctr) {
-    int clr = col;
+  for(int ctr=0; ctr < (int(flt->NumShips()) <? 22); ++ctr) {
+    int clr = cur_game->players[flt->GetShip(ctr)->Owner()]->color;
     if(ctr == selection) clr = 8;
-    sprintf(buf, "  %s: %s", flt->ships[ctr]->CName(), flt->ships[ctr]->Name());
+    sprintf(buf, "  %s: %s",
+	flt->GetShip(ctr)->CName(), flt->GetShip(ctr)->Name());
     string_draw(screen, 816, 13+24*(line++), cur_font[clr], buf);
     }
 
-  if((!flt->Destination()) && flt->ships.size() > 1) {
+  if((!flt->Destination()) && flt->NumShips() > 1) {
     buttlist[PANEL_FLEET][BUTTON_SPLIT] =		9;
     }
   else {
@@ -116,7 +117,7 @@ void panel_clicked_fleet(int mx, int my, int mb) {
     --panel_offset;
     panel_draw_fleet();
     SDL_Rect screenrec = {800, 12+24*SKIP, 224, 24*23};
-    screenrec.h = screenrec.h <? 24*(flt->ships.size());
+    screenrec.h = screenrec.h <? 24*(flt->NumShips());
     update(&screenrec);
     return;
     }
@@ -124,7 +125,7 @@ void panel_clicked_fleet(int mx, int my, int mb) {
     ++panel_offset;
     panel_draw_fleet();
     SDL_Rect screenrec = {800, 12+24*SKIP, 224, 24*23};
-    screenrec.h = screenrec.h <? 24*(flt->ships.size());
+    screenrec.h = screenrec.h <? 24*(flt->NumShips());
     update(&screenrec);
     return;
     }
@@ -133,7 +134,7 @@ void panel_clicked_fleet(int mx, int my, int mb) {
   line -= 12+24*SKIP;
   if(line >= 0) line /= 24;
   if(line < 0 || line > 22
-        || line >= int(flt->ships.size()) - panel_offset) {
+        || line >= int(flt->NumShips()) - panel_offset) {
     if(selection >= 0) {
       update(800, 12+24*(SKIP+selection-panel_offset), 224, 24);
       selection = -1;
@@ -178,6 +179,7 @@ void button_clicked_fleet(int button) {
   Fleet *flt = (Fleet*)cur_object;
   if(button == BUTTON_LAND) {
     if(!flt->CanLand()) return;
+    if(!flt->Location()) return;
     if(((Planet*)flt->Location())->colonies.size() < 1) {
       ((Planet*)flt->Location())->colonies.push_back(
 	new Colony(flt->Owner(), ((Planet*)flt->Location()))
@@ -185,10 +187,10 @@ void button_clicked_fleet(int button) {
       }
 
     int which = 0;
-    while(!flt->ships[which]->CanLand()) ++which;
-    ((Planet*)flt->Location())->colonies[0]->LandShip(flt->ships[which]);
-    flt->ships.erase(flt->ships.begin()+which);
-    if(flt->ships.size() < 1) {
+    while(!flt->GetShip(which)->CanLand()) ++which;
+    ((Planet*)flt->Location())->colonies[0]->LandShip(flt->GetShip(which));
+    flt->RemoveShip(which);
+    if(flt->NumShips() < 1) {
       delete flt;
       panel = PANEL_GAME;
       cur_object = NULL;
@@ -197,13 +199,13 @@ void button_clicked_fleet(int button) {
     page_draw();
     }
   if(button == BUTTON_SPLIT) {
-    vector<Ship*>::iterator shp = flt->ships.begin()+1;
-    for(; shp != flt->ships.end(); ++shp) {
-      Fleet *newfleet = new Fleet(flt->Location(), flt->owner, flt->Name());
-      newfleet->ships.push_back(*shp);
+    if(!flt->Location()) return;
+    for(int shp=1; shp < flt->NumShips(); ++shp) {
+      Fleet *newfleet = new Fleet(flt->Location(), flt->Name());
+      newfleet->AddShip(flt->GetShip(shp));
       newfleet->Location()->Sys()->objects.push_back(newfleet);
       }
-    flt->ships.erase(flt->ships.begin()+1, flt->ships.end());
+    flt->RemoveShips(1);
     page_draw();
     panel_init();
     }

@@ -72,6 +72,6 @@ extern int pagemap[PAGE_MAX][BUTTON_MAX];
 extern int mo[BUTTON_MAX];
 extern int page, panel;
 extern int cur_galaxy;
-extern int cur_system;
 extern int cur_ship;
+extern System *cur_system;
 extern SObject *cur_object;

@@ -3,12 +3,14 @@
 
 #include "math.h"
 
+#include "dict.h"
 #include "system.h"
 
 extern int max_factions;
 
-System::System(int xp, int yp, int nump, int minl, int atmosl, int pl) {
-  explored.resize(max_factions, 0);
+System::System(int xp, int yp, int nump, int minl, int atmosl, int pl)
+	: SObject(this) {
+  name = dict[rand()%dict_size];
   for(int ctr=0; ctr<nump; ++ctr) {
     Planet *plan;
     if(pl >= 0 && ctr == 2) {
@@ -28,15 +30,16 @@ System::System(int xp, int yp, int nump, int minl, int atmosl, int pl) {
       objects.push_back(plan);
       }
     }
-  if(pl >= 0) Explore(pl);
-  xpos = xp;
-  ypos = yp;
+  if(pl >= 0) Know(pl);
+  gxpos = xp;
+  gypos = yp;
   }
 
 System::~System() {
   }
 
 void System::TakeTurn() {
+  SObject::TakeTurn();
   for(int ctr=0; ctr<int(objects.size()); ++ctr) objects[ctr]->TakeTurn();
   }
 
@@ -67,15 +70,11 @@ void System::FleetArrives(Fleet *f) {
     ++cur;
     }
   objects.push_back(f);
-  Explore(f->Owner());
+  Know(f->Owner());
   }
 
-int System::ExploredBy(int n) {
-  return explored[n];
-  }
-
-void System::Explore(int n) {
-  explored[n] = 1;
+void System::Know(int n) {
+  SObject::Know(n);
   for(int ctr=0; ctr<int(objects.size()); ++ctr) {
     objects[ctr]->See(n);
     }

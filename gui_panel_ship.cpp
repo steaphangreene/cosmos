@@ -36,7 +36,7 @@ void panel_draw_ship() {
   int line = 0;
   char buf[80];
   Fleet *flt = (Fleet*)cur_object;
-  Ship *shp = flt->ships[cur_ship];
+  Ship *shp = flt->GetShip(cur_ship);
   int col = cur_game->players[shp->Owner()]->color;
   SDL_Rect screenrec = {800, 12, 224, 24*23};
   screenrec.h = screenrec.h <? 24*(shp->NumItems()+SKIP);
@@ -57,12 +57,12 @@ void panel_draw_ship() {
 
 void panel_clicked_ship(int mx, int my, int mb) {
   Fleet *flt = (Fleet*)cur_object;
-//  Ship *shp = flt->ships[cur_ship];
+//  Ship *shp = flt->GetShip(cur_ship);
   if(mx >= 800 && mb == 4) {
     --panel_offset;
     panel_draw_fleet();
     SDL_Rect screenrec = {800, 12+24*SKIP, 224, 24*23};
-    screenrec.h = screenrec.h <? 24*(flt->ships.size());
+    screenrec.h = screenrec.h <? 24*(flt->NumShips());
     update(&screenrec);
     return;
     }
@@ -70,7 +70,7 @@ void panel_clicked_ship(int mx, int my, int mb) {
     ++panel_offset;
     panel_draw_fleet();
     SDL_Rect screenrec = {800, 12+24*SKIP, 224, 24*23};
-    screenrec.h = screenrec.h <? 24*(flt->ships.size());
+    screenrec.h = screenrec.h <? 24*(flt->NumShips());
     update(&screenrec);
     return;
     }

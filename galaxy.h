@@ -2,6 +2,9 @@
 
 using namespace std;
 
+#ifndef GALAXY_H
+#define GALAXY_H
+
 #include "player.h"
 #include "system.h"
 
@@ -16,3 +19,5 @@ public:
   System **systems;
   int num_systems;
   };
+
+#endif

@@ -10,6 +10,7 @@ enum {
 	SOBJECT_NONE=0,
 	SOBJECT_PLANET,
 	SOBJECT_FLEET,
+	SOBJECT_SYSTEM,
 	SOBJECT_MAX
 	};
 
@@ -18,9 +19,11 @@ class System;
 class SObject {
 public:
   SObject(SObject *o);
-  SObject(System *s, int orb);
+  SObject(System *s, int orb = 0);
   virtual ~SObject();
   virtual int SType() { return SOBJECT_NONE; }
+  virtual int CanMoveS() { return 0; }
+  virtual int CanMoveG() { return 0; }
 
   virtual void TakeTurn();
 
@@ -53,10 +56,10 @@ public:
   int GXPos(int);
   int GYPos(int);
 
-  int SeenBy(int);
-  void See(int);
-  int KnownTo(int);
-  void Know(int);
+  virtual int SeenBy(int);
+  virtual void See(int);
+  virtual int KnownTo(int);
+  virtual void Know(int);
 
 protected:
   string name;

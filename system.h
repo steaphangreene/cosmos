@@ -11,23 +11,26 @@ class System;
 #include "planet.h"
 #include "fleet.h"
 
-class System {
+class System : public SObject {
 public:
   System(int xp, int yp, int nump, int minl, int atmosl, int pl=-1);
-  ~System();
 
-  void TakeTurn();
+  virtual ~System();
+
+  virtual int Owner();
+  virtual void TakeTurn();
+
+  virtual int SType() { return SOBJECT_SYSTEM; }
+  virtual int CanMoveS() { return 0; }
+  virtual int CanMoveG() { return 0; }
+
   void FleetLeaves(Fleet *);
   void FleetArrives(Fleet *);
-  int ExploredBy(int);
-  void Explore(int);
-  int Owner();
+
+  virtual void Know(int);
 
 //private:
   vector<SObject*> objects;
-  vector<int> explored;
-  int xpos;
-  int ypos;
   };
 
 #endif

@@ -14,15 +14,22 @@ class Fleet;
 
 class Fleet : public SObject {
 public:
-  Fleet(SObject *, int, const char *nm = "Some Fleet");
+  Fleet(SObject *, const char *nm = "Some Fleet");
   ~Fleet();
   void TakeTurn();
-  virtual int Owner() { return owner; };
+  virtual int Owner();
   virtual int SType() { return SOBJECT_FLEET; }
-  int CanLand();
+  virtual int CanMoveS();             
+  virtual int CanMoveG(); 
 
-//private:
-  int owner;
+  int CanLand();
+  int NumShips();
+  void AddShip(Ship *s);
+  Ship *GetShip(int n);
+  void RemoveShip(int n);
+  void RemoveShips(int s, int e=-1);
+
+private:
   vector<Ship*> ships;
   };
 

@@ -40,7 +40,10 @@ public:
 	{ crew += n; n = crew-maxcrew; crew <?= maxcrew; return n >? 0; }
   int Owner() { return owner; }
   void TakeTurn();
+
   int CanLand();
+  int CanMoveS();
+  int CanMoveG();
 
 //private:
   int tech;

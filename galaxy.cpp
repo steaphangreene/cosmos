@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "game.h"
 #include "galaxy.h"
 
 Galaxy::Galaxy(int numsys, int minl, int atmosl, const vector<Player *> &pl) {
@@ -10,8 +11,8 @@ Galaxy::Galaxy(int numsys, int minl, int atmosl, const vector<Player *> &pl) {
     int xpos = 34+rand()%700;
     int ypos = 34+rand()%700;
     for(int ctr2=0; ctr2<ctr; ++ctr2) {
-      int offx = abs(xpos - systems[ctr2]->xpos);
-      int offy = abs(ypos - systems[ctr2]->ypos);
+      int offx = abs(xpos - systems[ctr2]->GXPos(cur_game->turn));
+      int offy = abs(ypos - systems[ctr2]->GYPos(cur_game->turn));
       if(offx*offx + offy*offy < 1600) { xpos = 0; break; }
       }
     if(xpos == 0) { --ctr; continue; }  //Abort - too close;

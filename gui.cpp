@@ -54,8 +54,8 @@ Sound *cur_mus=NULL;
 int cur_mus_num=0;
 
 int cur_galaxy=0;
-int cur_system=0;
 int cur_ship=0;
+System *cur_system=NULL;
 SObject *cur_object=NULL;
 
 static char dialog_message[4096] = {0};

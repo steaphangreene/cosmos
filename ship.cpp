@@ -39,11 +39,47 @@ Ship::Ship(int tec, int own) {
 void Ship::TakeTurn() {
   }
 
+const char *Ship::CName() {
+  return sclass_name[sclass];
+  }
+
 int Ship::CanLand() {
   if(sclass <= SCLASS_COLONIZER || sclass == SCLASS_COLONYSHIP) return 1;
   return 0;
   }
 
-const char *Ship::CName() {
-  return sclass_name[sclass];
+int Ship::CanMoveS() {
+  switch(sclass) {
+    case(SCLASS_FIGHTER):
+    case(SCLASS_TRANSPORT):
+    case(SCLASS_COLONIZER):
+    case(SCLASS_COLONYSHIP):
+    case(SCLASS_DESTROYER): {
+      return 1;
+      } break;
+    case(SCLASS_MAX): {
+      //Should never get here
+      } break;
+    }
+  return 0;
+  }
+
+int Ship::CanMoveG() {
+  switch(sclass) {
+    case(SCLASS_FIGHTER):
+    case(SCLASS_TRANSPORT):
+    case(SCLASS_COLONIZER): {
+      return 0;
+      } break;
+    case(SCLASS_COLONYSHIP): {
+      return 50000;
+      } break;
+    case(SCLASS_DESTROYER): {
+      return 100000;
+      } break;
+    case(SCLASS_MAX): {
+      //Should never get here
+      } break;
+    }
+  return 0;
   }

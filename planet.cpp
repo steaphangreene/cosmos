@@ -96,3 +96,11 @@ int Planet::Owner() {
   if(colonies.size() < 1) return -1;
   return colonies[0]->Owner();
   }
+
+int Planet::CanMoveS() {
+  return 0;
+  }
+
+int Planet::CanMoveG() {
+  return 0;
+  }

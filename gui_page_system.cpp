@@ -41,9 +41,9 @@ void page_draw_system() {
 
   SDL_Rect destr = {(768-32)/2, (768-32)/2, 32, 32};
   SDL_BlitSurface(star, NULL, screen, &destr);
-  System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+  System *sys = cur_system;
 
-  if((!cheat1) && (!cur_game->galaxys[cur_galaxy]->systems[cur_system]->ExploredBy(local_player))) {
+  if((!cheat1) && (!sys->KnownTo(local_player))) {
     string_drawc(screen, 384, 384-11, cur_font[4], "Unexplored");
     return;
     }
@@ -56,6 +56,11 @@ void page_draw_system() {
 
   for(int obj=0; obj < int(sys->objects.size()); ++obj) {
     if((!cheat1) && (!sys->objects[obj]->SeenBy(local_player))) continue;
+
+    if(sys->objects[obj]->Destination()
+	&& sys->objects[obj]->Destination()->Sys() != sys)
+      continue;
+
     if(sys->objects[obj]->SType() == SOBJECT_PLANET) {
       Planet *plan = (Planet*)sys->objects[obj];
       if((plan)->colonies.size() > 0) {
@@ -101,7 +106,7 @@ void page_update_system() {
   }
 
 void page_clicked_system(int mx, int my, int mb) {
-  if((!cheat1) && (!cur_game->galaxys[cur_galaxy]->systems[cur_system]->ExploredBy(local_player))) return;
+  if((!cheat1) && (!cur_system->KnownTo(local_player))) return;
   if(mb != 1 && mb != 3) return;
 
   if(mb == 1) {  // Deselect
@@ -111,13 +116,13 @@ void page_clicked_system(int mx, int my, int mb) {
     }
 
   int offx, offy, sqd;
-  System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+  System *sys = cur_system;
   for(int obj=0; obj < int(sys->objects.size()); ++obj) {
+    if(sys->objects[obj]->OnFrame() != cur_game->frame) continue;
     offx = abs(sys->objects[obj]->SXPos(cur_game->turn) - mx);
     offy = abs(sys->objects[obj]->SYPos(cur_game->turn) - my);
     sqd = offx*offx + offy*offy;
-    if(sys->objects[obj]->OnFrame() == cur_game->frame
-	&& sqd <= click_margin[sys->objects[obj]->SType()]) {
+    if(sqd <= click_margin[sys->objects[obj]->SType()]) {
       if(mb == 1) {
 	clear_sprites(1, 10);
 	audio_play(click2, 8, 8);
@@ -139,8 +144,6 @@ void page_clicked_system(int mx, int my, int mb) {
 	  audio_play(click2, 8, 8);
 	  cur_object->Engage();
 	  clear_sprites(1, 10);
-	  //panel = PANEL_GAME;
-	  //panel_init();
 	  page_draw();
 	  panel_draw();
 	  }
@@ -157,14 +160,15 @@ void mouse_released_system() {
   }
 
 void mouse_moved_system(int mx, int my) {
-  if((!cheat1) && (!cur_game->galaxys[cur_galaxy]->systems[cur_system]->ExploredBy(local_player))) return;
+  if((!cheat1) && (!cur_system->KnownTo(local_player))) return;
   if(panel != PANEL_FLEET) return;
   if(cur_game->frame != cur_object->OnFrame()) return;
 
   int offx, offy, sqd;
-  System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+  System *sys = cur_system;
   for(int obj=0; obj < int(sys->objects.size()); ++obj) {
-    if(sys->objects[obj] == cur_object
+    if(sys->objects[obj]->OnFrame() != cur_game->frame
+	|| sys->objects[obj] == cur_object
 	|| sys->objects[obj] == cur_object->Destination()
 	|| (sys->objects[obj] == cur_object->Location()
 		&& (!cur_object->Destination())
@@ -174,10 +178,11 @@ void mouse_moved_system(int mx, int my) {
     offx = abs(sys->objects[obj]->SXPos(cur_game->turn) - mx);
     offy = abs(sys->objects[obj]->SYPos(cur_game->turn) - my);
     sqd = offx*offx + offy*offy;
-    if(sys->objects[obj]->OnFrame() == cur_game->frame
-	&& sqd <= click_margin[sys->objects[obj]->SType()]) {
-      Uint32 col = 0xFFFFFFFF;
+    if(sqd <= click_margin[sys->objects[obj]->SType()]) {
       cur_object->SetCourse(sys->objects[obj]);
+      panel_draw();
+
+      Uint32 col = 0xFFFFFFFF;
       if(cur_object->Distance() < 0) col = 0xFF0000FF;
       else if(cur_object->Distance() >= 0) col = 0xFF00FF00;
 
@@ -199,7 +204,6 @@ void mouse_moved_system(int mx, int my) {
 		<? ((Planet*)sys->objects[obj])->SYPos(cur_game->turn)
 	);
       update_sprite(1);
-      panel_draw();
       return;
       }
     }
