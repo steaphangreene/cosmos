@@ -35,9 +35,6 @@ void panel_cleanup_ship() {
 void panel_draw_ship() {
   }
 
-void panel_redraw_ship(SDL_Rect *area) {
-  }
-
 void panel_clicked_ship(int mx, int my, int mb) {
   }
 

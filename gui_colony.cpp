@@ -40,12 +40,6 @@ void panel_draw_colony() {
   stats_draw_colony(plan);
   }
 
-void panel_redraw_colony(SDL_Rect *area) {
-  Planet *plan;
-  plan =cur_game->galaxys[cur_galaxy]->systems[cur_system]->planets[cur_planet];
-  stats_draw_colony(plan);
-  }
-
 void panel_clicked_colony(int mx, int my, int mb) {
   System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
   Planet *plan = sys->planets[cur_planet];

@@ -27,45 +27,6 @@ void gui_init_planet() {
   pagemap[PAGE_PLANET][BUTTON_EXIT] =		PAGE_SYSTEM;
   }
 
-void page_redraw_planet(SDL_Rect *area) {
-  SDL_Rect todo = *area;
-
-  SDL_FillRect(screen, &todo, black);
-  System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
-  Planet *plan = sys->planets[cur_planet];
-  SDL_BlitSurface(planet[plan->Type()], &todo, screen, &todo);
-
-  SDL_Rect srcr = {0, 0, 64, 64};
-  SDL_Rect destr = {0, 0, 64, 64};
-  for(int sctr=0; sctr < plan->num_satellites; ++sctr) {
-    Satellite *sat = plan->satellites[sctr];
-    if(!(sat->InFront(cur_game->tick))) {
-      srcr.x = sat->XPos(cur_game->tick) - 32;
-      srcr.y = sat->YPos(cur_game->tick) - 32;
-      destr.x = sat->XPos(cur_game->tick) - 32;
-      destr.y = sat->YPos(cur_game->tick) - 32;
-      if(overlaps(destr, todo)) {
-	SDL_BlitSurface(satellite[sat->Type()], NULL, screen, &destr);
-	SDL_BlitSurface(planet[plan->Type()], &srcr, screen, &destr);
-	}
-      }
-    }
-  for(int sctr=0; sctr < plan->num_satellites; ++sctr) {
-    Satellite *sat = plan->satellites[sctr];
-    if(sat->InFront(cur_game->tick)) {
-      srcr.x = sat->XPos(cur_game->tick) - 32;
-      srcr.y = sat->YPos(cur_game->tick) - 32;
-      destr.x = sat->XPos(cur_game->tick) - 32;
-      destr.y = sat->YPos(cur_game->tick) - 32;
-      if(overlaps(destr, todo)) {
-	SDL_BlitSurface(satellite[sat->Type()], NULL, screen, &destr);
-	}
-      }
-    }
-  todo = *area;
-  SDL_SetClipRect(screen, NULL);
-  }
-
 static int lasttick = -1;
 
 void page_init_planet() {

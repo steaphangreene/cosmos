@@ -33,37 +33,6 @@ void gui_init_galaxy() {
 //    }
 //  }
 
-void page_redraw_galaxy(SDL_Rect *area) {
-//  MUST NOT CALL "page_update" - MOUSE CURSOR LOOP!!!!
-/*
-  SDL_Rect todo = *area;
-
-  SDL_FillRect(screen, &todo, black);
-  todo = *area;
-  SDL_Rect rec = {0, 0, 3, 3};
-  for(int snum=0; snum < cur_game->galaxys[cur_galaxy]->num_systems; ++snum) {
-    System *sys = cur_game->galaxys[cur_galaxy]->systems[snum];
-    int must = 0;
-    if(sys->claimed > -1) {
-      SDL_Rect rec2 = {0, 0, 9, 9};
-      rec2.x = sys->xpos - 4;
-      rec2.y = sys->ypos - 4;
-      if(overlaps(rec2, todo)) {
-	SDL_FillRect(screen, &rec2, color3(
-	  cur_game->players[sys->claimed]->color
-	  ));
-	must = 1;
-	}
-      }
-    rec.x = sys->xpos - 1;
-    rec.y = sys->ypos - 1;
-    if(must || overlaps(rec, todo)) {
-      SDL_BlitSurface(gstar, NULL, screen, &rec);
-      }
-    }
-*/
-  }
-
 void page_init_galaxy() {
   if(panel < PANEL_GAME) panel = PANEL_GAME;
   }

@@ -1,4 +1,4 @@
-#include <deque>
+#include <vector>
 
 using namespace std;
 
@@ -13,7 +13,7 @@ public:
   void TakeTurn();
 
 //private:
-  deque<Fleet*> fleets;
+  vector<Fleet*> fleets;
   Planet **planets;
   int num_planets;
   int xpos;

@@ -67,8 +67,6 @@ void mouse_released();
 void page_draw();
 void panel_draw();
 void page_update();
-void page_redraw(SDL_Rect *);
-void panel_redraw(SDL_Rect *);
 
 static SDL_Surface *base0 = NULL;
 static SDL_Surface *base1 = NULL;
@@ -451,91 +449,6 @@ void button_clicked(int button) {
     }
   }
 
-void panel_redraw(SDL_Rect *area) {
-  SDL_Rect todo = {0, 0, 1024, 768};
-  if(area) todo = *area;
-  SDL_SetClipRect(screen, &todo);
-  SDL_FillRect(screen, &todo, black);
-  if(area) todo = *area;
-
-  if(panel == PANEL_COLONY) {
-    panel_redraw_colony(area);
-    }
-  else if(panel == PANEL_FLEET) {
-    panel_redraw_fleet(area);
-    }
-  else if(panel == PANEL_SHIP) {
-    panel_redraw_ship(area);
-    }
-
-  memset(mo, -1, sizeof(mo));
-  update_buttons();
-  }
-
-void page_redraw(SDL_Rect *area) {
-  SDL_Rect todo = {0, 0, 1024, 768};
-  if(area) todo = *area;
-
-  if((!area) || area->x < 800) {
-    if(page == PAGE_ROOT) {
-      if(intro) SDL_BlitSurface(intro, &todo, screen, &todo);
-      else SDL_FillRect(screen, &todo, black);
-      if(area) todo = *area;
-      }
-    else if(page == PAGE_NEW) {
-      SDL_FillRect(screen, &todo, black);
-      if(area) todo = *area;
-      for(int set=0; set<num_configs; ++set) {
-	int xp = 256-string_len(config[set][0], cur_font[4]);
-	SDL_Rect lrec = {xp, 12+24*set, string_len(config[set][0], cur_font[4]), 24};
-	SDL_Rect rrec = {270, 12+24*set,
-		string_len(config[set][cur_game->working_setting[set]+1], cur_font[4]),
-		24};
-
-	if(overlaps(lrec, todo))
-	  string_draw(screen, xp, 12+24*set, cur_font[4], config[set][0]);
-	if(overlaps(rrec, todo)) {
-	  if(config[set][cur_game->working_setting[set]+1][0] != '@') {
-	    string_draw(screen, 270, 12+24*set, cur_font[4],
-		config[set][cur_game->working_setting[set]+1]);
-	    }
-	  else {
-	    string_draw(screen, 270, 12+24*set,
-		cur_font[cur_game->working_setting[set]+1],
-		config[set][cur_game->working_setting[set]+1]+1);
-	    }
-	  }
-	}
-      }
-    else if(page == PAGE_GALAXY) {
-      page_redraw_galaxy(area);
-      }
-    else if(page == PAGE_SYSTEM) {
-      page_redraw_system(area);
-      }
-    else if(page == PAGE_PLANET) {
-      page_redraw_planet(area);
-      }
-    else if(page == PAGE_SYSOPT) {
-      SDL_Rect pos = {8, 13, 22, 22};
-      SDL_BlitSurface(check[syscnf[0]], NULL, screen, &pos);
-      SDL_Rect bar = {368-8, 13, syscnf[1], 22};
-      SDL_FillRect(screen, &bar, SDL_MapRGB(screen->format, 0xFF,0x00,0x00));
-      bar.x += bar.w;
-      bar.w = 400 - bar.w;
-      SDL_FillRect(screen, &bar, SDL_MapRGB(screen->format, 0x7F,0x00,0x00));
-      }
-    else {
-      SDL_FillRect(screen, &todo, black);
-      if(area) todo = *area;
-      }
-    }
-  if((area) && (area->x + area->w) > 800) {
-    panel_redraw(area);
-    }
-  if(area) update(area);
-  }
-
 void panel_draw() {
   SDL_Rect pnr = {800, 0, 224, 768};
   SDL_FillRect(screen, &pnr, 0);
@@ -576,7 +489,13 @@ void page_draw() {
   if(page == PAGE_SYSOPT) {
     string_draw(screen, 40, 13, cur_font[4], "Play Music");
     string_drawr(screen, 368-8-8, 13, cur_font[4], "Music Volume");
-    page_redraw(NULL);
+    SDL_Rect pos = {8, 13, 22, 22};
+    SDL_BlitSurface(check[syscnf[0]], NULL, screen, &pos);
+    SDL_Rect bar = {368-8, 13, syscnf[1], 22};
+    SDL_FillRect(screen, &bar, SDL_MapRGB(screen->format, 0xFF,0x00,0x00));
+    bar.x += bar.w;
+    bar.w = 400 - bar.w;
+    SDL_FillRect(screen, &bar, SDL_MapRGB(screen->format, 0x7F,0x00,0x00));
     }
   if(page == PAGE_DIALOG) {
     string_draw(screen, 8, 13, cur_font[4], dialog_message);
@@ -683,9 +602,10 @@ void page_clicked(int mx, int my, int mb) {
 	if(cur_game->working_setting[set] < 0)
 	  cur_game->working_setting[set] = num_options[set]-1;
 	}
-      SDL_Rect r = {0, 12+24*set, 512, 24};
       audio_play(click2, 8, 8);
-      page_redraw(&r);
+      //SDL_Rect r = {0, 12+24*set, 512, 24};
+      //page_redraw(&r);
+      page_draw();
       }
     }
   else if(page == PAGE_SYSOPT) {
@@ -696,7 +616,8 @@ void page_clicked(int mx, int my, int mb) {
 	grabbed = my/24;
 	bar.y = 13+grabbed*24;
 	syscnf[2*grabbed+1] = mx-360;
-	page_redraw(&bar);
+	//page_redraw(&bar);
+	page_draw();
 	if(grabbed == 0) {
 	  if(syscnf[0]) audio_setvol(cur_mus, syscnf[1]/20);
 	  }
@@ -709,7 +630,8 @@ void page_clicked(int mx, int my, int mb) {
 	chk.y = 13+(my/24)*24;
 	syscnf[2*(my/24)] = !syscnf[2*(my/24)];
 	audio_play(click2, 8, 8);
-	page_redraw(&chk);
+	//page_redraw(&chk);
+	page_draw();
 	if((my/24) == 0) {
 	  if(!syscnf[0]) audio_setvol(cur_mus, 0);
 	  else audio_setvol(cur_mus, syscnf[1]/20);

@@ -23,9 +23,6 @@ void gui_init_system() {
   pagemap[PAGE_SYSTEM][BUTTON_EXIT] =		PAGE_GALAXY;
   }
 
-void page_redraw_system(SDL_Rect *area) {
-  }
-
 void page_init_system() {
   }
 

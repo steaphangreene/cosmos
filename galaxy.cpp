@@ -3,7 +3,7 @@
 
 #include "galaxy.h"
 
-Galaxy::Galaxy(int numsys, int minl, int atmosl, int *devl, vector<Player *> &pl) {
+Galaxy::Galaxy(int numsys, int minl, int atmosl, int *devl, const vector<Player *> &pl) {
   num_systems = numsys;
   systems = new (System*)[numsys];
   for(int ctr=0; ctr<numsys; ++ctr) {

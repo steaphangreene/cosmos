@@ -222,8 +222,8 @@ void Planet::TakeTurn() {
 	  objs.push_back(projs[0]);
 	  oqty.push_back(1);
 	  }
-	projs.pop_front();
-	prog.pop_front();
+	projs.erase(projs.begin());
+	prog.erase(prog.begin());
 	}
       else {
 	prog[0] += indus;

@@ -46,9 +46,6 @@ void panel_draw_fleet() {
     }
   }
 
-void panel_redraw_fleet(SDL_Rect *area) {
-  }
-
 void panel_clicked_fleet(int mx, int my, int mb) {
   }
 

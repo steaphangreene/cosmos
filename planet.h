@@ -1,5 +1,4 @@
 #include <vector>
-#include <deque>
 
 using namespace std;
 
@@ -43,9 +42,9 @@ public:
   Satellite **satellites;
   vector<int> objs;
   vector<int> oqty;
-  deque<int> projs;
-  deque<int> prog;
-  deque<Fleet*> fleets;
+  vector<int> projs;
+  vector<int> prog;
+  vector<Fleet*> fleets;
 
   int claimed;
 private:
