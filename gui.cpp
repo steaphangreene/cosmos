@@ -510,7 +510,7 @@ void panel_draw() {
   }
 
 void page_draw() {
-  cur_game->EmptyTrash(); //Get rid of empty fleet objs, etc....
+  EmptyTrash(); //Get rid of empty fleet objs, etc....
 
   SDL_Rect pgr = {0, 0, 800, 768};
   SDL_FillRect(screen, &pgr, 0);

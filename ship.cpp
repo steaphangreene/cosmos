@@ -50,36 +50,24 @@ int Ship::CanLand() {
 
 int Ship::SMove() {
   switch(sclass) {
-    case(SCLASS_FIGHTER):
-    case(SCLASS_TRANSPORT):
-    case(SCLASS_COLONIZER):
-    case(SCLASS_COLONYSHIP):
-    case(SCLASS_DESTROYER): {
-      return 1;
-      } break;
-    case(SCLASS_MAX): {
-      //Should never get here
-      } break;
+    case(SCLASS_FIGHTER):	return 500;
+    case(SCLASS_TRANSPORT):	return 200;
+    case(SCLASS_COLONIZER):	return 100;
+    case(SCLASS_COLONYSHIP):	return 100;
+    case(SCLASS_DESTROYER):	return 300;
+    case(SCLASS_MAX):break;
     }
   return 0;
   }
 
 int Ship::GMove() {
   switch(sclass) {
-    case(SCLASS_FIGHTER):
-    case(SCLASS_TRANSPORT):
-    case(SCLASS_COLONIZER): {
-      return 0;
-      } break;
-    case(SCLASS_COLONYSHIP): {
-      return 50000;
-      } break;
-    case(SCLASS_DESTROYER): {
-      return 100000;
-      } break;
-    case(SCLASS_MAX): {
-      //Should never get here
-      } break;
+    case(SCLASS_FIGHTER):	return 0;
+    case(SCLASS_TRANSPORT):	return 0;
+    case(SCLASS_COLONIZER):	return 0;
+    case(SCLASS_COLONYSHIP):	return 100;
+    case(SCLASS_DESTROYER):	return 300;
+    case(SCLASS_MAX):break;
     }
   return 0;
   }

@@ -31,8 +31,10 @@ System::System(int xp, int yp, int nump, int minl, int atmosl, int pl)
       }
     }
   if(pl >= 0) Know(pl);
-  gxpos = xp;
-  gypos = yp;
+  gxloc = xp;
+  gyloc = yp;
+  gxpos = (xp+10)/20;
+  gypos = (yp+10)/20;
   }
 
 System::~System() {

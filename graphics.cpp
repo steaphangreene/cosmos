@@ -333,6 +333,7 @@ SDL_Surface *getline(int x1, int y1, int x2, int y2, Uint32 col, Uint32 pat) {
     }
   SDL_Surface *ret = SDL_DisplayFormatAlpha(tmp);
   SDL_FreeSurface(tmp);
+  SDL_SetAlpha(ret, SDL_SRCALPHA|SDL_RLEACCEL, 255);
   return ret;
   }
 

@@ -15,9 +15,13 @@ class Fleet;
 class Fleet : public SObject {
 public:
   Fleet(SObject *, const char *nm = "Some Fleet");
-  ~Fleet();
-  void TakeTurn();
+  virtual ~Fleet();
+  virtual void TakeTurn();
+
   virtual int Owner();
+  virtual const char *Name() { return name.c_str(); };
+  virtual void SetName(const char *nm) { name = nm; };
+
   virtual int SType() { return SOBJECT_FLEET; }
   virtual int SMove();             
   virtual int GMove(); 
@@ -37,6 +41,7 @@ public:
 
 private:
   vector<Ship*> ships;
+  string name;
   };
 
 #endif

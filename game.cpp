@@ -10,6 +10,7 @@
 #include <sys/types.h>
 
 #include "game.h"
+#include "position.h"
 
 int MKDIR(const char *fn, int perms) {
   static char buf[1024] = {0};
@@ -138,11 +139,6 @@ void Game::TakeTurn() {
   for(int ctr=0; ctr<int(players.size()); ++ctr) players[ctr]->TakeTurn();
   for(int ctr=0; ctr<int(galaxys.size()); ++ctr) galaxys[ctr]->TakeTurn();
   EmptyTrash();
-  }
-
-void Game::EmptyTrash() {
-  for(int ctr=0; ctr<int(junk.size()); ++ctr) delete(junk[ctr]);
-  junk.clear();
   }
 
 void Game::Randomize() {
@@ -344,3 +340,21 @@ const char **config[num_configs] = {
   config13,
   config14
   };
+
+static vector<SObject*> trash;
+
+void Trash(SObject *t) {
+  if(t) trash.push_back(t);
+  }
+
+void EmptyTrash() {
+  CleanPositions(trash);
+  for(int ctr=0; ctr<int(trash.size()); ++ctr) {
+    trash[ctr]->SetName("Non-Existant Object");
+    if(trash[ctr]->SType() == SOBJECT_POSITION)
+      RecyclePosition((Position*)trash[ctr]);
+    else if(trash[ctr]->SType() == SOBJECT_FLEET) delete(trash[ctr]);
+    else delete(trash[ctr]);
+    }
+  trash.clear();
+  }

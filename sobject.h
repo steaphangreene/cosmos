@@ -8,6 +8,7 @@ using namespace std;
 
 enum {
 	SOBJECT_NONE=0,
+	SOBJECT_POSITION,
 	SOBJECT_PLANET,
 	SOBJECT_FLEET,
 	SOBJECT_SYSTEM,
@@ -15,9 +16,11 @@ enum {
 	};
 
 class System;
+class Position;
 
 class SObject {
 public:
+  SObject(int); // Placeholder for Positions to use
   SObject(SObject *o);
   SObject(System *s, int orb = 0);
   virtual ~SObject();
@@ -27,34 +30,37 @@ public:
 
   virtual void TakeTurn();
 
-  const char *Name() { return name.c_str(); };
-  void SetName(const char *nm) { name = nm; };
-
   System *Sys() { return system; };
   int OnFrame() { return frame; };
 
   virtual int Owner();
+  virtual const char *Name() { return "Stellar Object"; };
+  virtual void SetName(const char *nm) { };
 
-  SObject *Location() { return location; };
-  SObject *Destination() { return destination; };
+  Position *Location() { return location; };
+  Position *Destination() { return destination; };
   int ArriveTurn() { return arrive_turn; }
   int DepartTurn() { return depart_turn; }
   void Arrive();
 
-  SObject *Target() { return target; };
+  Position *Target() { return target; };
   int Distance() { return distance; };
   void SetCourse(SObject *);
   void Engage();
 
   int Period() { return period; }
   int OrbitDist() { return orbit; }
+  int OrbitPhase() { return startpos; }
 
-  void ComputeSPos(int);
-  int SXPos(int);
-  int SYPos(int);
-  void ComputeGPos(int);
-  int GXPos(int);
-  int GYPos(int);
+  int SXPos();
+  int SYPos();
+  int GXPos();
+  int GYPos();
+
+  int SXLoc(int);
+  int SYLoc(int);
+  int GXLoc(int);
+  int GYLoc(int);
 
   virtual int SeenBy(int);
   virtual void See(int);
@@ -62,16 +68,24 @@ public:
   virtual void Know(int);
 
 protected:
-  string name;
+  void Init();
+
   System *system;
   int orbit, startpos, period;
   int frame, sxpos, sypos, gxpos, gypos;
-  SObject *location, *destination, *target;
+  int sturn, sxloc, syloc;
+  int gturn, gxloc, gyloc;
+  Position *location, *destination, *target;
   int depart_turn, arrive_turn, distance;
 
   void SetOrigin();
   int TimeToLocal(int sqdst);
   int TimeToGalactic(int sqdst);
+
+  virtual void ComputeSPos();
+  virtual void ComputeGPos();
+  void ComputeSLoc(int);
+  void ComputeGLoc(int);
 
   vector<int> seen;
   vector<int> known;

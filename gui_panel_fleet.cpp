@@ -13,6 +13,7 @@ using namespace std;
 #include "fonts.h"
 #include "graphics.h"
 #include "gui_local.h"
+#include "position.h"
 
 #define SKIP 3
 
@@ -180,25 +181,27 @@ void button_clicked_fleet(int button) {
   if(button == BUTTON_LAND) {
     if(!flt->CanLand()) return;
     if(!flt->Location()) return;
-    if(((Planet*)flt->Location())->colonies.size() < 1) {
-      ((Planet*)flt->Location())->colonies.push_back(
-	new Colony(flt->Owner(), ((Planet*)flt->Location()))
+    if(!flt->Location()->Represents()) return;
+    if(((Planet*)flt->Location()->Represents())->colonies.size() < 1) {
+      ((Planet*)flt->Location()->Represents())->colonies.push_back(
+	new Colony(flt->Owner(), ((Planet*)flt->Location()->Represents()))
 	);
       }
 
     int which = 0;
     while(!flt->GetShip(which)->CanLand()) ++which;
-    ((Planet*)flt->Location())->colonies[0]->LandShip(flt->GetShip(which));
+    ((Planet*)flt->Location()->Represents())->colonies[0]->LandShip(flt->GetShip(which));
     flt->DestroyShip(which);
     panel_draw();
     page_draw();
     }
   if(button == BUTTON_SPLIT) {
     if(!flt->Location()) return;
+    if(!flt->Location()->Represents()) return;
     for(int shp=1; shp < flt->NumShips(); ++shp) {
-      Fleet *newfleet = new Fleet(flt->Location(), flt->Name());
+      Fleet *newfleet = new Fleet(flt->Location()->Represents(), flt->Name());
       newfleet->AddShip(flt->GetShip(shp));
-      newfleet->Location()->Sys()->objects.push_back(newfleet);
+      newfleet->Location()->Represents()->Sys()->objects.push_back(newfleet);
       }
     flt->RemoveShips(1);
     page_draw();

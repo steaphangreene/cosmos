@@ -80,6 +80,8 @@ Ship *Fleet::GetShip(int n) {
   return ships[n];
   }
 
+
+//FIXME - HAXXOR
 extern int panel;  // From gui.cpp
 extern SObject *cur_object;  // From gui.cpp
 void panel_draw();  // From gui.cpp
@@ -87,7 +89,7 @@ void panel_draw();  // From gui.cpp
 void Fleet::RemoveShip(int n) {
   ships.erase(ships.begin()+n);
   if(ships.size() <= 0) {
-    cur_game->junk.push_back(this);
+    Trash(this);
     if(cur_object == this) {
       cur_object = NULL;
       panel = PANEL_GAME;
@@ -100,7 +102,7 @@ void Fleet::RemoveShips(int s, int e) {
   if(e < 0) e = int(ships.size());
   ships.erase(ships.begin()+s, ships.begin()+e);
   if(ships.size() <= 0) {
-    cur_game->junk.push_back(this);
+    Trash(this);
     if(cur_object == this) {
       cur_object = NULL;
       panel = PANEL_GAME;
@@ -113,7 +115,7 @@ void Fleet::DestroyShip(int n) {
   delete ships[n];
   ships.erase(ships.begin()+n);
   if(ships.size() <= 0) {
-    cur_game->junk.push_back(this);
+    Trash(this);
     if(cur_object == this) {
       cur_object = NULL;
       panel = PANEL_GAME;
@@ -127,7 +129,7 @@ void Fleet::DestroyShips(int s, int e) {
   for(int ctr=s; ctr<e; ++ctr) delete ships[ctr];
   ships.erase(ships.begin()+s, ships.begin()+e);
   if(ships.size() <= 0) {
-    cur_game->junk.push_back(this);
+    Trash(this);
     if(cur_object == this) {
       cur_object = NULL;
       panel = PANEL_GAME;

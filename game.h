@@ -48,8 +48,6 @@ public:
 
   void TakeTurn();
 
-  void EmptyTrash();
-
 //private:
   void Finalize();
 
@@ -64,8 +62,9 @@ public:
   vector<Galaxy*> galaxys;
 
   vector<Player*> players;
-
-  vector<SObject*> junk;
   };
+
+void Trash(SObject *);
+void EmptyTrash();
 
 #endif

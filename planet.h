@@ -17,12 +17,17 @@ class Planet;
 class Planet : public SObject {
 public:
   Planet(System *s, int ord, int sz, int min, int atmos);
-  ~Planet();
-  int Type();
-  virtual int Owner();
+  virtual ~Planet();
   virtual int SType() { return SOBJECT_PLANET; }
+
+  virtual int Owner();
+  virtual const char *Name() { return name.c_str(); };
+  virtual void SetName(const char *nm) { name = nm; };
+
   virtual int SMove();
   virtual int GMove();
+
+  int Type();
 
   int Radiation();
   int Atmosphere();
@@ -36,6 +41,7 @@ public:
   vector <Colony *> colonies;
 
 protected:
+  string name;
   friend class System;
   int order, size, minerals, atmosphere, temperature, radiation;
   };

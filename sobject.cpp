@@ -5,6 +5,7 @@
 #include "math.h"
 
 #include "sobject.h"
+#include "position.h"
 #include "system.h"
 #include "game.h"
 #include "gui.h"
@@ -13,12 +14,7 @@ extern int max_factions;
 
 //Orbital Period = sqrt(Distance From Star ^ 3)
 
-SObject::SObject(System *s, int orb) {
-  name = "Stellar Object";
-  system = s;
-  orbit = orb;
-  period = int(sqrt(double(orbit)*double(orbit)*double(orbit)));
-  startpos = rand()&65535;
+void SObject::Init() {
   location = NULL;
   destination = NULL;
   depart_turn = 0;
@@ -27,31 +23,37 @@ SObject::SObject(System *s, int orb) {
   distance = 0;
   seen.resize(max_factions, 0);
   known.resize(max_factions, 0);
+  gturn = -1;
+  sturn = -1;
+  }
+
+SObject::SObject(System *s, int orb) {
+  Init();
+  system = s;
+  orbit = orb;
+  period = int(sqrt(double(orbit)*double(orbit)*double(orbit)));
+  startpos = rand()&65535;
+  }
+
+SObject::SObject(int a) {
+  Init();
   }
 
 SObject::SObject(SObject *o) {
-  name = "Stellar Object";
+  Init();
   system = o->Sys();
   orbit = o->orbit;
   period = o->period;
   startpos = o->startpos;
-  location = o;
-  destination = NULL;
-  depart_turn = 0;
-  arrive_turn = 0;
-  target = NULL;
-  distance = 0;
-  seen.resize(max_factions, 0);
-  known.resize(max_factions, 0);
+  location = GetPosition(o);
   }
 
-void SObject::ComputeSPos(int turn) {
+void SObject::ComputeSLoc(int turn) {
+  sturn = turn;
   double ang = double(startpos)
 	+ double(turn)*double(256*256*256) / double(period);
-  double xp = double(orbit/20) * cos(ang * 2.0 * M_PIl / double(65536));
-  double yp = double(orbit/20) * sin(ang * 2.0 * M_PIl / double(65536));
-  sxpos = int(384+xp);
-  sypos = int(384+yp);
+  sxloc = int(double(orbit) * cos(ang * 2.0 * M_PIl / double(65536)));
+  syloc = int(double(orbit) * sin(ang * 2.0 * M_PIl / double(65536)));
 
   if(destination) {
     int prog, trip = arrive_turn - depart_turn;
@@ -60,16 +62,35 @@ void SObject::ComputeSPos(int turn) {
     else if(turn <= depart_turn) prog = 0;
     else prog = turn - depart_turn;
 
-    sxpos *= (trip-prog);
-    sxpos += destination->SXPos(arrive_turn) * prog;
-    sxpos /= trip;
-    sypos *= (trip-prog);
-    sypos += destination->SYPos(arrive_turn) * prog;
-    sypos /= trip;
+    sxloc *= (trip-prog);
+    sxloc += destination->SXLoc(arrive_turn) * prog;
+    sxloc /= trip;
+    syloc *= (trip-prog);
+    syloc += destination->SYLoc(arrive_turn) * prog;
+    syloc /= trip;
     }
+  }
 
-  if(location && abs(location->SXPos(turn) - sxpos) < 6
-	&& abs(location->SYPos(turn) - sypos) < 6) {
+int SObject::SXLoc(int turn) {
+  if(turn == sturn) return sxloc;
+  ComputeSLoc(turn);
+  return sxloc;
+  }
+
+int SObject::SYLoc(int turn) {
+  if(turn == sturn) return syloc;
+  ComputeSLoc(turn);
+  return syloc;
+  }
+
+void SObject::ComputeSPos() {
+  ComputeSLoc(cur_game->turn);
+  frame = cur_game->frame;
+  sxpos = (sxloc+10)/20 + 384;
+  sypos = (syloc+10)/20 + 384;
+
+  if(location && abs(location->SXPos() - sxpos) < 6
+	&& abs(location->SYPos() - sypos) < 6) {
     sxpos += 8; sypos -= 2;
     }
 
@@ -87,30 +108,24 @@ void SObject::ComputeSPos(int turn) {
 	}
       }
     }
-  if(turn == cur_game->turn) frame = cur_game->frame;
-  else frame = cur_game->frame - 1;
   }
 
-int SObject::SXPos(int turn) {
-  if(turn == cur_game->turn && frame == cur_game->frame) return sxpos;
-  ComputeSPos(turn);
+int SObject::SXPos() {
+  if(frame == cur_game->frame) return sxpos;
+  ComputeSPos();
   return sxpos;
   }
 
-int SObject::SYPos(int turn) {
-  if(turn == cur_game->turn && frame == cur_game->frame) return sypos;
-  ComputeSPos(turn);
+int SObject::SYPos() {
+  if(frame == cur_game->frame) return sypos;
+  ComputeSPos();
   return sypos;
   }
 
-void SObject::ComputeGPos(int turn) {
-  if(SType() == SOBJECT_SYSTEM) {  // Star Systems Don't Move!
-    frame = cur_game->frame;
-    return;
-    }
-
-  gxpos = system->GXPos(turn);
-  gypos = system->GYPos(turn);
+void SObject::ComputeGLoc(int turn) {
+  gturn = turn;
+  gxloc = system->GXLoc(turn);
+  gyloc = system->GYLoc(turn);
 
   if(destination && destination->system != system) {
     int prog, trip = arrive_turn - depart_turn;
@@ -119,16 +134,36 @@ void SObject::ComputeGPos(int turn) {
     else if(turn <= depart_turn) prog = 0;
     else prog = turn - depart_turn;
 
-    gxpos *= (trip-prog);
-    gxpos += destination->GXPos(arrive_turn) * prog;
-    gxpos /= trip;
-    gypos *= (trip-prog);
-    gypos += destination->GYPos(arrive_turn) * prog;
-    gypos /= trip;
+    gxloc *= (trip-prog);
+    gxloc += destination->GXLoc(arrive_turn) * prog;
+    gxloc /= trip;
+    gyloc *= (trip-prog);
+    gyloc += destination->GYLoc(arrive_turn) * prog;
+    gyloc /= trip;
     }
+  }
 
-  if(system && abs(system->GXPos(turn) - gxpos) < 6
-	&& abs(system->GYPos(turn) - gypos) < 6) {
+int SObject::GXLoc(int turn) {
+  if(turn == gturn) return gxloc;
+  ComputeGLoc(turn);
+  return gxloc;
+  }
+
+int SObject::GYLoc(int turn) {
+  if(turn == gturn) return gyloc;
+  ComputeGLoc(turn);
+  return gyloc;
+  }
+
+void SObject::ComputeGPos() {
+  ComputeGLoc(cur_game->turn);
+  frame = cur_game->frame;
+  gxpos = (gxloc+10)/20;
+  gypos = (gyloc+10)/20;
+
+  if(system && system != this
+	&& abs(system->GXPos() - gxpos) < 6
+	&& abs(system->GYPos() - gypos) < 6) {
     gxpos += 8; gypos -= 2;
     }
 
@@ -146,20 +181,17 @@ void SObject::ComputeGPos(int turn) {
 	}
       }
     }
-
-  if(turn == cur_game->turn) frame = cur_game->frame;
-  else frame = cur_game->frame - 1;
   }
 
-int SObject::GXPos(int turn) {
-  if(turn == cur_game->turn && frame == cur_game->frame) return gxpos;
-  ComputeGPos(turn);
+int SObject::GXPos() {
+  if(frame == cur_game->frame) return gxpos;
+  ComputeGPos();
   return gxpos;
   }
 
-int SObject::GYPos(int turn) {
-  if(turn == cur_game->turn && frame == cur_game->frame) return gypos;
-  ComputeGPos(turn);
+int SObject::GYPos() {
+  if(frame == cur_game->frame) return gypos;
+  ComputeGPos();
   return gypos;
   }
 
@@ -171,20 +203,39 @@ void SObject::TakeTurn() {
   if(destination && cur_game->turn >= arrive_turn) Arrive();
   }
 
+//FIXME - HAXXOR
 void panel_draw();  // From gui.cpp
 extern SObject *cur_object;  // From gui.cpp
+
 void SObject::Arrive() {
-  if(destination->SType() == SOBJECT_PLANET) {
+  SObject *truedest = destination->Represents();
+  if(!truedest) {
+    system = destination->Sys();
+    orbit = destination->OrbitDist();
+    period = destination->Period();
+    startpos = destination->OrbitPhase();
+    arrive_turn = destination->ArriveTurn();
+    depart_turn = destination->DepartTurn();
+    Trash(location);
+    location = destination->Location();
+    Trash(destination);
+    destination = destination->Destination();
+    Trash(target);
+    target = NULL;
+    distance = 0;
+    }
+  else if(truedest->SType() == SOBJECT_PLANET) {
     system = destination->system;
     orbit = destination->orbit;
     period = destination->period;
     startpos = destination->startpos;
+    Trash(location);
     location = destination;
-    destination->See(Owner());
-    destination->Know(Owner());
+    truedest->See(Owner());
+    truedest->Know(Owner());
     destination = NULL;
     }
-  else if(destination->SType() == SOBJECT_SYSTEM) {
+  else if(truedest->SType() == SOBJECT_SYSTEM) {
     orbit = 6600;
     period = int(sqrt(double(orbit)*double(orbit)*double(orbit)));
 
@@ -195,38 +246,45 @@ void SObject::Arrive() {
     startpos = int(nang - tang);
 
     system->FleetLeaves((Fleet*)this);
-    system = (System*)destination;
+    system = destination->system;
     system->FleetArrives((Fleet*)this);
 
+    Trash(location);
     location = NULL;
-    destination->Know(Owner());
+    truedest->Know(Owner());
+    Trash(destination);
     destination = NULL;
     }
-  else if(destination->SType() == SOBJECT_FLEET && SType() == SOBJECT_FLEET
-	&& Owner() == destination->Owner()) {
+  else if(truedest->SType() == SOBJECT_FLEET && SType() == SOBJECT_FLEET
+	&& Owner() == truedest->Owner()) {
     Fleet *flt = (Fleet *)this;
     for(int shp=0; shp < flt->NumShips(); ++shp)
-      ((Fleet*)destination)->AddShip(flt->GetShip(shp));
-    if(cur_object == this) cur_object = destination;
+      ((Fleet*)truedest)->AddShip(flt->GetShip(shp));
+    if(cur_object == this) cur_object = truedest;
     panel_draw();
+    RemapPositions(flt, truedest);
     flt->RemoveShips(0);
     }
-  else if(destination->SType() == SOBJECT_FLEET && SType() == SOBJECT_FLEET) {
+  else if(truedest->SType() == SOBJECT_FLEET && SType() == SOBJECT_FLEET) {
     Fleet *flt = (Fleet*)this;
-    flt->Attack((Fleet*)destination);
+    flt->Attack((Fleet*)truedest);
     system = destination->system;
     orbit = destination->orbit;
     period = destination->period;
     startpos = destination->startpos;
+    Trash(location);
     location = destination->location;
+    Trash(destination);
     destination = destination->destination;  //FIXME! Two attacking each other!
     }
-  else if(destination->SType() == SOBJECT_FLEET) {
+  else if(truedest->SType() == SOBJECT_FLEET) {
     system = destination->system;
     orbit = destination->orbit;
     period = destination->period;
     startpos = destination->startpos;
+    Trash(location);
     location = destination->location;
+    Trash(destination);
     destination = destination->destination;
     }
   }
@@ -237,7 +295,7 @@ int SObject::Owner() {
 
 int SObject::TimeToLocal(int sqdist) {
   if(SMove() <= 0) return INT_MIN;
-  int ret = (int(sqrt(double(sqdist)))+19)/20;
+  int ret = int(sqrt(double(sqdist)));
   ret += SMove()-1;
   ret /= SMove();
   return ret;
@@ -245,7 +303,11 @@ int SObject::TimeToLocal(int sqdist) {
 
 int SObject::TimeToGalactic(int sqdist) {
   if(GMove() <= 0) return INT_MIN;
-  int ret = TimeToLocal(sqdist)*1000000;
+
+  //FIXME - Use Physics' Hyperspace Factor, etc...
+  //int ret = int(sqrt(double(sqdist))*double(1000000));
+  int ret = int(sqrt(double(sqdist)));
+
   ret += GMove()-1;
   ret /= GMove();
   return ret;
@@ -253,6 +315,7 @@ int SObject::TimeToGalactic(int sqdist) {
 
 void SObject::Engage() {
   if(target == NULL) return;
+  Trash(destination);
   destination = target;
   depart_turn = cur_game->turn;
   arrive_turn = cur_game->turn + distance;
@@ -261,16 +324,16 @@ void SObject::Engage() {
   }
 
 void SObject::SetCourse(SObject *p) {
-  target = p;
-  if(!target) return;
+  if(!p) { target = NULL; return; }
+  target = GetPosition(p);
 
   int tm = 1, offx, offy, sqd;
 
   if(target->system != system) {
-    offx = abs(system->GXPos(cur_game->turn)
-	- target->system->GXPos(cur_game->turn));
-    offy = abs(system->GYPos(cur_game->turn)
-	- target->system->GYPos(cur_game->turn));
+    offx = abs(system->GXLoc(cur_game->turn)
+	- target->system->GXLoc(cur_game->turn));
+    offy = abs(system->GYLoc(cur_game->turn)
+	- target->system->GYLoc(cur_game->turn));
     sqd = offx*offx + offy*offy;
 
     distance = TimeToGalactic(sqd);
@@ -281,21 +344,11 @@ void SObject::SetCourse(SObject *p) {
     SetOrigin();
     }
 
-  SObject *origin = this;
-  if(location && ((!destination)
-	|| depart_turn >= cur_game->turn))
-    origin = location;
-
-  SObject *goal = target;
-  if(goal->location && ((!goal->destination)
-	|| goal->depart_turn >= cur_game->turn))
-    goal = goal->location;
-
   for(int trip=0; ; ++trip) {
-    offx = abs(goal->SXPos(cur_game->turn + trip)
-	- origin->SXPos(cur_game->turn));
-    offy = abs(goal->SYPos(cur_game->turn + trip)
-	- origin->SYPos(cur_game->turn));
+    offx = abs(target->SXLoc(cur_game->turn + trip)
+	- SXLoc(cur_game->turn));
+    offy = abs(target->SYLoc(cur_game->turn + trip)
+	- SYLoc(cur_game->turn));
     sqd = offx*offx + offy*offy;
 
     tm = TimeToLocal(sqd);
@@ -307,8 +360,8 @@ void SObject::SetCourse(SObject *p) {
   }
 
 void SObject::SetOrigin() {
-  int xp = (SXPos(cur_game->turn)-384)*20;
-  int yp = (SYPos(cur_game->turn)-384)*20;
+  int xp = (SXLoc(cur_game->turn));
+  int yp = (SYLoc(cur_game->turn));
   orbit = int(sqrt(double(xp*xp+yp*yp)));
   period = int(sqrt(double(orbit)*double(orbit)*double(orbit)));
 
