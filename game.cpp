@@ -77,12 +77,7 @@ int Game::Load(const char *fn, int frac) {
     sprintf(buf, "saves/%s", fn);
 
   FILE *svfl = fopen(buf, "r");
-  if(!svfl) {
-//    char ebuf[1024] = {0};
-//    sprintf(ebuf, "Warning - Can't Load \"%s\"", buf);
-//    perror(ebuf);
-    return -1;
-    }
+  if(!svfl) return -1;
 
   Clear();
 

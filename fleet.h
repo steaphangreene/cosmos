@@ -16,6 +16,7 @@ class Ship;
 
 class Fleet : public SObject {
 public:
+  Fleet();
   Fleet(SObject *, const char *nm = "Some Fleet");
   Fleet(FILE *);
   virtual ~Fleet();

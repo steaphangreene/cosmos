@@ -118,6 +118,12 @@ void do_updates() {
 	spritef[ctr] &= (~(SPRITE_UPDATE));
 	}
       }
+
+    int needed = (num_updaterecs < 0);
+    for(int rec=0; (!needed) && rec<num_updaterecs; ++rec)
+      needed = overlaps(updaterecs[rec], spriter[ctr]);
+    if(!needed) continue;
+
     SDL_BlitSurface(screen, &spriter[ctr], spriteb[ctr], &wholer);
     }
   for(int ctr=int(sprite.size())-1; ctr >= 0; --ctr) if(sprite[ctr]) {

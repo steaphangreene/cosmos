@@ -7,6 +7,11 @@ using namespace std;
 #include "fleet.h"
 #include "gui.h"
 
+Fleet::Fleet() : SObject() {
+  name = "Some Fleet";
+  frame = 0;
+  }
+
 Fleet::Fleet(SObject *s, const char *nm) : SObject(s) {
   name = nm;
   frame = 0;
@@ -167,7 +172,7 @@ void Fleet::Attack(Fleet *f) {
     }
   }
 
-Fleet::Fleet(FILE *f) : SObject(0) {
+Fleet::Fleet(FILE *f) : SObject() {
   LoadFrom(f);
   }
 

@@ -6,14 +6,14 @@
 
 Galaxy::Galaxy(int numsys, int minl, int atmosl, const vector<Player *> &pl) {
   for(int ctr=0; ctr<numsys; ++ctr) {
-    int xpos = 34+rand()%14000;
-    int ypos = 34+rand()%14000;
+    int xpos = rand()%14000;
+    int ypos = rand()%14000;
     for(int ctr2=0; ctr2<ctr; ++ctr2) {
-      int offx = abs((xpos+10)/20 - systems[ctr2]->GXPos());
-      int offy = abs((ypos+10)/20 - systems[ctr2]->GYPos());
-      if(offx*offx + offy*offy < 1600) { xpos = 0; break; }
+      int offx = abs(xpos - systems[ctr2]->GXLoc(0));
+      int offy = abs(ypos - systems[ctr2]->GYLoc(0));
+      if(offx*offx + offy*offy < 1000000) { xpos = -1; break; }
       }
-    if(xpos == 0) { --ctr; continue; }  //Abort - too close;
+    if(xpos == -1) { --ctr; continue; }  //Abort - too close;
     if(ctr < int(pl.size())) {
       systems.push_back(new System(xpos, ypos, 10, minl, atmosl, ctr));
       }

@@ -31,6 +31,36 @@ void SObject::Init() {
   sturn = -1;
   }
 
+void SObject::CopyFrom(SObject *s) {
+  Init();
+  target = GetPosition(s->target);
+  location = GetPosition(s->location);
+  destination = GetPosition(s->destination);
+  distance = s->distance;
+  depart_turn = s->depart_turn;
+  arrive_turn = s->arrive_turn;
+
+  system = s->system;
+  orbit = s->orbit;
+  startpos = s->startpos;
+  period = s->period;
+
+  frame = s->frame;
+  gturn = s->gturn;
+  gxloc = s->gxloc;
+  gyloc = s->gyloc;
+  gxpos = s->gxpos;
+  gypos = s->gypos;
+  sturn = s->sturn;
+  sxloc = s->sxloc;
+  syloc = s->syloc;
+  sxpos = s->sxpos;
+  sypos = s->sypos;
+
+  for(int ctr=0; ctr<max_factions; ++ctr) seen[ctr] = s->seen[ctr];
+  for(int ctr=0; ctr<max_factions; ++ctr) known[ctr] = s->known[ctr];
+  }
+
 SObject::SObject(System *s, int orb) {
   Init();
   system = s;
@@ -39,7 +69,7 @@ SObject::SObject(System *s, int orb) {
   startpos = rand()&65535;
   }
 
-SObject::SObject(int a) {
+SObject::SObject() {
   Init();
   }
 
@@ -170,8 +200,8 @@ int SObject::GYLoc(int turn) {
 void SObject::ComputeGPos() {
   ComputeGLoc(cur_game->turn);
   frame = cur_game->frame;
-  gxpos = (gxloc+10)/20;
-  gypos = (gyloc+10)/20;
+  gxpos = 34 + (gxloc+10)/20;
+  gypos = 34 + (gyloc+10)/20;
 
   if(system && system != this) {
     int space = (Space() + system->Space()) / 2;

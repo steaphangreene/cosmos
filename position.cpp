@@ -1,11 +1,11 @@
 #include "game.h"
 #include "position.h"
 
-Position::Position() : SObject(1) {
+Position::Position() : SObject() {
   next = NULL;
   }
 
-Position::Position(FILE *f) : SObject(1) {
+Position::Position(FILE *f) : SObject() {
   LoadFrom(f);
   }
 
@@ -21,6 +21,7 @@ const char *Position::Name() {
   };
 
 void Position::AssignTo(SObject *o) {
+/*
   system = o->Sys();
   orbit = o->OrbitDist();
   period = o->Period();
@@ -29,9 +30,12 @@ void Position::AssignTo(SObject *o) {
   destination = o->Destination();
   arrive_turn = o->ArriveTurn();
   depart_turn = o->DepartTurn();
+*/
+  CopyFrom(o);
   target = NULL;
   distance = 0;
-  represents = o;
+  if(o->SType() == SOBJECT_POSITION) represents = ((Position*)o)->Represents();
+  else represents = o;
   }
 
 void Position::ComputeSPos() {
@@ -65,6 +69,7 @@ static Position *unused_pos = NULL;
 static Position *used_pos = NULL;
 
 Position *GetPosition(SObject *s) {
+  if(!s) return NULL;
   Position *ret;
 
   if(!unused_pos) {

@@ -45,57 +45,57 @@ void panel_draw_fleet() {
   SDL_FillRect(screen, &screenrec, black);
 
   sprintf(buf, "Fleet: %s", flt->Name());
-  string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
+  string_draw(screen, 816, 13+24*(line++), cur_font_black[col], buf);
 
   if(flt->Target() && flt->Distance() >= 0) {
     sprintf(buf, "Course to %s", flt->Target()->Name());
-    string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
+    string_draw(screen, 816, 13+24*(line++), cur_font_black[col], buf);
     int eta = flt->Distance();
     if(eta > 1) sprintf(buf, "ETA: %d Days", eta);
     else if(eta == 1) sprintf(buf, "ETA: 1 Day");
     else sprintf(buf, "Would Arrive Today");
-    string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
+    string_draw(screen, 816, 13+24*(line++), cur_font_black[col], buf);
     }
   else if(flt->Target()) {
     sprintf(buf, "Invalid Course");
-    string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
+    string_draw(screen, 816, 13+24*(line++), cur_font_black[col], buf);
     int eta = -flt->Distance();
     if(eta > 1) sprintf(buf, "ETA: %d Days", eta);
     else if(eta == 1) sprintf(buf, "ETA: 1 Day");
     else sprintf(buf, "Would Arrive Today");
-    string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
+    string_draw(screen, 816, 13+24*(line++), cur_font_black[col], buf);
     }
   else if((!flt->Location()) && (!flt->Destination())) {
     sprintf(buf, "Orbiting Star");
-    string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
+    string_draw(screen, 816, 13+24*(line++), cur_font_black[col], buf);
     sprintf(buf, "%d-Day Orbit", (flt->Period()+255)/256);
-    string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
+    string_draw(screen, 816, 13+24*(line++), cur_font_black[col], buf);
     }
   else if(!flt->Destination()) {
     sprintf(buf, "Orbiting %s", flt->Location()->Name());
-    string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
+    string_draw(screen, 816, 13+24*(line++), cur_font_black[col], buf);
     sprintf(buf, "16 Orbits/Day");
-    string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
+    string_draw(screen, 816, 13+24*(line++), cur_font_black[col], buf);
     }
   else {
     sprintf(buf, "Going to %s", flt->Destination()->Name());
-    string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
+    string_draw(screen, 816, 13+24*(line++), cur_font_black[col], buf);
     int eta = flt->ArriveTurn() - cur_game->turn;
     if(eta > 1) sprintf(buf, "ETA: %d Days", eta);
     else if(eta == 1) sprintf(buf, "ETA: 1 Day");
     else sprintf(buf, "Arriving Today");
-    string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
+    string_draw(screen, 816, 13+24*(line++), cur_font_black[col], buf);
     }
 
-  for(int ctr=0; ctr < (int(flt->NumShips()) <? 22); ++ctr) {
+  for(int ctr=0; ctr < (int(flt->NumShips()) <? (23-SKIP)); ++ctr) {
     int clr = cur_game->players[flt->GetShip(ctr)->Owner()]->color;
     if(ctr == selection) clr = 8;
     sprintf(buf, "  %s: %s",
 	flt->GetShip(ctr)->CName(), flt->GetShip(ctr)->Name());
-    string_draw(screen, 816, 13+24*(line++), cur_font[clr], buf);
+    string_draw(screen, 816, 13+24*(line++), cur_font_black[clr], buf);
     }
 
-  if((!flt->Destination()) && flt->NumShips() > 1) {
+  if(flt->NumShips() > 1) {
     buttlist[PANEL_FLEET][BUTTON_SPLIT] =		9;
     }
   else {
@@ -199,12 +199,21 @@ void button_clicked_fleet(int button) {
     page_draw();
     }
   if(button == BUTTON_SPLIT) {
+/*
     if(!flt->Location()) return;
     if(!flt->Location()->Represents()) return;
     for(int shp=1; shp < flt->NumShips(); ++shp) {
       Fleet *newfleet = new Fleet(flt->Location()->Represents(), flt->Name());
       newfleet->AddShip(flt->GetShip(shp));
       newfleet->Location()->Represents()->Sys()->objects.push_back(newfleet);
+      }
+*/
+    for(int shp=1; shp < flt->NumShips(); ++shp) {
+      Fleet *newfleet = new Fleet();
+      newfleet->CopyFrom(flt);
+      newfleet->SetName(flt->Name());
+      newfleet->AddShip(flt->GetShip(shp));
+      flt->Sys()->objects.push_back(newfleet);
       }
     flt->RemoveShips(1);
     page_draw();

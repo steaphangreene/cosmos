@@ -45,16 +45,16 @@ void panel_draw_ship() {
   SDL_FillRect(screen, &screenrec, black);
 
   sprintf(buf, "%s", shp->Name());
-  string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
+  string_draw(screen, 816, 13+24*(line++), cur_font_black[col], buf);
 
   sprintf(buf, "Class: %s", shp->CName());
-  string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
+  string_draw(screen, 816, 13+24*(line++), cur_font_black[col], buf);
 
   sprintf(buf, "Fleet: %s", flt->Name());
-  string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
+  string_draw(screen, 816, 13+24*(line++), cur_font_black[col], buf);
 
   sprintf(buf, "Crew: %dM", shp->Crew());
-  string_draw(screen, 816, 13+24*(line++), cur_font[col], buf);
+  string_draw(screen, 816, 13+24*(line++), cur_font_black[col], buf);
   }
 
 void panel_clicked_ship(int mx, int my, int mb) {

@@ -45,7 +45,11 @@ System::~System() {
 
 void System::TakeTurn() {
   SObject::TakeTurn();
-  for(int ctr=0; ctr<int(objects.size()); ++ctr) objects[ctr]->TakeTurn();
+  for(int ctr=0; ctr<int(objects.size()); ++ctr) {
+    SObject *tmp = objects[ctr];
+    objects[ctr]->TakeTurn();
+    if(tmp != objects[ctr]) --ctr;
+    }
   }
 
 int System::Owner() {
@@ -85,7 +89,7 @@ void System::Know(int n) {
     }
   }
 
-System::System(FILE *f) : SObject(0) {
+System::System(FILE *f) : SObject() {
   LoadFrom(f);
   }
 

@@ -40,6 +40,7 @@ static int syscnf[NUM_SYSCNF*2] = {1, 160};
 static int syscnf_back[NUM_SYSCNF*2];
 
 font *cur_font[9];
+font *cur_font_black[9];
 
 SDL_Surface *selectg;
 SDL_Surface *button[BUTTON_MAX][2];
@@ -405,8 +406,8 @@ SDL_Surface *build_button0(const char *label) {
   if(!base0) base0 = get_blank0_image();
   SDL_Surface *s = SDL_DisplayFormat(base0);
 
-  int len = string_length(label, cur_font[4]);
-  string_draw(s, 100-(len/2), 13, cur_font[4], label);
+  int len = string_length(label, cur_font_black[4]);
+  string_draw(s, 100-(len/2), 13, cur_font_black[4], label);
   return s;
   }
 
@@ -414,7 +415,7 @@ SDL_Surface *build_button1(const char *label) {
   if(!base1) base1 = get_blank1_image();
   SDL_Surface *s = SDL_DisplayFormat(base1);
 
-  int len = string_length(label, cur_font[4]);
+  int len = string_length(label, cur_font[0]);
   string_draw(s, 100-(len/2), 13, cur_font[0], label);
   return s;
   }
@@ -446,6 +447,16 @@ void gui_init() {
   string_drawc(screen, 512, 384-11, cur_font[0], STARTUP);
   statrec.y -= 4;  statrec.x -= 4;
   statrec.w += 8;  statrec.h += 8;
+
+  cur_font_black[8] = font_backed(cur_font[8], black);
+  cur_font_black[7] = font_backed(cur_font[7], black);
+  cur_font_black[6] = font_backed(cur_font[6], black);
+  cur_font_black[5] = font_backed(cur_font[5], black);
+  cur_font_black[4] = font_backed(cur_font[4], black);
+  cur_font_black[3] = font_backed(cur_font[3], black);
+  cur_font_black[2] = font_backed(cur_font[2], black);
+  cur_font_black[1] = font_backed(cur_font[1], black);
+  cur_font_black[0] = NULL;p();
 
   grabbed = -1;
 
@@ -659,22 +670,22 @@ void page_draw() {
     }
   if(page == PAGE_NEW) {
     for(int set=0; set<num_configs; ++set) {
-      int xp = 256-string_length(config[set][0], cur_font[4]);
-      string_draw(screen, xp, 12+24*set, cur_font[4], config[set][0]);
+      int xp = 256-string_length(config[set][0], cur_font_black[4]);
+      string_draw(screen, xp, 12+24*set, cur_font_black[4], config[set][0]);
       if(config[set][cur_game->working_setting[set]+1][0] != '@') {
-	string_draw(screen, 270, 12+24*set, cur_font[4],
+	string_draw(screen, 270, 12+24*set, cur_font_black[4],
 		config[set][cur_game->working_setting[set]+1]);
 	}
       else {
 	string_draw(screen, 270, 12+24*set,
-		cur_font[cur_game->working_setting[set]+1],
+		cur_font_black[cur_game->working_setting[set]+1],
 		config[set][cur_game->working_setting[set]+1]+1);
 	}
       }
     }
   if(page == PAGE_SYSOPT) {
-    string_draw(screen, 40, 13, cur_font[4], "Play Music");
-    string_drawr(screen, 368-8-8, 13, cur_font[4], "Music Volume");
+    string_draw(screen, 40, 13, cur_font_black[4], "Play Music");
+    string_drawr(screen, 368-8-8, 13, cur_font_black[4], "Music Volume");
     SDL_Rect pos = {8, 13, 22, 22};
     SDL_BlitSurface(check[syscnf[0]], NULL, screen, &pos);
     SDL_Rect bar = {368-8, 13, syscnf[1], 22};
@@ -684,7 +695,7 @@ void page_draw() {
     SDL_FillRect(screen, &bar, SDL_MapRGB(screen->format, 0x7F,0x00,0x00));
     }
   if(page == PAGE_DIALOG) {
-    string_draw(screen, 8, 13, cur_font[4], dialog_message);
+    string_draw(screen, 8, 13, cur_font_black[4], dialog_message);
     }
   if(page == PAGE_GALAXY) {
     page_draw_galaxy();

@@ -112,6 +112,10 @@ void page_draw_system() {
       update_sprite(1);
       }
     }
+
+  int mx, my;
+  SDL_GetMouseState(&mx, &my);
+  mouse_moved_system(mx, my);
   }
 
 void page_update_system() {
@@ -200,6 +204,7 @@ void mouse_moved_system(int mx, int my) {
     offy = abs(sys->objects[obj]->SYPos() - my);
     sqd = offx*offx + offy*offy;
     if(sqd <= sys->objects[obj]->SqOff()) {
+      if(cur_object->Target() == sys->objects[obj]) return;
       cur_object->SetCourse(sys->objects[obj]);
       panel_draw();
 
@@ -229,7 +234,9 @@ void mouse_moved_system(int mx, int my) {
       }
     }
 
-  cur_object->SetCourse(NULL);
-  clear_sprites(2, 10);
-  panel_draw();
+  if(panel == PANEL_FLEET && cur_object->Target()) {
+    cur_object->SetCourse(NULL);
+    clear_sprites(2, 10);
+    panel_draw();
+    }
   }

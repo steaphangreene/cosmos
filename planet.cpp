@@ -104,7 +104,7 @@ int Planet::GMove() {
   return 0;
   }
 
-Planet::Planet(FILE *f) : SObject(1) {
+Planet::Planet(FILE *f) : SObject() {
   LoadFrom(f);
   }
 

@@ -70,6 +70,7 @@ extern SDL_Surface *screen;
 extern SDL_Surface *selectg;
 extern unsigned long black;
 extern font *cur_font[9];
+extern font *cur_font_black[9];
 extern int click1, click2;
 extern int buttlist[PANEL_MAX][BUTTON_MAX];
 extern int pagemap[PAGE_MAX][BUTTON_MAX];

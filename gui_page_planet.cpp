@@ -131,57 +131,57 @@ void stats_draw_planet(Planet *plan, int upd) {
     sprintf(buf, "Atmosphere: %d", plan->Atmosphere());
   else
     sprintf(buf, "Atmosphere: ?");
-  string_draw(screen, 5, 13+24*(line++), cur_font[col], buf);
+  string_draw(screen, 5, 13+24*(line++), cur_font_black[col], buf);
 
   if(cheat1 || plan->KnownTo(local_player))
     sprintf(buf, "Minerals: %d", plan->Minerals());
   else
     sprintf(buf, "Minerals: ?");
-  string_draw(screen, 5, 13+24*(line++), cur_font[col], buf);
+  string_draw(screen, 5, 13+24*(line++), cur_font_black[col], buf);
   
   if(cheat1 || plan->KnownTo(local_player))
     sprintf(buf, "Satellites: %d", plan->num_satellites);
   else
     sprintf(buf, "Satellites: ?");
-  string_draw(screen, 5, 13+24*(line++), cur_font[col], buf);
+  string_draw(screen, 5, 13+24*(line++), cur_font_black[col], buf);
 
   line = 0;
   sprintf(buf, "Planet %s", plan->Name());
-  string_drawr(screen, 768, 13+24*(line++), cur_font[col], buf);
+  string_drawr(screen, 768, 13+24*(line++), cur_font_black[col], buf);
 
   if(cheat1 || plan->KnownTo(local_player))
     sprintf(buf, "Avg. Temp: %dC", plan->Temperature()-273);
   else
     sprintf(buf, "Avg. Temp: ?");
-  string_drawr(screen, 768, 13+24*(line++), cur_font[col], buf);
+  string_drawr(screen, 768, 13+24*(line++), cur_font_black[col], buf);
 
   if(cheat1 || plan->KnownTo(local_player))
     sprintf(buf, "Surf. Rad: %d", plan->Radiation());
   else
     sprintf(buf, "Surf. Rad: ?");
-  string_drawr(screen, 768, 13+24*(line++), cur_font[col], buf);
+  string_drawr(screen, 768, 13+24*(line++), cur_font_black[col], buf);
 
 
   if(plan->colonies.size() > 0) {
     line = 0;
     sprintf(buf, "Pop: %s", popstr(plan->colonies[0]->Population(), plan->colonies[0]->PopulationM()));
-    string_draw(screen, 12, (768-24*3-11)+24*(line++), cur_font[col], buf);
+    string_draw(screen, 12, (768-24*3-11)+24*(line++), cur_font_black[col], buf);
 
     sprintf(buf, "Free: %s", popstr(plan->colonies[0]->FreePop(), plan->colonies[0]->FreePopM()));
-    string_draw(screen, 12, (768-24*3-11)+24*(line++), cur_font[col], buf);
+    string_draw(screen, 12, (768-24*3-11)+24*(line++), cur_font_black[col], buf);
 
     sprintf(buf, "Growth: %s", popstr(plan->colonies[0]->Growth(), plan->colonies[0]->GrowthM()));
-    string_draw(screen, 12, (768-24*3-11)+24*(line++), cur_font[col], buf);
+    string_draw(screen, 12, (768-24*3-11)+24*(line++), cur_font_black[col], buf);
 
 
     line = 0;
     sprintf(buf, "Loyalty: %d", plan->colonies[0]->Loyalty());
-    string_drawr(screen, 768, (768-24*3-11)+24*(line++), cur_font[col], buf);
+    string_drawr(screen, 768, (768-24*3-11)+24*(line++), cur_font_black[col], buf);
 
     sprintf(buf, "Security: %d", plan->colonies[0]->Security());
-    string_drawr(screen, 768, (768-24*3-11)+24*(line++), cur_font[col], buf);
+    string_drawr(screen, 768, (768-24*3-11)+24*(line++), cur_font_black[col], buf);
 
     sprintf(buf, "Happiness: %d", plan->colonies[0]->Happiness());
-    string_drawr(screen, 768, (768-24*3-11)+24*(line++), cur_font[col], buf);
+    string_drawr(screen, 768, (768-24*3-11)+24*(line++), cur_font_black[col], buf);
     }
   }

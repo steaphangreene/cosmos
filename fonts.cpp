@@ -5,10 +5,6 @@
 
 #include <SDL.h>
 
-#include "data/font22_black.h"
-#include "data/font22_blue.h"
-#include "data/font22_red.h"
-#include "data/font22_green.h"
 #include "data/font22_white.h"
 
 static const unsigned char rchanc[] = { 0xFF, 0, 0, 0 };
@@ -175,5 +171,14 @@ font *font_colored(font *f, unsigned long c) {
     base += ret->img->pitch/4;
     }
   SDL_UnlockSurface(ret->img);
+  return ret;
+  }
+
+font *font_backed(font *f, unsigned long c) {
+  font *ret = new font;
+  (*ret) = (*f);
+  ret->img = SDL_DisplayFormat(f->img);
+  SDL_FillRect(ret->img, NULL, 0);
+  SDL_BlitSurface(f->img, NULL, ret->img, NULL);
   return ret;
   }

@@ -181,7 +181,7 @@ void stats_draw_colony(Colony *col, int upd) {
 
   line = 0;
   sprintf(buf, "Industry: %d/%d", col->SpareIndustry(), col->Industry());
-  string_draw(screen, 816, 13+24*(line), cur_font[color], buf);
+  string_draw(screen, 816, 13+24*(line), cur_font_black[color], buf);
 
   if(panel_offset < 0) panel_offset = 0;
   if(panel_offset > (0 >? int(col->objs.size())+int(col->projs.size())-22))
@@ -202,7 +202,7 @@ void stats_draw_colony(Colony *col, int upd) {
       else {
 	sprintf(buf, "%d %s: %d/%d", col->oqty[ctr], tc->names, used, need);
 	}
-      string_draw(screen, 800, 13+24*(SKIP+line), cur_font[clr], buf);
+      string_draw(screen, 800, 13+24*(SKIP+line), cur_font_black[clr], buf);
       }
     }
   for(int ctr=0; ctr<(int)col->projs.size() && line < 22; ++ctr,++line) {
@@ -216,7 +216,7 @@ void stats_draw_colony(Colony *col, int upd) {
       int clr = color;
       if(selection == line+panel_offset) clr = 8;
       sprintf(buf, "+%s: %d/%d", tc->name, used, need);
-      string_draw(screen, 800, 13+24*(SKIP+line), cur_font[clr], buf);
+      string_draw(screen, 800, 13+24*(SKIP+line), cur_font_black[clr], buf);
       }
     }
   }

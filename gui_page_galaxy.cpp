@@ -113,6 +113,10 @@ void page_draw_galaxy() {
 	}
       }
     }
+
+  int mx, my;
+  SDL_GetMouseState(&mx, &my);
+  mouse_moved_galaxy(mx, my);
   }
 
 void page_update_galaxy() {
@@ -189,6 +193,9 @@ void mouse_moved_galaxy(int mx, int my) {
 	if(cur_object->Destination()
 		&& cur_object->Destination()->Sys() != cur_object->Sys())
 	  continue;
+
+	if((SObject*)(cur_object->Target()) == (SObject*)sys) return;
+
 	cur_object->SetCourse(sys);
 	panel_draw();
 
@@ -214,7 +221,7 @@ void mouse_moved_galaxy(int mx, int my) {
       return;
       }
     }
-  if(panel == PANEL_FLEET) {
+  if(panel == PANEL_FLEET && cur_object->Target()) {
     cur_object->SetCourse(NULL);
     clear_sprites(2, 10);
     panel_draw();
