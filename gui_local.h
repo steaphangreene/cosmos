@@ -1,3 +1,5 @@
+#include "fleet.h"
+
 void gui_init_galaxy();
 void page_draw_galaxy();
 void page_init_galaxy();
@@ -72,5 +74,5 @@ extern int page, panel;
 extern int cur_galaxy;
 extern int cur_system;
 extern int cur_planet;
-extern int cur_fleet;
 extern int cur_ship;
+extern Fleet *cur_fleet;

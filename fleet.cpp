@@ -25,6 +25,24 @@ Fleet::~Fleet() {
       }
     ++cur;
     }
+  if(loc) {
+    cur = loc->fleets.begin();
+    while(cur < loc->fleets.end()) {
+      if(*cur == this) {
+	cur = loc->fleets.erase(cur);
+	continue;
+	}
+      ++cur;
+      }
+    cur = loc->Sys()->fleets.begin();
+    while(cur < loc->Sys()->fleets.end()) {
+      if(*cur == this) {
+	cur = loc->Sys()->fleets.erase(cur);
+	continue;
+	}
+      ++cur;
+      }
+    }
   }
 
 void Fleet::Arrive() {
@@ -46,7 +64,7 @@ void Fleet::TakeTurn() {
   }
 
 int Fleet::TimeToLocal(int sqdist) {
-  return (int(sqrt(sqdist)))+19/20;
+  return (int(sqrt(double(sqdist))))+19/20;
   }
 
 int Fleet::TimeToGalactic(int sqdist) {

@@ -17,7 +17,8 @@ using namespace std;
 #include "gui_local.h"
 
 static SDL_Surface *gstar;
-static int bpanel = -1, bfleet = -1;
+static int bpanel = -1;
+static Fleet *bfleet = NULL;
 
 void gui_init_galaxy() {
   gstar = get_gstar_image();
@@ -101,9 +102,9 @@ void page_clicked_galaxy(int mx, int my, int mb) {
     offy = abs(cur_game->fleets[flt]->YPos() - my);
     if(offx*offx + offy*offy <= 9) {
       audio_play(click2, 8, 8);
-      bfleet = flt;
+      bfleet = cur_game->fleets[flt];
       bpanel = PANEL_FLEET;
-      cur_fleet = flt;
+      cur_fleet = cur_game->fleets[flt];
       panel = PANEL_FLEET;
       panel_init();
       return;
@@ -122,31 +123,32 @@ void mouse_moved_galaxy(int mx, int my) {
     offx = abs(cur_game->fleets[flt]->XPos() - mx);
     offy = abs(cur_game->fleets[flt]->YPos() - my);
     if(offx*offx + offy*offy <= 9) {
-      if(cur_fleet != flt || panel != PANEL_FLEET) {
+      if(cur_fleet != cur_game->fleets[flt] || panel != PANEL_FLEET) {
 	if(!mouse_over) {
 	  bfleet = cur_fleet;
 	  bpanel = panel;
 	  mouse_over = 1;
 	  }
-	if(bpanel == PANEL_FLEET && panel == PANEL_FLEET && bfleet != flt) {
+	if(bpanel == PANEL_FLEET && panel == PANEL_FLEET
+		&& bfleet != cur_game->fleets[flt]) {
 	  update_sprite(1);
 	  SDL_Surface *line = getline(
-		cur_game->fleets[bfleet]->XPos(),
-		cur_game->fleets[bfleet]->YPos(),
+		bfleet->XPos(),
+		bfleet->YPos(),
 		cur_game->fleets[flt]->XPos(),
 		cur_game->fleets[flt]->YPos(),
 		0xFFFFFFFF, 0x0F0F0F0F
 		);
 	  set_sprite(1, line);
 	  move_sprite(1,
-		cur_game->fleets[bfleet]->XPos()
+		bfleet->XPos()
 			<? cur_game->fleets[flt]->XPos(),
-		cur_game->fleets[bfleet]->YPos()
+		bfleet->YPos()
 			<? cur_game->fleets[flt]->YPos()
 		);
 	  update_sprite(1);
 	  }
-	cur_fleet = flt;
+	cur_fleet = cur_game->fleets[flt];
 	panel = PANEL_FLEET;
 	panel_init();
 	}
@@ -167,17 +169,17 @@ void mouse_moved_galaxy(int mx, int my) {
 	if(panel == PANEL_FLEET) {
 	  update_sprite(1);
 	  SDL_Surface *line = getline(
-		cur_game->fleets[cur_fleet]->XPos(),
-		cur_game->fleets[cur_fleet]->YPos(),
+		cur_fleet->XPos(),
+		cur_fleet->YPos(),
 		cur_game->galaxys[cur_galaxy]->systems[sys]->xpos,
 		cur_game->galaxys[cur_galaxy]->systems[sys]->ypos,
 		0xFFFFFFFF, 0x0F0F0F0F
 		);
 	  set_sprite(1, line);
 	  move_sprite(1,
-		cur_game->fleets[cur_fleet]->XPos()
+		cur_fleet->XPos()
 			<? cur_game->galaxys[cur_galaxy]->systems[sys]->xpos,
-		cur_game->fleets[cur_fleet]->YPos()
+		cur_fleet->YPos()
 			<? cur_game->galaxys[cur_galaxy]->systems[sys]->ypos
 		);
 	  update_sprite(1);

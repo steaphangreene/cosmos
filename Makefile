@@ -8,8 +8,8 @@ DTAR:=	cosmos_data.tar.gz
 DTARU:=	cosmos_data.tar
 DTARD:=	cosmos_data-$(TSTR).tar.gz
 BINS:=	        cosmos.exe cosmos.Linux-i686 cosmos.Linux-i586 \
-        cosmos.Linux-sparc64 cosmos.SunOS-sun4 cosmos.Darwin-ppc
-#       cosmos.Linux-ppc \
+	cosmos.Linux-sparc64 cosmos.SunOS-sun4 cosmos.Darwin-ppc
+#	cosmos.Linux-ppc \
 
 
 # Debugging settings
@@ -22,7 +22,7 @@ CC:=	g++$(COSMOS_CTAIL) -DVERSION=\"pre$(TSTR)\" -O2 -pipe -Wall `sdl-config --c
 LIBS:=	`sdl-config --libs` $(COSMOS_LIBS)
 STRIP:=	strip
 
-OBJS:=	main.o gui.o audio.o fonts.o graphics.o \
+OBJS:=	main.o data.o gui.o audio.o fonts.o graphics.o \
 	gui_page_galaxy.o gui_page_system.o gui_page_planet.o \
 	gui_panel_colony.o gui_panel_fleet.o gui_panel_ship.o \
 	ship.o fleet.o game.o player.o colony.o \
@@ -57,7 +57,7 @@ $(BIN):	$(OBJS)
 all:	cosmos_src.tar.gz $(BINS) graphics/*.raw
 
 #This has to be dependant on all - because it gets the version info!
-main.o:	*.cpp *.h data/*.h
+data.o:	*.cpp *.h data/*.h
 
 cosmos.Linux-i586:	cosmos_src.tar.gz $(OBJS)
 	scp cosmos_src.tar.gz reactor:
@@ -84,10 +84,10 @@ cosmos.Darwin-ppc:	cosmos_src.tar.gz $(OBJS)
 	ssh -p 2222 inkhead.org rm -rf cosmos cosmos_src.tar.gz
 
 cosmos.Linux-ppc:	cosmos_src.tar.gz $(OBJS)
-	scp -P 2223 cosmos_src.tar.gz inkhead.org:
-	ssh -p 2223 inkhead.org "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp TSTR=$(TSTR)"
-	scp -P 2223 inkhead.org:cosmos/$@ .
-	ssh -p 2223 inkhead.org rm -rf cosmos cosmos_src.tar.gz
+	scp -P 2222 cosmos_src.tar.gz crazyduck.org:
+	ssh -p 2222 crazyduck.org "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp TSTR=$(TSTR)"
+	scp -P 2222 crazyduck.org:cosmos/$@ .
+	ssh -p 2222 crazyduck.org rm -rf cosmos cosmos_src.tar.gz
 
 $(BTAR):	cosmos $(BINS)
 	rm -f $(BTAR)

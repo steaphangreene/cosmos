@@ -101,18 +101,30 @@ void page_clicked_system(int mx, int my, int mb) {
 	panel_init();
 	}
       else if(mb == 3 && panel == PANEL_FLEET) {
-	if(sys->planets[plan] == cur_game->fleets[cur_fleet]->Location())
-	  continue;
+	if(sys->planets[plan] == cur_fleet->Location()) continue;
 	int sqd, tm;
 	audio_play(click2, 8, 8);
 	offx = abs(sys->planets[plan]->XPos(cur_game->turn)
-		- cur_game->fleets[cur_fleet]->XPos());
+		- cur_fleet->XPos());
 	offy = abs(sys->planets[plan]->YPos(cur_game->turn)
-		- cur_game->fleets[cur_fleet]->YPos());
+		- cur_fleet->YPos());
 	sqd = offx*offx + offy*offy;
-	tm = cur_game->fleets[cur_fleet]->TimeToLocal(sqd);
+	tm = 1;
+	for(int trip=0; ; ++trip) {
+	  offx = abs(sys->planets[plan]->XPos(cur_game->turn + trip)
+		- cur_fleet->XPos());
+	  offy = abs(sys->planets[plan]->YPos(cur_game->turn + trip)
+		- cur_fleet->YPos());
+	  sqd = offx*offx + offy*offy;
+
+	  tm = cur_fleet->TimeToLocal(sqd);
+	  if(abs(tm) <= trip) {
+	    tm = (tm/abs(tm))*trip;
+	    break;
+	    }
+	  }
 	if(tm >= 0) {
-	  cur_game->fleets[cur_fleet]->SetCourse(sys->planets[plan], tm);
+	  cur_fleet->SetCourse(sys->planets[plan], tm);
 	  set_sprite(1, NULL);
 	  page_draw();
 	  }
@@ -121,18 +133,34 @@ void page_clicked_system(int mx, int my, int mb) {
       }
     }
   for(int flt=0; flt < int(cur_game->fleets.size()); ++flt) {
-    if(flt == cur_fleet && panel == PANEL_FLEET) continue;
+    if(cur_game->fleets[flt] == cur_fleet && panel == PANEL_FLEET) continue;
     offx = abs(cur_game->fleets[flt]->XPos() - mx);
     offy = abs(cur_game->fleets[flt]->YPos() - my);
     fr = cur_game->fleets[flt]->OnFrame();
     if(cur_game->frame == fr && offx*offx + offy*offy <= 9) {
-      update_sprite(1);
-      set_sprite(1, NULL);
-      audio_play(click2, 8, 8);
-      cur_fleet = flt;
-      panel = PANEL_FLEET;
-      panel_init();
-      return;
+      if(mb == 1) {
+	update_sprite(1);
+	set_sprite(1, NULL);
+	audio_play(click2, 8, 8);
+	cur_fleet = cur_game->fleets[flt];
+	panel = PANEL_FLEET;
+	panel_init();
+	return;
+	}
+      else if(mb == 3 && panel == PANEL_FLEET) {
+	if(cur_game->fleets[flt] == cur_fleet) continue;
+	if(cur_game->fleets[flt]->Location() != cur_fleet->Location()) continue;
+	audio_play(click2, 8, 8);
+	vector<Ship*>::iterator shp = cur_fleet->ships.begin(); 
+	for(; shp != cur_fleet->ships.end(); ++shp) {
+	  cur_game->fleets[flt]->ships.push_back(*shp);
+	  }
+	Fleet *tmpf = cur_fleet;
+	cur_fleet = cur_game->fleets[flt];
+	delete tmpf;
+	page_draw();
+	panel_init();
+	}
       }
     }
   }
@@ -142,41 +170,48 @@ void mouse_released_system() {
 
 void mouse_moved_system(int mx, int my) {
   if(panel != PANEL_FLEET) return;
-  if(cur_game->frame != cur_game->fleets[cur_fleet]->OnFrame()) return;
+  if(cur_game->frame != cur_fleet->OnFrame()) return;
 
   int offx, offy, sqd, tm, fr;
   System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
   for(int plan=0; plan < sys->num_planets; ++plan) {
-    if(sys->planets[plan] == cur_game->fleets[cur_fleet]->Location()) continue;
+    if(sys->planets[plan] == cur_fleet->Location()) continue;
     offx = abs(sys->planets[plan]->XPos(cur_game->turn) - mx);
     offy = abs(sys->planets[plan]->YPos(cur_game->turn) - my);
     sqd = offx*offx + offy*offy;
     if(sqd <= 36) {
       Uint32 col = 0xFFFFFFFF;
-      offx = abs(sys->planets[plan]->XPos(cur_game->turn)
-		- cur_game->fleets[cur_fleet]->XPos());
-      offy = abs(sys->planets[plan]->YPos(cur_game->turn)
-		- cur_game->fleets[cur_fleet]->YPos());
-      sqd = offx*offx + offy*offy;
+      tm = 1;
+      for(int trip=0; ; ++trip) {
+	offx = abs(sys->planets[plan]->XPos(cur_game->turn + trip)
+		- cur_fleet->XPos());
+	offy = abs(sys->planets[plan]->YPos(cur_game->turn + trip)
+		- cur_fleet->YPos());
+	sqd = offx*offx + offy*offy;
 
-      tm = cur_game->fleets[cur_fleet]->TimeToLocal(sqd);
+	tm = cur_fleet->TimeToLocal(sqd);
+	if(abs(tm) <= trip) {
+	  tm = (tm/abs(tm))*trip;
+	  break;
+	  }
+	}
       if(tm < 0) col = 0xFF0000FF;
       else if(tm > 0) col = 0xFF00FF00;
 
       update_sprite(1);
       SDL_Surface *line = getline(
-	cur_game->fleets[cur_fleet]->XPos(),
-	cur_game->fleets[cur_fleet]->YPos(),
-	sys->planets[plan]->XPos(cur_game->turn),
-	sys->planets[plan]->YPos(cur_game->turn),
+	cur_fleet->XPos(),
+	cur_fleet->YPos(),
+	sys->planets[plan]->XPos(cur_game->turn + tm),
+	sys->planets[plan]->YPos(cur_game->turn + tm),
 	col, 0x0F0F0F0F
 	);
       set_sprite(1, line);
       move_sprite(1,
-	cur_game->fleets[cur_fleet]->XPos()
-		<? sys->planets[plan]->XPos(cur_game->turn),
-	cur_game->fleets[cur_fleet]->YPos()
-		<? sys->planets[plan]->YPos(cur_game->turn)
+	cur_fleet->XPos()
+		<? sys->planets[plan]->XPos(cur_game->turn + tm),
+	cur_fleet->YPos()
+		<? sys->planets[plan]->YPos(cur_game->turn + tm)
 	);
       update_sprite(1);
       cur_planet = plan;
@@ -188,35 +223,35 @@ void mouse_moved_system(int mx, int my) {
     offy = abs(cur_game->fleets[flt]->YPos() - my);
     sqd = offx*offx + offy*offy;
     fr = cur_game->fleets[flt]->OnFrame();
-    if(cur_fleet != flt && cur_game->frame == fr && sqd <= 9) {
+    if(cur_fleet != cur_game->fleets[flt] && cur_game->frame == fr && sqd <= 9) {
       Uint32 col = 0xFFFFFFFF;
       offx = abs(cur_game->fleets[flt]->XPos()
-		- cur_game->fleets[cur_fleet]->XPos());
+		- cur_fleet->XPos());
       offy = abs(cur_game->fleets[flt]->YPos()
-		- cur_game->fleets[cur_fleet]->YPos());
+		- cur_fleet->YPos());
       sqd = offx*offx + offy*offy;
 
-      int tm = cur_game->fleets[cur_fleet]->TimeToLocal(sqd);
+      int tm = cur_fleet->TimeToLocal(sqd);
       if(tm < 0) col = 0xFF0000FF;
       else if(tm > 0) col = 0xFF00FF00;
 
       update_sprite(1);
       SDL_Surface *line = getline(
-	cur_game->fleets[cur_fleet]->XPos(),
-	cur_game->fleets[cur_fleet]->YPos(),
+	cur_fleet->XPos(),
+	cur_fleet->YPos(),
 	cur_game->fleets[flt]->XPos(),
 	cur_game->fleets[flt]->YPos(),
 	col, 0x0F0F0F0F
 	);
       set_sprite(1, line);
       move_sprite(1,
-	cur_game->fleets[cur_fleet]->XPos()
+	cur_fleet->XPos()
 		<? cur_game->fleets[flt]->XPos(),
-	cur_game->fleets[cur_fleet]->YPos()
+	cur_fleet->YPos()
 		<? cur_game->fleets[flt]->YPos()
 	);
       update_sprite(1);
-//      cur_fleet = flt;
+//      cur_fleet = cur_game->fleets[flt];
       return;
       }
     }

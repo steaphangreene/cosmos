@@ -9,6 +9,7 @@ using namespace std;
 #include <SDL.h>
 
 #include "gui.h"
+#include "data.h"
 #include "game.h"
 #include "audio.h"
 #include "fonts.h"
@@ -52,8 +53,8 @@ int cur_mus_num=0;
 int cur_galaxy=0;
 int cur_system=0;
 int cur_planet=0;
-int cur_fleet=0;
 int cur_ship=0;
+Fleet *cur_fleet=NULL;
 
 static char dialog_message[4096] = {0};
 
@@ -298,7 +299,17 @@ void gui_init() {
 
   black = SDL_MapRGB(screen->format, 0x00, 0x00, 0x00);
   set_cursor(get_cursor_image());
+
   intro = get_image("graphics/intro.raw", 800, 768);
+  if(intro == NULL) {
+    SDL_Surface *tmp = SDL_CreateRGBSurface(SDL_SWSURFACE|SDL_SRCALPHA,
+	800, 768, 32,
+	0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+    SDL_FillRect(tmp, NULL, 0);
+    intro = SDL_DisplayFormat(tmp);
+    SDL_FreeSurface(tmp);
+    }
+  string_drawr(intro, 768, 704, cur_font[4], version);
 
   button[BUTTON_RESUMEGAME][0] = build_button0("Resume Game");
   button[BUTTON_RESUMEGAME][1] = build_button1("Resume Game");
@@ -340,6 +351,8 @@ void gui_init() {
   button[BUTTON_ABANDON][1] = build_button1("Abandon");
   button[BUTTON_LAND][0] = build_button0("Land Ship(s)");
   button[BUTTON_LAND][1] = build_button1("Land Ship(s)");
+  button[BUTTON_SPLIT][0] = build_button0("Split Fleet");
+  button[BUTTON_SPLIT][1] = build_button1("Split Fleet");
 
   panelmap[PAGE_ROOT] = PANEL_ROOT;
   buttlist[PANEL_ROOT][BUTTON_LOADGAME] = 7;

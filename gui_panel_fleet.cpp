@@ -23,7 +23,7 @@ void gui_init_fleet() {
   }
 
 void panel_init_fleet() {
-  buttlist[PANEL_FLEET][BUTTON_EXIT] =	11;
+  buttlist[PANEL_FLEET][BUTTON_EXIT] =		11;
   panel_offset = 0;
   selection = -1;
   grabbed = -1;
@@ -35,7 +35,7 @@ void panel_cleanup_fleet() {
 void panel_draw_fleet() {
   int line = 0;
   char buf[80];
-  Fleet *flt = cur_game->fleets[cur_fleet];
+  Fleet *flt = cur_fleet;
   int col = cur_game->players[flt->Owner()]->color;
   SDL_Rect screenrec = {800, 12, 224, 24*23};
   screenrec.h = screenrec.h <? 24*(flt->ships.size()+SKIP);
@@ -49,6 +49,13 @@ void panel_draw_fleet() {
     if(ctr == selection) clr = 8;
     sprintf(buf, "  %s", flt->ships[ctr]->name.c_str());
     string_draw(screen, 816, 13+24*(line++), cur_font[clr], buf);
+    }
+
+  if(flt->Destination() == NULL && flt->ships.size() > 1) {
+    buttlist[PANEL_FLEET][BUTTON_SPLIT] =		9;
+    }
+  else {
+    buttlist[PANEL_FLEET][BUTTON_SPLIT] =		0;
     }
 
   if(flt->CanLand() && page == PAGE_SYSTEM
@@ -65,7 +72,7 @@ void panel_draw_fleet() {
   }
 
 void panel_clicked_fleet(int mx, int my, int mb) {
-  Fleet *flt = cur_game->fleets[cur_fleet];
+  Fleet *flt = cur_fleet;
   if(mx >= 800 && mb == 4) {
     --panel_offset;
     panel_draw_fleet();
@@ -129,7 +136,7 @@ void mouse_moved_fleet(int mx, int my) {
   }
 
 void button_clicked_fleet(int button) {
-  Fleet *flt = cur_game->fleets[cur_fleet];
+  Fleet *flt = cur_fleet;
   if(button == BUTTON_LAND) {
     if(flt->Location()->colonies.size() < 1) {
       flt->Location()->colonies.push_back(
@@ -140,13 +147,26 @@ void button_clicked_fleet(int button) {
 
     flt->ships.erase(flt->ships.begin());
     if(flt->ships.size() < 1) {
-      flt->SetPos(0, 0, cur_game->frame-1);
+      delete flt;
       panel = PANEL_GAME;
-      cur_fleet = -1;
+      cur_fleet = NULL;
       }
 
+    set_sprite(1, NULL);
     panel_draw();
     page_draw();
+    }
+  if(button == BUTTON_SPLIT) {
+    vector<Ship*>::iterator shp = cur_fleet->ships.begin()+1;
+    for(; shp != cur_fleet->ships.end(); ++shp) {
+      Fleet *newfleet = new Fleet(cur_fleet->owner, cur_fleet->name.c_str());
+      newfleet->loc = cur_fleet->loc;
+      newfleet->ships.push_back(*shp);
+      newfleet->Location()->fleets.push_back(newfleet);
+      }
+    cur_fleet->ships.erase(cur_fleet->ships.begin()+1, cur_fleet->ships.end());
+    page_draw();
+    panel_init();
     }
   }
 

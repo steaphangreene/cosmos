@@ -266,6 +266,7 @@ void set_sprite(int n, SDL_Surface *c) {
     update(&spriter[n]);
     spritef[n] &= (~(SPRITE_UPDATE));
     }
+  if(sprite[n]) delete sprite[n];
   sprite[n] = c;
   if(c == NULL) {
     spriteb[n] = NULL;
@@ -290,6 +291,8 @@ void move_sprite(int n, int x, int y) {
   }
 
 SDL_Surface *getline(int x1, int y1, int x2, int y2, Uint32 col, Uint32 pat) {
+  if(abs(x1-x2) == 0 || abs(y1-y2) == 0) return NULL;
+
   SDL_Surface *tmp = SDL_CreateRGBSurface(SDL_SWSURFACE|SDL_SRCALPHA,
 	abs(x1-x2)+1, abs(y1-y2)+1, 32,
 	0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);

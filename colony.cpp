@@ -33,13 +33,15 @@ void Colony::Init(int initial) {
       population += initial * tc->crew * cur_tree->Homeworld(ctr);
       }
     }
-  if(initial) {
-    int fn = 0;
-    Planet *plan = planet;
-    if(!plan) return;
-    for(int ctr=0; ctr<cur_tree->NumTechs(); ++ctr) {
-      Tech *tc = cur_tree->GetTech(ctr);
-      if(tc->type == TECH_SHIP) {
+  int fn = 0;
+  Planet *plan = planet;
+  if(!plan) return;
+  for(int ctr=0; ctr<cur_tree->NumTechs(); ++ctr) {
+    Tech *tc = cur_tree->GetTech(ctr);
+    if(tc->type == TECH_SHIP) {
+      objs.push_back(ctr);
+      oqty.push_back(0);
+      if(initial) {
 	plan->fleets.push_back(new Fleet(owner, tc->names));
 	for(int shp=0 ; shp < cur_tree->Homeworld(ctr); ++shp) {
 	  plan->fleets[fn]->ships.push_back(new Ship(ctr, owner));
@@ -60,6 +62,13 @@ int Colony::Industry() {
   int ind = Population()/1000;
   for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
     ind += cur_tree->Industry(objs[ctr], oqty[ctr], this);
+    }
+  if(planet) {
+    for(int flt=0; flt<int(planet->fleets.size()); ++flt) {
+      for(int shp=0; shp<int(planet->fleets[flt]->ships.size()); ++shp) {
+	ind += cur_tree->Industry(planet->fleets[flt]->ships[shp]->tech, 1, this);
+	}
+      }
     }
   long long free;
   free = FreePop();
@@ -130,13 +139,27 @@ int Colony::Happiness() {
   for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
     hap += cur_tree->Happiness(objs[ctr], oqty[ctr], this);
     }
+  if(planet) {
+    for(int flt=0; flt<int(planet->fleets.size()); ++flt) {
+      for(int shp=0; shp<int(planet->fleets[flt]->ships.size()); ++shp) {
+	hap += cur_tree->Happiness(planet->fleets[flt]->ships[shp]->tech, 1, this);
+	}
+      }
+    }
   return 0 >? hap <? 1000;
   }
 
 int Colony::Security() {
   int sec = 0;
-  for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
+  for(int ctr=0; ctr<int(objs.size()); ++ctr) {
     sec += cur_tree->Security(objs[ctr], oqty[ctr], this);
+    }
+  if(planet) {
+    for(int flt=0; flt<int(planet->fleets.size()); ++flt) {
+      for(int shp=0; shp<int(planet->fleets[flt]->ships.size()); ++shp) {
+	sec += cur_tree->Security(planet->fleets[flt]->ships[shp]->tech, 1, this);
+	}
+      }
     }
   return 0 >? sec <? 1000;
   }
@@ -145,6 +168,13 @@ int Colony::Loyalty() {
   int loy = 0;
   for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
     loy += cur_tree->Loyalty(objs[ctr], oqty[ctr], this);
+    }
+  if(planet) {
+    for(int flt=0; flt<int(planet->fleets.size()); ++flt) {
+      for(int shp=0; shp<int(planet->fleets[flt]->ships.size()); ++shp) {
+	loy += cur_tree->Loyalty(planet->fleets[flt]->ships[shp]->tech, 1, this);
+	}
+      }
     }
   return loy;
   }
@@ -174,12 +204,24 @@ void Colony::TakeTurn() {
       need = tc->icost;
       if(prog[0]+indus >= need) {
 	indus -= need-prog[0];
-	for(ctr=0; ctr < (int)objs.size(); ++ctr) {
-	  if(objs[ctr] == projs[0]) { ++oqty[ctr]; break; }
-	  }
-	if(ctr == (int)objs.size()) {
-	  objs.push_back(projs[0]);
-	  oqty.push_back(1);
+	if(cur_tree->GetTech(projs[0])->type == TECH_SHIP) {
+	  if(planet) {
+	    Fleet *flt = new Fleet(owner, tc->names);
+	    planet->fleets.push_back(flt);
+	    flt->ships.push_back(new Ship(projs[0], owner));
+	    flt->ships[0]->AddCrew(flt->ships[0]->MaxCrew());
+	    population -= flt->ships[0]->MaxCrew();
+	    flt->loc = planet;
+	    }
+          }
+	else {
+	  for(ctr=0; ctr < (int)objs.size(); ++ctr) {
+	    if(objs[ctr] == projs[0]) { ++oqty[ctr]; break; }
+	    }
+	  if(ctr == (int)objs.size()) {
+	    objs.push_back(projs[0]);
+	    oqty.push_back(1);
+	    }
 	  }
 	projs.erase(projs.begin());
 	prog.erase(prog.begin());
