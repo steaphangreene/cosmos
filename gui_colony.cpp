@@ -14,32 +14,18 @@ using namespace std;
 #include "graphics.h"
 #include "gui_local.h"
 
-extern unsigned long black;
-
-extern SDL_Surface *screen;
-extern font *cur_font[9];
-extern int click1, click2;
-
-extern int buttlist[PAGE_MAX][BUTTON_MAX];
-extern int pagemap[PAGE_MAX][BUTTON_MAX];
-extern int mo[BUTTON_MAX];
-
 #define SKIP 1
-
-extern int page;
-extern int cur_galaxy;
-extern int cur_system;
-extern int cur_planet;
 
 void stats_draw_colony(Planet *, int update = 0);
 
-int selection = -1, grabbed = -1;
+static int selection = -1, grabbed = -1;
 static int panel_offset = 0;
 
 void gui_init_colony() {
   }
 
 void panel_init_colony() {
+  buttlist[PANEL_COLONY][BUTTON_EXIT] =	11;
   panel_offset = 0;
   selection = -1;
   grabbed = -1;
@@ -94,11 +80,11 @@ void panel_clicked_colony(int mx, int my, int mb) {
 
       SDL_Rect canrec = {800, 768-64*3, 224, 128};
       SDL_FillRect(screen, &canrec, black);
-      buttlist[PAGE_PLANET][BUTTON_CANCELBUILD] =	0;
-      buttlist[PAGE_PLANET][BUTTON_CANCELPROJECT] =	0;
-      buttlist[PAGE_PLANET][BUTTON_NEWPROJECT] =	0;
-      buttlist[PAGE_PLANET][BUTTON_BUILD] =		0;
-      buttlist[PAGE_PLANET][BUTTON_ABANDON] =		0;
+      buttlist[PANEL_COLONY][BUTTON_CANCELBUILD] =	0;
+      buttlist[PANEL_COLONY][BUTTON_CANCELPROJECT] =	0;
+      buttlist[PANEL_COLONY][BUTTON_NEWPROJECT] =	0;
+      buttlist[PANEL_COLONY][BUTTON_BUILD] =		0;
+      buttlist[PANEL_COLONY][BUTTON_ABANDON] =		0;
       update(&canrec);
       }
     return;
@@ -128,51 +114,51 @@ void panel_clicked_colony(int mx, int my, int mb) {
       stats_draw_colony(plan);
       update(800, 12+24*(SKIP+selection-panel_offset), 224, 24);
       if(line >= int(plan->objs.size())) {
-	buttlist[PAGE_PLANET][BUTTON_CANCELBUILD] =	10;
+	buttlist[PANEL_COLONY][BUTTON_CANCELBUILD] =	10;
 	mo[BUTTON_CANCELBUILD] = -1;
 	SDL_Rect canrec = {800, 768-64*3, 224, 64};
 	SDL_FillRect(screen, &canrec, black);
-	buttlist[PAGE_PLANET][BUTTON_CANCELPROJECT] =	0;
-	buttlist[PAGE_PLANET][BUTTON_NEWPROJECT] =	0;
-	buttlist[PAGE_PLANET][BUTTON_BUILD] =		0;
-	buttlist[PAGE_PLANET][BUTTON_ABANDON] =		0;
+	buttlist[PANEL_COLONY][BUTTON_CANCELPROJECT] =	0;
+	buttlist[PANEL_COLONY][BUTTON_NEWPROJECT] =	0;
+	buttlist[PANEL_COLONY][BUTTON_BUILD] =		0;
+	buttlist[PANEL_COLONY][BUTTON_ABANDON] =		0;
 	update(&canrec);
 	}
       else if(cur_tree->GetTech(plan->objs[line])->type == TECH_PROJECT) {
-	buttlist[PAGE_PLANET][BUTTON_NEWPROJECT] =	9;
-	buttlist[PAGE_PLANET][BUTTON_CANCELPROJECT] =	10;
+	buttlist[PANEL_COLONY][BUTTON_NEWPROJECT] =	9;
+	buttlist[PANEL_COLONY][BUTTON_CANCELPROJECT] =	10;
 	mo[BUTTON_CANCELPROJECT] = -1;
 	mo[BUTTON_NEWPROJECT] = -1;
-	buttlist[PAGE_PLANET][BUTTON_BUILD] =		0;
-	buttlist[PAGE_PLANET][BUTTON_ABANDON] =		0;
-	buttlist[PAGE_PLANET][BUTTON_CANCELBUILD] =	0;
+	buttlist[PANEL_COLONY][BUTTON_BUILD] =		0;
+	buttlist[PANEL_COLONY][BUTTON_ABANDON] =		0;
+	buttlist[PANEL_COLONY][BUTTON_CANCELBUILD] =	0;
 	}
       else if(cur_tree->GetTech(plan->objs[line])->type == TECH_STRUCTURE) {
-	buttlist[PAGE_PLANET][BUTTON_BUILD] =		9;
-	buttlist[PAGE_PLANET][BUTTON_ABANDON] =		10;
+	buttlist[PANEL_COLONY][BUTTON_BUILD] =		9;
+	buttlist[PANEL_COLONY][BUTTON_ABANDON] =		10;
 	mo[BUTTON_BUILD] = -1;
 	mo[BUTTON_ABANDON] = -1;
-	buttlist[PAGE_PLANET][BUTTON_CANCELPROJECT] =	0;
-	buttlist[PAGE_PLANET][BUTTON_NEWPROJECT] =	0;
-	buttlist[PAGE_PLANET][BUTTON_CANCELBUILD] =	0;
+	buttlist[PANEL_COLONY][BUTTON_CANCELPROJECT] =	0;
+	buttlist[PANEL_COLONY][BUTTON_NEWPROJECT] =	0;
+	buttlist[PANEL_COLONY][BUTTON_CANCELBUILD] =	0;
 	}
       else if(cur_tree->GetTech(plan->objs[line])->type == TECH_SHIP) {
-	buttlist[PAGE_PLANET][BUTTON_BUILD] =		9;
-	buttlist[PAGE_PLANET][BUTTON_ABANDON] =		10;
+	buttlist[PANEL_COLONY][BUTTON_BUILD] =		9;
+	buttlist[PANEL_COLONY][BUTTON_ABANDON] =		10;
 	mo[BUTTON_BUILD] = -1;
 	mo[BUTTON_ABANDON] = -1;
-	buttlist[PAGE_PLANET][BUTTON_CANCELPROJECT] =	0;
-	buttlist[PAGE_PLANET][BUTTON_NEWPROJECT] =	0;
-	buttlist[PAGE_PLANET][BUTTON_CANCELBUILD] =	0;
+	buttlist[PANEL_COLONY][BUTTON_CANCELPROJECT] =	0;
+	buttlist[PANEL_COLONY][BUTTON_NEWPROJECT] =	0;
+	buttlist[PANEL_COLONY][BUTTON_CANCELBUILD] =	0;
 	}
       else {
 	SDL_Rect canrec = {800, 768-64*3, 224, 128};
 	SDL_FillRect(screen, &canrec, black);
-	buttlist[PAGE_PLANET][BUTTON_CANCELPROJECT] =	0;
-	buttlist[PAGE_PLANET][BUTTON_NEWPROJECT] =	0;
-	buttlist[PAGE_PLANET][BUTTON_BUILD] =		0;
-	buttlist[PAGE_PLANET][BUTTON_ABANDON] =		0;
-	buttlist[PAGE_PLANET][BUTTON_CANCELBUILD] =	0;
+	buttlist[PANEL_COLONY][BUTTON_CANCELPROJECT] =	0;
+	buttlist[PANEL_COLONY][BUTTON_NEWPROJECT] =	0;
+	buttlist[PANEL_COLONY][BUTTON_BUILD] =		0;
+	buttlist[PANEL_COLONY][BUTTON_ABANDON] =		0;
+	buttlist[PANEL_COLONY][BUTTON_CANCELBUILD] =	0;
 	update(&canrec);
 	}
       }
@@ -344,7 +330,7 @@ void button_clicked_colony(int button) {
 	SDL_Rect canrec = {800, 768-64*2, 224, 64};
 	SDL_FillRect(screen, &canrec, black);
 	update(&canrec);
-	buttlist[PAGE_PLANET][BUTTON_CANCELBUILD] =	0;
+	buttlist[PANEL_COLONY][BUTTON_CANCELBUILD] =	0;
 	selection = -1;
 	}
       stats_draw_colony(plan, 0);

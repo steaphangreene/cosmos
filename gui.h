@@ -12,7 +12,15 @@ enum {PAGE_INVALID = 0,
 	};
 
 enum {PANEL_NONE = 0,
+	PANEL_ROOT,
+	PANEL_NEW,
+	PANEL_LOAD,
+	PANEL_NET,
+	PANEL_SYSOPT,
+	PANEL_GAME, //Order important!  All after are in-game!
 	PANEL_COLONY,
+	PANEL_FLEET,
+	PANEL_SHIP,
 	PANEL_MAX
 	};
 

@@ -16,29 +16,13 @@ using namespace std;
 #include "graphics.h"
 #include "gui_local.h"
 
-extern unsigned long black;
-
-extern SDL_Surface *screen;
-extern SDL_Rect mouser;
-extern SDL_Surface *cursor;
-
 static SDL_Surface *gstar;
-
-extern int buttlist[PAGE_MAX][BUTTON_MAX];
-extern int pagemap[PAGE_MAX][BUTTON_MAX];
-
-extern int page;
-extern int cur_galaxy;
-extern int cur_system;
-extern int cur_planet;
-
-void cursor_draw();
 
 void gui_init_galaxy() {
   gstar = get_gstar_image();
 
-  buttlist[PAGE_GALAXY][BUTTON_TURN] =		10;
-  buttlist[PAGE_GALAXY][BUTTON_EXIT] =		11;
+  buttlist[PANEL_GAME][BUTTON_TURN] =		10;
+  buttlist[PANEL_GAME][BUTTON_EXIT] =		11;
   pagemap[PAGE_GALAXY][BUTTON_EXIT] =		PAGE_ROOT;
 //  ambient[PAGE_GALAXY] = audio_loadsound("sounds/ambient00.wav");
   }
@@ -81,6 +65,7 @@ void page_redraw_galaxy(SDL_Rect *area) {
   }
 
 void page_init_galaxy() {
+  if(panel < PANEL_GAME) panel = PANEL_GAME;
   }
 
 void page_cleanup_galaxy() {
@@ -102,24 +87,23 @@ void page_draw_galaxy() {
     rec.y = sys->ypos - 1;
     SDL_BlitSurface(gstar, NULL, screen, &rec);
 
-    vector<int> present;
-    for(int shp = 0; shp < int(sys->ships.size()); ++shp) {
-      present.push_back(sys->ships[shp]->Owner());
+    vector<Fleet *> present;
+    for(int shp = 0; shp < int(sys->fleets.size()); ++shp) {
+      present.push_back(sys->fleets[shp]);
       }
     for(int plan=0; plan < sys->num_planets; ++plan) {
-      for(int shp = 0; shp < int(sys->planets[plan]->ships.size()); ++shp) {
-	present.push_back(sys->planets[plan]->ships[shp]->Owner());
+      for(int shp = 0; shp < int(sys->planets[plan]->fleets.size()); ++shp) {
+	present.push_back(sys->planets[plan]->fleets[shp]);
 	}
       }
     if(present.size() > 0) {
-//      sort(present.begin(), present.end());
-//      present.erase(unique(present.begin(), present.end()), present.end());
       for(int ctr=0; ctr<int(present.size()); ++ctr) {
 	SDL_Rect rec2 = {0, 0, 4, 4};
-	rec2.x = sys->xpos + 6;
-	rec2.y = sys->ypos - 4 + 6*ctr;
+	present[ctr]->SetPos(sys->xpos + 8,  sys->ypos + 6*ctr - 2);
+	rec2.x = present[ctr]->XPos() - 2;
+	rec2.y = present[ctr]->YPos() - 2;
 	SDL_FillRect(screen, &rec2,
-		color3(cur_game->players[present[ctr]]->color));
+		color3(cur_game->players[present[ctr]->Owner()]->color));
 	}
       }
     }
@@ -136,7 +120,17 @@ void page_clicked_galaxy(int mx, int my, int mb) {
     if(offx*offx + offy*offy <= 36) {
       cur_system = sys;
       page = PAGE_SYSTEM;
-      break;
+      return;
+      }
+    }
+  for(int flt=0; flt < int(cur_game->fleets.size()); ++flt) {
+    offx = abs(cur_game->fleets[flt]->XPos() - mx);
+    offy = abs(cur_game->fleets[flt]->YPos() - my);
+    if(offx*offx + offy*offy <= 9) {
+      cur_fleet = flt;
+      panel = PANEL_FLEET;
+      panel_init();
+      return;
       }
     }
   }

@@ -27,11 +27,8 @@ Game::Game() {
   memset(working_setting, 0, sizeof(working_setting));
   memset(game_setting, 0, sizeof(game_setting));
   memset(setting, 0, sizeof(setting));
-  num_players = 0;
-  players = NULL;
-  num_galaxys = 0;
-  galaxys = NULL;
   started = 0;
+  frame = 0;
   }
 
 Game::~Game() {
@@ -39,8 +36,9 @@ Game::~Game() {
   }
 
 void Game::TakeTurn() {
-  for(int ctr=0; ctr<num_players; ++ctr) players[ctr]->TakeTurn();
-  for(int ctr=0; ctr<num_galaxys; ++ctr) galaxys[ctr]->TakeTurn();
+  for(int ctr=0; ctr<int(players.size()); ++ctr) players[ctr]->TakeTurn();
+  for(int ctr=0; ctr<int(galaxys.size()); ++ctr) galaxys[ctr]->TakeTurn();
+  for(int ctr=0; ctr<int(fleets.size()); ++ctr) fleets[ctr]->TakeTurn();
   turn++;
   }
 
@@ -75,14 +73,9 @@ void Game::Finalize() {
 
 void Game::Clear() {
   started = 0;
-  for(int ctr=0; ctr<num_players; ++ctr) delete players[ctr];
-  if(players) delete [] players;
-  num_players = 0;
-  players = NULL;
-  for(int ctr=0; ctr<num_galaxys; ++ctr) delete galaxys[ctr];
-  if(galaxys) delete [] galaxys;
-  num_galaxys = 0;
-  galaxys = NULL;
+  players.clear();
+  galaxys.clear();
+  fleets.clear();
   }
 
 void Game::Fill() {
@@ -93,10 +86,9 @@ void Game::Fill() {
 
   cur_tree = new TechTree(setting[7], setting[8], setting[9]);
 
-  num_players = setting[6];
-  players = new (Player*)[num_players];
+  int num_players = setting[6];
   for(int ctr=0; ctr<num_players; ++ctr) {
-    players[ctr] = new Player;
+    players.push_back(new Player);
     }
   players[0]->color = setting[14]+1;
   int numcol = 6;
@@ -110,14 +102,13 @@ void Game::Fill() {
     --numcol;
     }
 
-  num_galaxys = setting[10];
-  galaxys = new (Galaxy*)[num_galaxys];
-  galaxys[0] = new Galaxy(setting[11]*20,
+  int num_galaxys = setting[10];
+  galaxys.push_back(new Galaxy(setting[11]*20,
 	setting[12], setting[13], cur_tree->Homeworld(),
-	num_players, players);
+	players));
   for(int ctr=1; ctr<num_galaxys; ++ctr) {
-    galaxys[ctr] = new Galaxy(setting[11]*20,
-	setting[12], setting[13], cur_tree->Homeworld());
+    galaxys.push_back(new Galaxy(setting[11]*20,
+	setting[12], setting[13], cur_tree->Homeworld()));
     }
   }
 

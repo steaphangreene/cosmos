@@ -28,6 +28,8 @@ void page_clicked_planet(int, int, int);
 void mouse_moved_planet(int, int);
 void mouse_released_planet();
 
+char *popstr(int, int mpop=0);
+
 void gui_init_colony();
 void panel_draw_colony();
 void panel_init_colony();
@@ -36,6 +38,45 @@ void panel_update_colony();
 void panel_redraw_colony(SDL_Rect *);
 void panel_clicked_colony(int, int, int);
 void button_clicked_colony(int);
-char *popstr(int, int mpop=0);
 void mouse_moved_colony(int, int);
 void mouse_released_colony();
+
+void gui_init_fleet();
+void panel_draw_fleet();
+void panel_init_fleet();
+void panel_cleanup_fleet();
+void panel_update_fleet();
+void panel_redraw_fleet(SDL_Rect *);
+void panel_clicked_fleet(int, int, int);
+void button_clicked_fleet(int);
+void mouse_moved_fleet(int, int);
+void mouse_released_fleet();
+
+void gui_init_ship();
+void panel_draw_ship();
+void panel_init_ship();
+void panel_cleanup_ship();
+void panel_update_ship();
+void panel_redraw_ship(SDL_Rect *);
+void panel_clicked_ship(int, int, int);
+void button_clicked_ship(int);
+void mouse_moved_ship(int, int);
+void mouse_released_ship();
+
+void panel_init();
+void page_init();
+void panel_draw();
+void page_draw();
+extern unsigned long black;
+extern SDL_Surface *screen;
+extern font *cur_font[9];
+extern int click1, click2;
+extern int buttlist[PANEL_MAX][BUTTON_MAX];
+extern int pagemap[PAGE_MAX][BUTTON_MAX];
+extern int mo[BUTTON_MAX];
+extern int page, panel;
+extern int cur_galaxy;
+extern int cur_system;
+extern int cur_planet;
+extern int cur_fleet;
+extern int cur_ship;

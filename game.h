@@ -1,4 +1,15 @@
+#include <vector>
+
+using namespace std;
+
+class Game;
+extern Game *cur_game;
+
+#ifndef GAME_H
+#define GAME_H
+
 #include "galaxy.h"
+#include "fleet.h"
 
 void game_init();
 
@@ -41,13 +52,11 @@ public:
   int game_setting[num_configs];
   int working_setting[num_configs];
 
-  int turn, tick;
+  int turn, tick, frame;
 
-  int num_galaxys;
-  Galaxy **galaxys;
-
-  int num_players;
-  Player **players;
+  vector<Galaxy *>galaxys;
+  vector<Fleet *>fleets;
+  vector<Player *>players;
   };
 
-extern Game *cur_game;
+#endif

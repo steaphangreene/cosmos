@@ -37,6 +37,7 @@ public:
   int AddCrew(int n)
 	{ crew += n; n = crew-maxcrew; crew <?= maxcrew; return n >? 0; }
   int Owner() { return owner; }
+  void TakeTurn();
 
 //private:
   int tech;

@@ -14,24 +14,8 @@ using namespace std;
 #include "graphics.h"
 #include "gui_local.h"
 
-extern unsigned long black;
-
-extern SDL_Surface *screen;
-extern font *cur_font[9];
-extern int click1, click2;
-
 static SDL_Surface *planet[4], *satellite[4];
 void stats_draw_planet(Planet *, int update = 0);
-
-extern int buttlist[PAGE_MAX][BUTTON_MAX];
-extern int pagemap[PAGE_MAX][BUTTON_MAX];
-extern int mo[BUTTON_MAX];
-
-extern int page;
-extern int panel;
-extern int cur_galaxy;
-extern int cur_system;
-extern int cur_planet;
 
 void gui_init_planet() {
   planet[0] = get_alpha_image("graphics/planet00.raw", 768, 768);
@@ -95,7 +79,7 @@ void page_init_planet() {
   }
 
 void page_cleanup_planet() {
-  if(panel == PANEL_COLONY) panel = PANEL_NONE;
+//  if(panel == PANEL_COLONY) panel = PANEL_NONE;
   }
 
 void page_draw_planet() {

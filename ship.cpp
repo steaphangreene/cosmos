@@ -31,3 +31,6 @@ Ship::Ship(int tec, int own) {
       } break;
     }
   }
+
+void Ship::TakeTurn() {
+  }

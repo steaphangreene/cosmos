@@ -35,8 +35,9 @@ static SDL_Surface *intro;
 
 int lastpage = PAGE_INVALID, page = PAGE_ROOT;
 int lastpanel = PANEL_NONE, panel = PANEL_NONE;
-int buttlist[PAGE_MAX][BUTTON_MAX] = {{0}};
+int buttlist[PANEL_MAX][BUTTON_MAX] = {{0}};
 int pagemap[PAGE_MAX][BUTTON_MAX] = {{0}};
+int panelmap[PAGE_MAX] = {{0}};
 
 int mousex=0, mousey=0, mouseb=0;
 int mo[BUTTON_MAX] = {0};
@@ -47,9 +48,12 @@ Sound *cur_amb=NULL;
 int cur_amb_num=0;
 Sound *cur_mus=NULL;
 int cur_mus_num=0;
+
 int cur_galaxy=0;
 int cur_system=0;
 int cur_planet=0;
+int cur_fleet=0;
+int cur_ship=0;
 
 static char dialog_message[4096] = {0};
 
@@ -91,8 +95,8 @@ SDL_Surface *build_button1(const char *label) {
 int update_buttons() {
   int inbutt = 0;
   mouseb = SDL_GetMouseState(&mousex, &mousey);
-  for(int ctr=1; ctr < BUTTON_MAX; ++ctr) if(buttlist[page][ctr]) {
-    int ord = buttlist[page][ctr];
+  for(int ctr=1; ctr < BUTTON_MAX; ++ctr) if(buttlist[panel][ctr]) {
+    int ord = buttlist[panel][ctr];
     int m = (mousey >= 64*ord && mousex >= 812
 	&& mousey < 50+64*ord && mousex < 1012 && !(mouseb&1));
     if(m != mo[ctr]) {
@@ -111,11 +115,23 @@ void panel_cleanup(int pan) {
   if(pan == PANEL_COLONY) {
     panel_cleanup_colony();
     }
+  else if(pan == PANEL_FLEET) {
+    panel_cleanup_fleet();
+    }
+  else if(pan == PANEL_SHIP) {
+    panel_cleanup_ship();
+    }
   }
 
 void panel_init() {
   if(panel == PANEL_COLONY) {
     panel_init_colony();
+    }
+  else if(panel == PANEL_FLEET) {
+    panel_init_fleet();
+    }
+  else if(panel == PANEL_SHIP) {
+    panel_init_ship();
     }
   panel_draw();
 
@@ -152,7 +168,9 @@ void page_init() {
     }
   page_draw();
 
-  buttlist[PAGE_ROOT][BUTTON_RESUMEGAME] = (cur_game->InProgress())? 6 : 0;
+  if(panelmap[page] != PANEL_NONE) panel = panelmap[page];
+
+  buttlist[PANEL_ROOT][BUTTON_RESUMEGAME] = (cur_game->InProgress())? 6 : 0;
 
   if(ambient[page] && ambient[page] != cur_amb_num &&
 	ambient[page] != ambient[lastpage]) {
@@ -196,7 +214,7 @@ void gui_main() {
         else if(pagemap[page][BUTTON_EXIT]) {
 	  page = pagemap[page][BUTTON_EXIT];
 	  }
-        else if(buttlist[page][BUTTON_QUITGAME]) {
+        else if(buttlist[panel][BUTTON_QUITGAME]) {
 	  done = 1;
 	  }
 	}
@@ -321,11 +339,12 @@ void gui_init() {
   button[BUTTON_ABANDON][0] = build_button0("Abandon");
   button[BUTTON_ABANDON][1] = build_button1("Abandon");
 
-  buttlist[PAGE_ROOT][BUTTON_LOADGAME] = 7;
-  buttlist[PAGE_ROOT][BUTTON_NEWGAME] =		8;
-  buttlist[PAGE_ROOT][BUTTON_NETWORKGAME] =	9;
-  buttlist[PAGE_ROOT][BUTTON_SYSTEMOPTIONS] =	10;
-  buttlist[PAGE_ROOT][BUTTON_QUITGAME] =	11;
+  panelmap[PAGE_ROOT] = PANEL_ROOT;
+  buttlist[PANEL_ROOT][BUTTON_LOADGAME] = 7;
+  buttlist[PANEL_ROOT][BUTTON_NEWGAME] =		8;
+  buttlist[PANEL_ROOT][BUTTON_NETWORKGAME] =	9;
+  buttlist[PANEL_ROOT][BUTTON_SYSTEMOPTIONS] =	10;
+  buttlist[PANEL_ROOT][BUTTON_QUITGAME] =	11;
   pagemap[PAGE_ROOT][BUTTON_RESUMEGAME] =	PAGE_GALAXY;
   pagemap[PAGE_ROOT][BUTTON_NEWGAME] =		PAGE_NEW;
   pagemap[PAGE_ROOT][BUTTON_LOADGAME] =		PAGE_LOAD;
@@ -334,29 +353,33 @@ void gui_init() {
 //  ambient[PAGE_ROOT] = audio_loadsound("sounds/ambient00.wav");
   music[PAGE_ROOT] = audio_loadmusic("sounds/music00.wav");
 
-  buttlist[PAGE_NEW][BUTTON_CLEARALL] =		7;
-  buttlist[PAGE_NEW][BUTTON_RESETALL] =		8;
-  buttlist[PAGE_NEW][BUTTON_RANDOMIZE] =	9;
-  buttlist[PAGE_NEW][BUTTON_ACCEPT] =		10;
-  buttlist[PAGE_NEW][BUTTON_CANCEL] =		11;
+  panelmap[PAGE_NEW] = PANEL_NEW;
+  buttlist[PANEL_NEW][BUTTON_CLEARALL] =		7;
+  buttlist[PANEL_NEW][BUTTON_RESETALL] =		8;
+  buttlist[PANEL_NEW][BUTTON_RANDOMIZE] =	9;
+  buttlist[PANEL_NEW][BUTTON_ACCEPT] =		10;
+  buttlist[PANEL_NEW][BUTTON_CANCEL] =		11;
   pagemap[PAGE_NEW][BUTTON_ACCEPT] =		PAGE_GALAXY;
   pagemap[PAGE_NEW][BUTTON_CANCEL] =		PAGE_ROOT;
 
-  buttlist[PAGE_LOAD][BUTTON_ACCEPT] =		10;
-  buttlist[PAGE_LOAD][BUTTON_CANCEL] =		11;
+  panelmap[PAGE_LOAD] = PANEL_LOAD;
+  buttlist[PANEL_LOAD][BUTTON_ACCEPT] =		10;
+  buttlist[PANEL_LOAD][BUTTON_CANCEL] =		11;
 //  pagemap[PAGE_LOAD][BUTTON_ACCEPT] =		PAGE_GALAXY;
   pagemap[PAGE_LOAD][BUTTON_CANCEL] =		PAGE_ROOT;
 
-  buttlist[PAGE_NET][BUTTON_CANCEL] =		11;
+  panelmap[PAGE_NET] = PANEL_NET;
+  buttlist[PANEL_NET][BUTTON_CANCEL] =		11;
   pagemap[PAGE_NET][BUTTON_CANCEL] =		PAGE_ROOT;
 
-  buttlist[PAGE_SYSOPT][BUTTON_ACCEPT] =	10;
-  buttlist[PAGE_SYSOPT][BUTTON_CANCEL] =	11;
+  panelmap[PAGE_SYSOPT] = PANEL_SYSOPT;
+  buttlist[PANEL_SYSOPT][BUTTON_ACCEPT] =	10;
+  buttlist[PANEL_SYSOPT][BUTTON_CANCEL] =	11;
   pagemap[PAGE_SYSOPT][BUTTON_ACCEPT] =		PAGE_ROOT;
   pagemap[PAGE_SYSOPT][BUTTON_CANCEL] =		PAGE_ROOT;
 //  ambient[PAGE_SYSOPT] = audio_loadsound("sounds/ambient00.wav");
 
-  buttlist[PAGE_DIALOG][BUTTON_EXIT] =		11;
+  buttlist[PANEL_NONE][BUTTON_EXIT] =		11;
 
   music[PAGE_GALAXY] = audio_loadmusic("sounds/music01.wav");
 
@@ -368,6 +391,8 @@ void gui_init() {
   gui_init_planet();
 
   gui_init_colony();
+  gui_init_fleet();
+  gui_init_ship();
 
   page_init();
   panel_init();
@@ -377,6 +402,12 @@ void button_clicked(int button) {
   switch(panel) {
     case(PANEL_COLONY): {
       button_clicked_colony(button);
+      } break;
+    case(PANEL_FLEET): {
+      button_clicked_fleet(button);
+      } break;
+    case(PANEL_SHIP): {
+      button_clicked_ship(button);
       } break;
     }
   switch(page) {
@@ -429,6 +460,12 @@ void panel_redraw(SDL_Rect *area) {
 
   if(panel == PANEL_COLONY) {
     panel_redraw_colony(area);
+    }
+  else if(panel == PANEL_FLEET) {
+    panel_redraw_fleet(area);
+    }
+  else if(panel == PANEL_SHIP) {
+    panel_redraw_ship(area);
     }
 
   memset(mo, -1, sizeof(mo));
@@ -500,13 +537,20 @@ void page_redraw(SDL_Rect *area) {
   }
 
 void panel_draw() {
-  SDL_Rect pgr = {800, 0, 224, 768};
-  SDL_FillRect(screen, &pgr, 0);
+  SDL_Rect pnr = {800, 0, 224, 768};
+  SDL_FillRect(screen, &pnr, 0);
   if(panel == PANEL_COLONY) {
     panel_draw_colony();
     }
+  else if(panel == PANEL_FLEET) {
+    panel_draw_fleet();
+    }
+  else if(panel == PANEL_SHIP) {
+    panel_draw_ship();
+    }
   memset(mo, -1, sizeof(mo));
   update_buttons();
+  update(&pnr);
   }
 
 void page_draw() {
@@ -546,7 +590,20 @@ void page_draw() {
   if(page == PAGE_PLANET) {
     page_draw_planet();
     }
-  update_all();
+//  update_all();
+  update(&pgr);
+  }
+
+void panel_update() {
+  if(panel == PANEL_COLONY) {
+    panel_update_colony();
+    }
+  else if(panel == PANEL_FLEET) {
+    panel_update_fleet();
+    }
+  else if(panel == PANEL_SHIP) {
+    panel_update_ship();
+    }
   }
 
 void page_update() {
@@ -559,9 +616,7 @@ void page_update() {
   else if(page == PAGE_SYSTEM) {
     page_update_system();
     }
-  if(panel == PANEL_COLONY) {
-    panel_update_colony();
-    }
+  panel_update();
   }
 
 void mouse_released() {
@@ -579,6 +634,12 @@ void mouse_released() {
     }
   if(panel == PANEL_COLONY) {
     mouse_released_colony();
+    }
+  else if(panel == PANEL_FLEET) {
+    mouse_released_fleet();
+    }
+  else if(panel == PANEL_SHIP) {
+    mouse_released_ship();
     }
   }
 
@@ -599,6 +660,12 @@ void mouse_moved(int mx, int my) {
     }
   if(panel == PANEL_COLONY) {
     mouse_moved_colony(mx, my);
+    }
+  else if(panel == PANEL_FLEET) {
+    mouse_moved_fleet(mx, my);
+    }
+  else if(panel == PANEL_SHIP) {
+    mouse_moved_ship(mx, my);
     }
   }
 
@@ -667,6 +734,12 @@ void page_clicked(int mx, int my, int mb) {
 void panel_clicked(int mx, int my, int mb) {
   if(panel == PANEL_COLONY) {
     panel_clicked_colony(mx, my, mb);
+    }
+  else if(panel == PANEL_FLEET) {
+    panel_clicked_fleet(mx, my, mb);
+    }
+  else if(panel == PANEL_SHIP) {
+    panel_clicked_ship(mx, my, mb);
     }
   }
 

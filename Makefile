@@ -20,8 +20,8 @@ STRIP:=	strip
 
 OBJS:=	main.o gui.o audio.o fonts.o graphics.o \
 	gui_galaxy.o gui_system.o gui_planet.o \
-	gui_colony.o \
-	ship.o game.o galaxy.o system.o planet.o satellite.o player.o \
+	gui_colony.o gui_fleet.o gui_ship.o \
+	ship.o fleet.o game.o galaxy.o system.o planet.o satellite.o player.o \
 	techtree.o tech_tiny.o
 
 WCC:=   win32-gcc -O2 -pipe -Wall `win32-exec sdl-config --cflags` -s

@@ -6,7 +6,7 @@ using namespace std;
 #ifndef PLANET_H
 #define PLANET_H
 
-#include "ship.h"
+#include "fleet.h"
 #include "techtree.h"
 #include "satellite.h"
 
@@ -45,7 +45,7 @@ public:
   vector<int> oqty;
   deque<int> projs;
   deque<int> prog;
-  deque<Ship*> ships;
+  deque<Fleet*> fleets;
 
   int claimed;
 private:

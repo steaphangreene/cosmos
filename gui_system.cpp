@@ -14,60 +14,16 @@ using namespace std;
 #include "graphics.h"
 #include "gui_local.h"
 
-extern unsigned long black;
-
-extern SDL_Surface *screen;
-extern font *cur_font[9];
-extern SDL_Rect mouser;
-extern SDL_Surface *cursor;
-
 static SDL_Surface *splanet[4], *star;
-
-extern int buttlist[PAGE_MAX][BUTTON_MAX];
-extern int pagemap[PAGE_MAX][BUTTON_MAX];
-
-extern int page;
-extern int cur_galaxy;
-extern int cur_system;
-extern int cur_planet;
-
-void cursor_draw();
 
 void gui_init_system() {
   star = get_star_image();
   splanet[0] = get_splanet_image();
 
-  buttlist[PAGE_SYSTEM][BUTTON_EXIT] =		11;
   pagemap[PAGE_SYSTEM][BUTTON_EXIT] =		PAGE_GALAXY;
   }
 
 void page_redraw_system(SDL_Rect *area) {
-/*
-  SDL_Rect todo = *area;
-  SDL_FillRect(screen, &todo, black);
-  SDL_Rect destr = {(768-32)/2, (768-32)/2, 32, 32};
-  if(overlaps(destr, todo)) SDL_BlitSurface(star, NULL, screen, &destr);
-  destr.w = 3;  destr.h = 3;
-  System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
-  for(int plan=0; plan < sys->num_planets; ++plan) {
-    int must = 0;
-    if(sys->planets[plan]->claimed >= 0) {
-      SDL_Rect rec2 = {0, 0, 9, 9};
-      rec2.x = sys->planets[plan]->XPos(cur_game->turn) - 4;
-      rec2.y = sys->planets[plan]->YPos(cur_game->turn) - 4;
-      if(overlaps(rec2, todo)) {
-	SDL_FillRect(screen, &rec2, color3(cur_game->players[
-		sys->planets[plan]->claimed]->color));
-	must = 1;
-	}
-      }
-    destr.x = sys->planets[plan]->XPos(cur_game->turn) - 1;
-    destr.y = sys->planets[plan]->YPos(cur_game->turn) - 1;
-    if(must || overlaps(destr, todo))
-      SDL_BlitSurface(splanet[0], NULL, screen, &destr);
-    }
-  todo = *area;
-*/
   }
 
 void page_init_system() {
@@ -81,6 +37,7 @@ void page_draw_system() {
   SDL_BlitSurface(star, NULL, screen, &destr);
   destr.w = 3;  destr.h = 3;
   System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+  ++cur_game->frame;
   for(int plan=0; plan < sys->num_planets; ++plan) {
     if(sys->planets[plan]->claimed >= 0) {
       SDL_Rect rec2 = {0, 0, 9, 9};
@@ -92,10 +49,15 @@ void page_draw_system() {
     destr.x = sys->planets[plan]->XPos(cur_game->turn) - 1;
     destr.y = sys->planets[plan]->YPos(cur_game->turn) - 1;
     SDL_BlitSurface(splanet[0], NULL, screen, &destr);
-    if(sys->planets[plan]->ships.size() > 0) {
+    for(int ctr=0; ctr < int(sys->planets[plan]->fleets.size()); ++ctr) {
       SDL_Rect rec2 = {0, 0, 4, 4};
-      rec2.x = sys->planets[plan]->XPos(cur_game->turn) + 6;
-      rec2.y = sys->planets[plan]->YPos(cur_game->turn) - 4;
+      sys->planets[plan]->fleets[ctr]->SetPos(
+	sys->planets[plan]->XPos(cur_game->turn) + 8,
+	sys->planets[plan]->YPos(cur_game->turn) + 6*ctr - 2,
+	cur_game->frame
+	);
+      rec2.x = sys->planets[plan]->fleets[ctr]->XPos() - 2;
+      rec2.y = sys->planets[plan]->fleets[ctr]->YPos() - 2;
       SDL_FillRect(screen, &rec2, color3(cur_game->players[
 		sys->planets[plan]->claimed]->color));
       }
@@ -106,15 +68,26 @@ void page_update_system() {
   }
 
 void page_clicked_system(int mx, int my, int mb) {
-  int offx, offy;
+  int offx, offy, fr;
   System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
   for(int plan=0; plan < sys->num_planets; ++plan) {
-    offx = abs(mx - sys->planets[plan]->XPos(cur_game->turn));
-    offy = abs(my - sys->planets[plan]->YPos(cur_game->turn));
+    offx = abs(sys->planets[plan]->XPos(cur_game->turn) - mx);
+    offy = abs(sys->planets[plan]->YPos(cur_game->turn) - my);
     if(offx*offx + offy*offy <= 36) {
       cur_planet = plan;
       page = PAGE_PLANET;
       break;
+      }
+    }
+  for(int flt=0; flt < int(cur_game->fleets.size()); ++flt) {
+    offx = abs(cur_game->fleets[flt]->XPos() - mx);
+    offy = abs(cur_game->fleets[flt]->YPos() - my);
+    fr = cur_game->fleets[flt]->OnFrame();
+    if(cur_game->frame == fr && offx*offx + offy*offy <= 9) {
+      cur_fleet = flt;
+      panel = PANEL_FLEET;
+      panel_init();
+      return;
       }
     }
   }

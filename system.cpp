@@ -30,14 +30,17 @@ System::System(int xp, int yp, int nump, int minl, int atmosl, int *devl, int pl
 	  planets[ctr]->population += tc->crew * devl[ctr2];
 	  }
 	}
+      int fn = 0;
       for(int ctr2=0; ctr2<cur_tree->NumTechs(); ++ctr2) {
 	Tech *tc = cur_tree->GetTech(ctr2);
 	if(tc->type == TECH_SHIP) {
+	  planets[ctr]->fleets.push_back(new Fleet(pl, tc->names));
 	  for(int shp=0	; shp < devl[ctr2]; ++shp) {
-	    planets[ctr]->ships.push_back(new Ship(tc->special, pl));
-	    (*(planets[ctr]->ships.end()-1))->AddCrew(
-		(*(planets[ctr]->ships.end()-1))->MaxCrew());
+	    planets[ctr]->fleets[fn]->ships.push_back(new Ship(ctr2, pl));
+	    (*(planets[ctr]->fleets[fn]->ships.end()-1))->AddCrew(
+		(*(planets[ctr]->fleets[fn]->ships.end()-1))->MaxCrew());
 	    }
+	  ++fn;
 	  }
 	}
       }

@@ -3,7 +3,7 @@
 using namespace std;
 
 #include "planet.h"
-#include "ship.h"
+#include "fleet.h"
 
 class System {
 public:
@@ -13,7 +13,7 @@ public:
   void TakeTurn();
 
 //private:
-  deque<Ship*> ships;
+  deque<Fleet*> fleets;
   Planet **planets;
   int num_planets;
   int xpos;
