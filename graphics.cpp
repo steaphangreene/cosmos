@@ -1,7 +1,7 @@
 #include <SDL.h>
 
-#include "blank0.h"
-#include "blank1.h"
+#include "graphics/blank0.h"
+#include "graphics/blank1.h"
 
 #include "fonts.h"
 

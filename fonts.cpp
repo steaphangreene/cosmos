@@ -3,7 +3,7 @@
 
 #include <SDL.h>
 
-#include "font22.h"
+#include "graphics/font22.h"
 
 SDL_Surface *font;
 int foff[128];

@@ -4,12 +4,12 @@
 
 #include "game.h"
 
-Game *curgame = NULL;
+Game *cur_game = NULL;
 
 using namespace std;
 
 void game_init() {
-  curgame = new Game;
+  cur_game = new Game;
   }
 
 Game::Game() {
@@ -34,7 +34,10 @@ void Game::Reset() {
   s_size = 0;
   s_races = 0;
   s_techlevel = 0;
-  s_systemquality = 0;
+  s_minerals = 0;
+  s_atmosphere = 0;
+
+  num_galaxys = 0;
   }
 
 void Game::Finalize() {
@@ -50,11 +53,13 @@ void Game::Finalize() {
   if(s_size == 0) s_size = (rand()%(GSIZE_MAX-1))+1;
   if(s_races == 0) s_races = (rand()%(RACES_MAX-1))+1;
   if(s_techlevel == 0) s_techlevel = (rand()%(TECH_MAX-1))+1;
-  if(s_systemquality == 0) s_systemquality = (rand()%(SQUALITY_MAX-1))+1;
+  if(s_minerals == 0) s_minerals = (rand()%(SMINERALS_MAX-1))+1;
+  if(s_atmosphere == 0) s_atmosphere = (rand()%(SATMOSPHERE_MAX-1))+1;
   }
 
 void Game::Clear() {
   started = 0;
+  num_galaxys = 0;
   }
 
 void Game::Fill() {
@@ -74,6 +79,13 @@ void Game::Fill() {
   printf("Galaxy Size = %d\n", s_size);
   printf("Number of Races = %d\n", s_races);
   printf("Tech Level = %d\n", s_techlevel);
-  printf("System Quality = %d\n", s_systemquality);
+  printf("Planet Minerals = %d\n", s_minerals);
+  printf("Planet Atmosphere = %d\n", s_atmosphere);
 */
+
+  num_galaxys = s_galaxys;
+  galaxys = new (Galaxy*)[num_galaxys];
+  for(int ctr=0; ctr<num_galaxys; ++ctr) {
+    galaxys[ctr] = new Galaxy(s_size*20, s_minerals, s_atmosphere);
+    }
   }

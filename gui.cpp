@@ -29,6 +29,9 @@ int mo[BUTTON_MAX] = {0};
 int ambient[PAGE_MAX] = {0}, click;
 Sound *cur_amb=NULL;
 int cur_amb_num=0;
+int cur_galaxy=0;
+int cur_system=0;
+int cur_planet=0;
 
 void gui_button_pressed(int button);
 void draw_page();
@@ -57,7 +60,7 @@ void page_init() {
 
   draw_page();
 
-  buttlist[PAGE_ROOT][BUTTON_RESUMEGAME] = (curgame->InProgress())? 6 : 0;
+  buttlist[PAGE_ROOT][BUTTON_RESUMEGAME] = (cur_game->InProgress())? 6 : 0;
 
   if(ambient[page] && ambient[page] != cur_amb_num &&
 	ambient[page] != ambient[lastpage]) {
@@ -157,7 +160,7 @@ void gui_init() {
   pagemap[PAGE_ROOT][BUTTON_LOADGAME] =		PAGE_LOAD;
   pagemap[PAGE_ROOT][BUTTON_NETWORKGAME] =	PAGE_NET;
   pagemap[PAGE_ROOT][BUTTON_SYSTEMOPTIONS] =	PAGE_SYSOPT;
-  ambient[PAGE_ROOT] = audio_loadsound("sounds/ambient01.wav");
+  ambient[PAGE_ROOT] = audio_loadsound("sounds/ambient00.wav");
 
   buttlist[PAGE_NEW][BUTTON_RESETALL] =		8;
   buttlist[PAGE_NEW][BUTTON_RANDOMIZE] =	9;
@@ -178,7 +181,7 @@ void gui_init() {
   buttlist[PAGE_SYSOPT][BUTTON_CANCEL] =	11;
   pagemap[PAGE_SYSOPT][BUTTON_ACCEPT] =		PAGE_ROOT;
   pagemap[PAGE_SYSOPT][BUTTON_CANCEL] =		PAGE_ROOT;
-  ambient[PAGE_SYSOPT] = audio_loadsound("sounds/ambient04.wav");
+  ambient[PAGE_SYSOPT] = audio_loadsound("sounds/ambient00.wav");
 
   buttlist[PAGE_GALAXY][BUTTON_QUITGAME] =	11;
   pagemap[PAGE_GALAXY][BUTTON_QUITGAME] =	PAGE_ROOT;
@@ -202,11 +205,11 @@ void gui_button_pressed(int button) {
     case(PAGE_NEW): {
       switch(button) {
 	case(BUTTON_RANDOMIZE): {
-	  curgame->Randomize();
+	  cur_game->Randomize();
 	  page_init();
 	  } break;
 	case(BUTTON_RESETALL): {
-	  curgame->Reset();
+	  cur_game->Reset();
 	  page_init();
 	  } break;
 	}
@@ -216,6 +219,14 @@ void gui_button_pressed(int button) {
 
 void draw_page() {
   if(page == PAGE_ROOT) SDL_BlitSurface(intro, NULL, screen, NULL);
-  if(page == PAGE_NEW) curgame->Clear();
-  if(page == PAGE_GALAXY) curgame->Fill();
+  if(page == PAGE_NEW) cur_game->Clear();
+  if(page == PAGE_GALAXY) {
+    cur_game->Fill();
+    SDL_Rect rec = {0, 0, 2, 2};
+    for(int sys=0; sys < cur_game->galaxys[cur_galaxy]->num_systems; ++sys) {
+      rec.x = cur_game->galaxys[cur_galaxy]->systems[sys]->xpos;
+      rec.y = cur_game->galaxys[cur_galaxy]->systems[sys]->ypos;
+      SDL_FillRect(screen, &rec, 0xFFFFFFFF);
+      }
+    }
   }

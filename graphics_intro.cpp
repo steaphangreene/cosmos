@@ -1,6 +1,6 @@
 #include <SDL.h>
 
-#include "intro.h"
+#include "graphics/intro.h"
 
 SDL_Surface *get_intro_image() {
   return SDL_CreateRGBSurfaceFrom((void*)intro_image.pixel_data,

@@ -1,3 +1,5 @@
+#include "galaxy.h"
+
 void game_init();
 
 enum {	TECHTREE_UNKNOWN=0,
@@ -76,14 +78,17 @@ enum {	TECH_UNKNOWN=0,
 	TECH_HIGH,
 	TECH_MAX };
 
-enum {	SQUALITY_UNKNOWN=0,
-	SQUALITY_RARE,
-	SQUALITY_POOR,
-	SQUALITY_AVERAGE,
-	SQUALITY_MINERALS,
-	SQUALITY_ATMOSPHERE,
-	SQUALITY_EXCELLENT,
-	SQUALITY_MAX };
+enum {	SMINERALS_UNKNOWN=0,
+	SMINERALS_LOW,
+	SMINERALS_AVERAGE,
+	SMINERALS_HIGH,
+	SMINERALS_MAX };
+
+enum {	SATMOSPHERE_UNKNOWN=0,
+	SATMOSPHERE_LOW,
+	SATMOSPHERE_AVERAGE,
+	SATMOSPHERE_HIGH,
+	SATMOSPHERE_MAX };
 
 class Game {
 public:
@@ -109,12 +114,15 @@ public:
   int GetTechLevel();
   int GetSystemQuality();
 
-private:
+//private:
   void Finalize();
   int started;
   int s_techtree, s_ship, s_board, s_planet;
   int s_galaxyview, s_systemview, s_planetview;
-  int s_galaxys, s_size, s_races, s_techlevel, s_systemquality;
+  int s_galaxys, s_size, s_races, s_techlevel, s_minerals, s_atmosphere;
+
+  int num_galaxys;
+  Galaxy **galaxys;
   };
 
-extern Game *curgame;
+extern Game *cur_game;
