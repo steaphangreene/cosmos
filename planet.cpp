@@ -20,15 +20,15 @@ Planet::Planet(int ord, int sz, int min, int atmos) {
   startpos = rand()&65535;
   };
 
-int Planet::XPos() {
-  double ang = double(startpos) + double(cur_game->turn)*double(256) / double(period)*double(256);
+int Planet::XPos(int turn) {
+  double ang = double(startpos) + double(turn)*double(256*256*256) / double(period);
   double dist = double(order+1) * double(30);
   double xpos = dist * cos(ang * 2.0 * M_PI / double(65536));
   return int(400+xpos);
   };
 
-int Planet::YPos() {
-  double ang = double(startpos) + double(cur_game->turn)*double(256) / double(period)*double(256);
+int Planet::YPos(int turn) {
+  double ang = double(startpos) + double(turn)*double(256*256*256) / double(period);
   double dist = double(order+1) * double(30);
   double ypos = dist * sin(ang * 2.0 * M_PI / double(65536));
   return int(384+ypos);

@@ -134,7 +134,7 @@ void audio_stop(Sound *s) {
   }
 
 void audio_init() {
-  audio.freq = 22050;
+  audio.freq = 44100;
   audio.format = AUDIO_S16;
   audio.samples = 2048;
   audio.channels = 2;

@@ -36,6 +36,7 @@ int cur_planet=0;
 void gui_button_clicked(int button);
 void page_clicked(int mx, int my, int mb);
 void page_draw();
+void page_update();
 
 int update_buttons() {
   int inbutt = 0;
@@ -82,8 +83,9 @@ void gui_main() {
       page_draw();
       }
     else if(event.type == SDL_USEREVENT) {
-      cur_game->turn += 256;
-      page_draw();
+      ++cur_game->tick;
+      if(cur_game->tick > 65535) cur_game->tick = 0;
+      page_update();
       }
     else if(event.type == SDL_KEYDOWN) {
       if(event.key.keysym.sym == SDLK_ESCAPE) {
@@ -247,32 +249,44 @@ void page_draw() {
       SDL_FillRect(screen, &rec, 0xFFFFFFFF);
       }
     }
-
-  for(int ctr=1; ctr < BUTTON_MAX; ++ctr) if(buttlist[page][ctr]) {
-    int ord = buttlist[page][ctr];
-    mo[ctr] = (mousey >= 64*ord && mousex >= 812
-		&& mousey < 50+64*ord && mousex < 1012);
-    rect.x = 812;  rect.y = 64*ord;
-    SDL_BlitSurface(button[ctr][0], NULL, screen, &rect);
-    }
   if(page == PAGE_SYSTEM) {
+    page_update();
+    }
+  memset(mo, -1, sizeof(mo));
+  update_buttons();
+
+  SDL_UpdateRect(screen, 0, 0, 0, 0);
+  }
+
+void page_update() {
+  static int lasttick = -1;
+  if(page == PAGE_SYSTEM) {
+    if(lasttick >= 0) {
+      SDL_Rect destr = {(800-32)/2, (768-32)/2, 32, 32};
+      SDL_BlitSurface(star, NULL, screen, &destr);
+      System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+      for(int plan=0; plan < sys->num_planets; ++plan) {
+	destr.x = sys->planets[plan]->XPos(lasttick) - 1;
+	destr.y = sys->planets[plan]->YPos(lasttick) - 1;
+	destr.w = 3;
+	destr.h = 3;
+	SDL_FillRect(screen, &destr, 0x00000000);
+	SDL_UpdateRect(screen, destr.x, destr.y, destr.w, destr.h);
+	}
+      }
     SDL_Rect destr = {(800-32)/2, (768-32)/2, 32, 32};
     SDL_BlitSurface(star, NULL, screen, &destr);
     System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
     for(int plan=0; plan < sys->num_planets; ++plan) {
-      int x = sys->planets[plan]->XPos();
-      int y = sys->planets[plan]->YPos();
-      destr.x = x;
-      destr.y = y;
+      destr.x = sys->planets[plan]->XPos(cur_game->tick) - 1;
+      destr.y = sys->planets[plan]->YPos(cur_game->tick) - 1;
       destr.w = 3;
       destr.h = 3;
       SDL_FillRect(screen, &destr, 0xFFFF00FF);
+      SDL_UpdateRect(screen, destr.x, destr.y, destr.w, destr.h);
       }
     }
-  memset(mo, 0, sizeof(mo));
-  update_buttons();
-
-  SDL_UpdateRect(screen, 0, 0, 0, 0);
+  lasttick = cur_game->tick;
   }
 
 void page_clicked(int mx, int my, int mb) {

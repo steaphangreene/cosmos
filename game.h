@@ -121,7 +121,7 @@ public:
   int s_galaxyview, s_systemview, s_planetview;
   int s_galaxys, s_size, s_races, s_techlevel, s_minerals, s_atmosphere;
 
-  int turn;
+  int turn, tick;
   int num_galaxys;
   Galaxy **galaxys;
   };
