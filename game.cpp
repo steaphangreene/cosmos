@@ -37,9 +37,9 @@ Game::~Game() {
   }
 
 void Game::TakeTurn() {
+  turn++;
   for(int ctr=0; ctr<int(players.size()); ++ctr) players[ctr]->TakeTurn();
   for(int ctr=0; ctr<int(galaxys.size()); ++ctr) galaxys[ctr]->TakeTurn();
-  turn++;
   }
 
 void Game::Randomize() {

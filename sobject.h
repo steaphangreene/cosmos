@@ -9,6 +9,7 @@ class System;
 
 class SObject {
 public:
+  SObject(SObject *o);
   SObject(System *s, int orb);
   virtual ~SObject();
   virtual int SType();
@@ -18,14 +19,25 @@ public:
   System *Sys() { return system; };
   int OnFrame() { return frame; }
 
-  void SetPos(int x, int y, int f=0) { xpos = x; ypos = y; frame = f; };
+  virtual int Owner();
+
+  SObject *Location() { return location; };
+  SObject *Destination() { return destination; };
+  void Arrive();
+
+  void ComputeSPos(int);
   int SXPos(int);
   int SYPos(int);
+  void ComputeGPos(int);
+  int GXPos(int);
+  int GYPos(int);
 
 protected:
   System *system;
-  int orbit, startturn, startpos, period;
-  int frame, xpos, ypos;
+  int orbit, startpos, period;
+  int frame, sxpos, sypos, gxpos, gypos;
+  SObject *location, *destination;
+  int depart_turn, arrive_turn;
   };
 
 #endif

@@ -42,13 +42,13 @@ void Colony::Init(int initial) {
       objs.push_back(ctr);
       oqty.push_back(0);
       if(initial && cur_tree->Homeworld(ctr) > 0) {
-	planet->Sys()->fleets.push_back(new Fleet(planet->Sys(), owner, tc->names));
+	planet->Sys()->fleets.push_back(new Fleet(planet, owner, tc->names));
 	for(int shp=0 ; shp < cur_tree->Homeworld(ctr); ++shp) {
 	  ((Fleet*)planet->Sys()->fleets[fn])->ships.push_back(new Ship(ctr, owner));
 	  (*(((Fleet*)planet->Sys()->fleets[fn])->ships.end()-1))->AddCrew(
 		(*(((Fleet*)planet->Sys()->fleets[fn])->ships.end()-1))->MaxCrew());
 	  }
-	((Fleet*)(*(planet->Sys()->fleets.end()-1)))->loc = planet;
+	//((Fleet*)(*(planet->Sys()->fleets.end()-1)))->location = planet;
 	++fn;
 	}
       }
@@ -208,12 +208,12 @@ void Colony::TakeTurn() {
 	indus -= need-prog[0];
 	if(tc->type == TECH_SHIP) {
 	  if(planet) {
-	    Fleet *flt = new Fleet(planet->Sys(), owner, tc->names);
+	    Fleet *flt = new Fleet(planet, owner, tc->names);
 	    planet->Sys()->fleets.push_back(flt);
 	    flt->ships.push_back(new Ship(projs[0], owner));
 	    flt->ships[0]->AddCrew(flt->ships[0]->MaxCrew());
 	    population -= flt->ships[0]->MaxCrew();
-	    flt->loc = planet;
+	    //flt->location = planet;
 	    }
           }
 	else {
@@ -246,6 +246,8 @@ void Colony::LandShip(Ship *s) {
 	  break;
 	  }
 	}
+      }break;
+    case(SCLASS_TRANSPORT): {
       }break;
     default: {
       fprintf(stderr, "How the fuck did you land THAT on a planet?!?\n");

@@ -7,27 +7,23 @@ using namespace std;
 
 extern int max_factions;
 
-Fleet::Fleet(System *s, int o, const char *nm) : SObject(s, 0) {
+Fleet::Fleet(SObject *s, int o, const char *nm) : SObject(s) {
   detected.resize(max_factions, 0);
   detected[o] = 1;
   name = nm;
   owner = o;
   frame = 0;
-  loc = NULL;
-  dest = NULL;
   targ = NULL;
-  prog = -1;
-  trip = 0;
   dist = -1;
   }
 
 Fleet::~Fleet() {
   vector<SObject *>::iterator cur;
-  if(loc) {
-    cur = loc->Sys()->fleets.begin();
-    while(cur < loc->Sys()->fleets.end()) {
+  if(system) {
+    cur = system->fleets.begin();
+    while(cur < system->fleets.end()) {
       if(*cur == this) {
-	cur = loc->Sys()->fleets.erase(cur);
+	cur = system->fleets.erase(cur);
 	continue;
 	}
       ++cur;
@@ -35,21 +31,10 @@ Fleet::~Fleet() {
     }
   }
 
-void Fleet::Arrive() {
-  prog = -1;
-  loc = dest;
-  dest = NULL;
-  loc->Explore(owner);
-//  loc->Sys()->FleetLeaves(this);
-  }
-
 void Fleet::TakeTurn() {
   targ = NULL;
   dist = -1;
-  if(prog >= 0) {
-    ++prog;
-    if(prog >= abs(trip)) Arrive();
-    }
+  SObject::TakeTurn();
   for(int ctr=0; ctr<int(ships.size()); ++ctr) {
     ships[ctr]->TakeTurn();
     }
@@ -65,11 +50,10 @@ int Fleet::TimeToGalactic(int sqdist) {
 
 void Fleet::Engage() {
   if(targ == NULL) return;
-  dest = targ;
-  trip = dist;
-//  loc->Sys()->FleetArrives(this);
-  prog = 0;
-  if(trip == 0) Arrive();
+  destination = targ;
+  depart_turn = cur_game->turn;
+  arrive_turn = cur_game->turn + dist;
+  if(arrive_turn == depart_turn) Arrive();
   }
 
 void Fleet::SetCourse(Planet *p, int d) {

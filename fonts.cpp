@@ -81,43 +81,77 @@ font *font_init() {
   return f;
   }
 
-int string_len(const char *str, font *f) {
-  int ret=0;
+int string_length(const char *str, font *f) {
+  int ret=0, ln=0;
   for(int ctr=0; ctr<int(strlen(str)); ++ctr) {
-    ret += f->len[str[ctr]];
+    if(str[ctr] == '\r') { ret = ret >? ln; ln = 0; }
+    if(str[ctr] == '\t') { ln += 64; ln &= (~(63)); }
+    else { ln += f->len[str[ctr]]; }
+    }
+  return ret >? ln;
+  }
+
+int string_height(const char *str, font *f) {
+  int ret=22;
+  for(int ctr=0; ctr<int(strlen(str)); ++ctr) {
+    if(str[ctr] == '\n') ret += 24;
     }
   return ret;
   }
 
-void string_draw(SDL_Surface *s, int x, int y, font *f, const char *t) {
+SDL_Surface *get_string(font *f, const char *t) {
   SDL_Rect sr, dr;
-  int xpos = x;
+  int xpos = 0;
   sr.y = 0;
   sr.h = 24;
-  dr.y = y;
+  dr.y = 0;
 
+  int xs = string_length(t, f);
+  int ys = string_height(t, f);
+
+  SDL_Surface *tmp = SDL_CreateRGBSurface(SDL_SWSURFACE|SDL_SRCALPHA,
+	xs, ys, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+  SDL_FillRect(tmp, NULL, 0);
+
+  SDL_SetAlpha(f->img, 0, 255);
   for(int ctr=0; ctr<int(strlen(t)); ++ctr) {
     if(isgraph(t[ctr]) || t[ctr] == ' ') {
       sr.x = f->off[t[ctr]];
       sr.w = f->len[t[ctr]];
       dr.x = xpos;
-      SDL_BlitSurface(f->img, &sr, s, &dr);
+      SDL_BlitSurface(f->img, &sr, tmp, &dr);
       xpos += f->len[t[ctr]];
       }
     else if(t[ctr] == '\n') {
-      xpos = x;
+      xpos = 0;
       dr.y += 24;
       }
+    else if(t[ctr] == '\t') {
+      if(t[ctr] == '\t') { xpos += 64; xpos &= (~(63)); }
+      }
     }
+  SDL_SetAlpha(f->img, SDL_SRCALPHA|SDL_RLEACCEL, 255);
+
+  SDL_Surface *ret = SDL_DisplayFormatAlpha(tmp);
+  SDL_FreeSurface(tmp);
+  SDL_SetAlpha(ret, SDL_SRCALPHA|SDL_RLEACCEL, 255);
+  return ret;
+  }
+
+void string_draw(SDL_Surface *s, int x, int y, font *f, const char *t) {
+  SDL_Rect fr = {x, y, 0, 0};
+  SDL_Surface *mes = get_string(f, t);
+  SDL_BlitSurface(mes, NULL, s, &fr);
+  SDL_FreeSurface(mes);
   }
 
 void string_drawc(SDL_Surface *s, int x, int y, font *f, const char *t) {
-  x -= string_len(t, f)/2;
+  x -= string_length(t, f)/2;
   string_draw(s, x, y, f, t);
   }
 
 void string_drawr(SDL_Surface *s, int x, int y, font *f, const char *t) {
-  x -= string_len(t, f);
+  x -= string_length(t, f);
   string_draw(s, x, y, f, t);
   }
 

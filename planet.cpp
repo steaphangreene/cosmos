@@ -100,3 +100,8 @@ int Planet::ExploredBy(int n) {
 void Planet::Explore(int n) {
   explored[n] = 1;
   }
+
+int Planet::Owner() {
+  if(colonies.size() < 1) return -1;
+  return colonies[0]->Owner();
+  }

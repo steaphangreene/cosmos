@@ -19,6 +19,7 @@ public:
   Planet(System *s, int ord, int sz, int min, int atmos);
   ~Planet();
   int Type();
+  virtual int Owner();
 
   int Radiation();
   int Atmosphere();

@@ -51,14 +51,14 @@ void panel_draw_fleet() {
     string_draw(screen, 816, 13+24*(line++), cur_font[clr], buf);
     }
 
-  if(flt->Progress() == -1 && flt->ships.size() > 1) {
+  if((!flt->Destination()) && flt->ships.size() > 1) {
     buttlist[PANEL_FLEET][BUTTON_SPLIT] =		9;
     }
   else {
     buttlist[PANEL_FLEET][BUTTON_SPLIT] =		0;
     }
 
-  if(flt->CanLand() && page == PAGE_SYSTEM && flt->Progress() == -1) {
+  if(flt->CanLand() && page == PAGE_SYSTEM && (!flt->Destination())) {
     buttlist[PANEL_FLEET][BUTTON_LAND] =	10;
     mo[BUTTON_LAND] = -1;
     }
@@ -138,15 +138,15 @@ void button_clicked_fleet(int button) {
   Fleet *flt = cur_fleet;
   if(button == BUTTON_LAND) {
     if(!flt->CanLand()) return;
-    if(flt->Location()->colonies.size() < 1) {
-      flt->Location()->colonies.push_back(
-	new Colony(flt->Owner(), flt->Location())
+    if(((Planet*)flt->Location())->colonies.size() < 1) {
+      ((Planet*)flt->Location())->colonies.push_back(
+	new Colony(flt->Owner(), ((Planet*)flt->Location()))
 	);
       }
 
     int which = 0;
     while(!flt->ships[which]->CanLand()) ++which;
-    flt->Location()->colonies[0]->LandShip(flt->ships[which]);
+    ((Planet*)flt->Location())->colonies[0]->LandShip(flt->ships[which]);
     flt->ships.erase(flt->ships.begin()+which);
     if(flt->ships.size() < 1) {
       delete flt;
@@ -159,8 +159,8 @@ void button_clicked_fleet(int button) {
   if(button == BUTTON_SPLIT) {
     vector<Ship*>::iterator shp = cur_fleet->ships.begin()+1;
     for(; shp != cur_fleet->ships.end(); ++shp) {
-      Fleet *newfleet = new Fleet(cur_fleet->Sys(), cur_fleet->owner, cur_fleet->name.c_str());
-      newfleet->loc = cur_fleet->loc;
+      Fleet *newfleet = new Fleet(cur_fleet->Location(), cur_fleet->owner, cur_fleet->name.c_str());
+      //newfleet->location = cur_fleet->location;
       newfleet->ships.push_back(*shp);
       newfleet->Location()->Sys()->fleets.push_back(newfleet);
       }

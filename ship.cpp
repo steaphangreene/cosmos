@@ -2,6 +2,7 @@
 #include "techtree.h"
 
 const char *sclass_name[SCLASS_MAX] = {
+  "Transport",
   "Colonizer",
   "Fighter",
   "Colony Ship",
@@ -18,6 +19,8 @@ Ship::Ship(int tec, int own) {
   maxcrew = tc->crew;
   crew = 0;
   switch(sclass) {
+    case(SCLASS_TRANSPORT): {
+      } break;
     case(SCLASS_COLONIZER): {
       } break;
     case(SCLASS_COLONYSHIP): {
@@ -36,6 +39,6 @@ void Ship::TakeTurn() {
   }
 
 int Ship::CanLand() {
-  if(sclass == SCLASS_COLONIZER || sclass == SCLASS_COLONYSHIP) return 1;
+  if(sclass <= SCLASS_COLONIZER || sclass == SCLASS_COLONYSHIP) return 1;
   return 0;
   }

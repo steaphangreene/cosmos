@@ -42,11 +42,17 @@ void TechTree::init_tiny(int techl, int devl) {
 	"The mining of the resources of a planet's natural satellites.",
 	30, 100, 10, 100, 0, 0, 0, 0,
 	-1, -1, -1, -1));
+  start[lst.size()] = 0;
+  lst.push_back(new Tech(TECH_SHIP, "Transport", "Transports",
+	"A large, cheap one-use ship used to transport 100 Million people\n"
+	"from one colony to another within a system.",
+	50, 10, 4, 100, 0, 0, 0, SCLASS_TRANSPORT,
+	TECH_TINY_CITY, -1, -1, -1));
   start[lst.size()] = 1;
   lst.push_back(new Tech(TECH_SHIP, "Colonizer", "Colonizers",
 	"A massive system ship containing a portable self-contained city\n"
 	"which can be landed on another planet in the system to establish\n"
-	"or enhance a colony",
+	"or enhance a colony.",
 	75, 200, 4, 1000, 0, 10, 10, SCLASS_COLONIZER,
 	TECH_TINY_CITY, -1, -1, -1));
   start[lst.size()] = 2;
@@ -57,7 +63,7 @@ void TechTree::init_tiny(int techl, int devl) {
   start[lst.size()] = 0;
   lst.push_back(new Tech(TECH_SHIP, "Colony Ship", "Colony Ships",
 	"A massive hyperspace ship containing a portable self-contained city\n"
-	"which can be landed on a planet to establish or enhance a colony",
+	"which can be landed on a planet to establish or enhance a colony.",
 	150, 1000, 10, 500, 0, 10, 10, SCLASS_COLONYSHIP,
 	TECH_TINY_CITY, TECH_TINY_COLONIZER, -1, -1));
   start[lst.size()] = 0;
@@ -67,7 +73,7 @@ void TechTree::init_tiny(int techl, int devl) {
 	TECH_TINY_FIGHTER, -1, -1, -1));
 
   num_sciences = 0;
-  num_techs = 8;
+  num_techs = int(lst.size()) - num_sciences;
   homeworld = start;
   }
 

@@ -35,6 +35,7 @@ font *cur_font[9];
 SDL_Surface *button[BUTTON_MAX][2];
 
 static SDL_Surface *intro;
+//static SDL_Surface *credg;
 
 int lastpage = PAGE_INVALID, page = PAGE_ROOT;
 int lastpanel = PANEL_NONE, panel = PANEL_NONE;
@@ -79,7 +80,7 @@ SDL_Surface *build_button0(const char *label) {
   if(!base0) base0 = get_blank0_image();
   SDL_Surface *s = SDL_DisplayFormat(base0);
 
-  int len = string_len(label, cur_font[4]);
+  int len = string_length(label, cur_font[4]);
   string_draw(s, 100-(len/2), 13, cur_font[4], label);
   return s;
   }
@@ -88,8 +89,8 @@ SDL_Surface *build_button1(const char *label) {
   if(!base1) base1 = get_blank1_image();
   SDL_Surface *s = SDL_DisplayFormat(base1);
 
-  int len = string_len(label, cur_font[4]);
-  string_draw(s, 100-(len/2), 13, cur_font[4], label);
+  int len = string_length(label, cur_font[4]);
+  string_draw(s, 100-(len/2), 13, cur_font[0], label);
   return s;
   }
 
@@ -155,6 +156,10 @@ void page_cleanup(int pag) {
   }
 
 void page_init() {
+  if(page == PAGE_ROOT) {
+//    set_sprite(1, credg);
+//    move_sprite(1, 10, 128);
+    }
   if(page == PAGE_GALAXY) {
     page_init_galaxy();
     }
@@ -324,6 +329,8 @@ void gui_init() {
     SDL_FreeSurface(tmp);
     }
   string_drawr(intro, 768, 704, cur_font[4], version);
+
+//  credg = get_string(cur_font[4], credits);
 
   button[BUTTON_RESUMEGAME][0] = build_button0("Resume Game");
   button[BUTTON_RESUMEGAME][1] = build_button1("Resume Game");
@@ -506,10 +513,12 @@ void page_draw() {
   SDL_Rect pgr = {0, 0, 800, 768};
   SDL_FillRect(screen, &pgr, 0);
 
-  if(page == PAGE_ROOT) SDL_BlitSurface(intro, NULL, screen, NULL);
+  if(page == PAGE_ROOT) {
+    SDL_BlitSurface(intro, NULL, screen, NULL);
+    }
   if(page == PAGE_NEW) {
     for(int set=0; set<num_configs; ++set) {
-      int xp = 256-string_len(config[set][0], cur_font[4]);
+      int xp = 256-string_length(config[set][0], cur_font[4]);
       string_draw(screen, xp, 12+24*set, cur_font[4], config[set][0]);
       if(config[set][cur_game->working_setting[set]+1][0] != '@') {
 	string_draw(screen, 270, 12+24*set, cur_font[4],
@@ -562,7 +571,10 @@ void panel_update() {
   }
 
 void page_update() {
-  if(page == PAGE_PLANET) {
+  if(page == PAGE_ROOT) {
+    //move_sprite(1, 10, 128);
+    }
+  else if(page == PAGE_PLANET) {
     page_update_planet();
     }
   else if(page == PAGE_GALAXY) {

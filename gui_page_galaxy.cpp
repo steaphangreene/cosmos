@@ -42,6 +42,8 @@ void page_cleanup_galaxy() {
   }
 
 void page_draw_galaxy() {
+  ++cur_game->frame;
+
   SDL_Rect rec = {0, 0, 3, 3};
   for(int snum=0; snum < cur_game->galaxys[cur_galaxy]->num_systems; ++snum) {
     System *sys = cur_game->galaxys[cur_galaxy]->systems[snum];
@@ -65,9 +67,9 @@ void page_draw_galaxy() {
     if(present.size() > 0) {
       for(int ctr=0; ctr<int(present.size()); ++ctr) {
 	SDL_Rect rec2 = {0, 0, 4, 4};
-	((Fleet*)present[ctr])->SetPos(sys->xpos + 8,  sys->ypos + 6*ctr - 2);
-	rec2.x = present[ctr]->SXPos(cur_game->turn) - 2;
-	rec2.y = present[ctr]->SYPos(cur_game->turn) - 2;
+	//((Fleet*)present[ctr])->SetPos(sys->xpos + 8,  sys->ypos + 6*ctr - 2);
+	rec2.x = present[ctr]->GXPos(cur_game->turn) - 2;
+	rec2.y = present[ctr]->GYPos(cur_game->turn) - 2;
 	SDL_FillRect(screen, &rec2,
 		color3(cur_game->players[((Fleet*)present[ctr])->Owner()]->color));
 	}
@@ -95,8 +97,8 @@ void page_clicked_galaxy(int mx, int my, int mb) {
 /*
   for(int flt=0; flt < int(cur_game->fleets.size()); ++flt) {
     if((!cheat1) && (!cur_game->fleets[flt]->DetectedBy(local_player))) continue;
-    offx = abs(cur_game->fleets[flt]->SXPos(cur_game->turn) - mx);
-    offy = abs(cur_game->fleets[flt]->SYPos(cur_game->turn) - my);
+    offx = abs(cur_game->fleets[flt]->GXPos(cur_game->turn) - mx);
+    offy = abs(cur_game->fleets[flt]->GYPos(cur_game->turn) - my);
     if(offx*offx + offy*offy <= 9) {
       audio_play(click2, 8, 8);
       bfleet = cur_game->fleets[flt];
@@ -119,8 +121,8 @@ void mouse_moved_galaxy(int mx, int my) {
 /*
   for(int flt=0; flt < int(cur_game->fleets.size()); ++flt) {
     if((!cheat1) && (!cur_game->fleets[flt]->DetectedBy(local_player))) continue;
-    offx = abs(cur_game->fleets[flt]->SXPos(cur_game->turn) - mx);
-    offy = abs(cur_game->fleets[flt]->SYPos(cur_game->turn) - my);
+    offx = abs(cur_game->fleets[flt]->GXPos(cur_game->turn) - mx);
+    offy = abs(cur_game->fleets[flt]->GYPos(cur_game->turn) - my);
     if(offx*offx + offy*offy <= 9) {
       if(cur_fleet != cur_game->fleets[flt] || panel != PANEL_FLEET) {
 	if(!mouse_over) {
@@ -132,18 +134,18 @@ void mouse_moved_galaxy(int mx, int my) {
 		&& bfleet != cur_game->fleets[flt]) {
 	  update_sprite(1);
 	  SDL_Surface *line = getline(
-		bfleet->SXPos(cur_game->turn),
-		bfleet->SYPos(cur_game->turn),
-		cur_game->fleets[flt]->SXPos(cur_game->turn),
-		cur_game->fleets[flt]->SYPos(cur_game->turn),
+		bfleet->GXPos(cur_game->turn),
+		bfleet->GYPos(cur_game->turn),
+		cur_game->fleets[flt]->GXPos(cur_game->turn),
+		cur_game->fleets[flt]->GYPos(cur_game->turn),
 		0xFFFFFFFF, 0x0F0F0F0F
 		);
 	  set_sprite(1, line);
 	  move_sprite(1,
-		bfleet->SXPos(cur_game->turn)
-			<? cur_game->fleets[flt]->SXPos(cur_game->turn),
-		bfleet->SYPos(cur_game->turn)
-			<? cur_game->fleets[flt]->SYPos(cur_game->turn)
+		bfleet->GXPos(cur_game->turn)
+			<? cur_game->fleets[flt]->GXPos(cur_game->turn),
+		bfleet->GYPos(cur_game->turn)
+			<? cur_game->fleets[flt]->GYPos(cur_game->turn)
 		);
 	  update_sprite(1);
 	  }
@@ -169,17 +171,17 @@ void mouse_moved_galaxy(int mx, int my) {
 	if(panel == PANEL_FLEET) {
 	  update_sprite(1);
 	  SDL_Surface *line = getline(
-		cur_fleet->SXPos(cur_game->turn),
-		cur_fleet->SYPos(cur_game->turn),
+		cur_fleet->GXPos(cur_game->turn),
+		cur_fleet->GYPos(cur_game->turn),
 		cur_game->galaxys[cur_galaxy]->systems[sys]->xpos,
 		cur_game->galaxys[cur_galaxy]->systems[sys]->ypos,
 		0xFFFFFFFF, 0x0F0F0F0F
 		);
 	  set_sprite(1, line);
 	  move_sprite(1,
-		cur_fleet->SXPos(cur_game->turn)
+		cur_fleet->GXPos(cur_game->turn)
 			<? cur_game->galaxys[cur_galaxy]->systems[sys]->xpos,
-		cur_fleet->SYPos(cur_game->turn)
+		cur_fleet->GYPos(cur_game->turn)
 			<? cur_game->galaxys[cur_galaxy]->systems[sys]->ypos
 		);
 	  update_sprite(1);

@@ -1,1 +1,28 @@
 const char *version = VERSION;
+
+const char *credits =
+"Primary Developer:\n"
+"	Steaphan 'Stea' Greene - FKA Insomnia <stea@core.binghamton.edu>\n"
+"\n"
+"Graphics and Art:\n"
+"	Steaphan 'Stea' Greene - FKA Insomnia <stea@core.binghamton.edu>\n"
+"\n"
+"Music:\n"
+"	Wyatt Peterson <wyatt@binghamton.edu>\n"
+"\n"
+"Intro Screen:\n"
+"	Image Courtesy of NASA's JPL: http://jpl.nasa.gov/\n"
+"	Touched up by The Gimp: http://www.gimp.org/\n"
+"\n"
+"Testers:\n"
+"	Wyatt Peterson <wyatt@binghamton.edu>\n"
+"	Sandor Szatmari <inkhead@inkhead.org>\n"
+"\n"
+"Hardware Access Providers:\n"
+"	Steaphan 'Stea' Greene - FKA Insomnia <stea@core.binghamton.edu>\n"
+"	Sandor Szatmari <inkhead@inkhead.org>\n"
+"	Binghamton Univ. Comp. Sci. Dept: http://www.cs.binghamton.edu/\n"
+"\n"
+"Interface Libraries:\n"
+"	SDL: http://www.libsdl.org/\n"
+"";
