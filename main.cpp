@@ -27,6 +27,7 @@ Uint32 ticktock(Uint32 interval, void *param) {
   }
 
 int main(int argc, char **argv) {
+  printf("This is COSMOS - version %s\n", VERSION);
   if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER|DEBUG)) {
     fprintf(stderr, "Error initializing SDL!\n");
     exit(1);

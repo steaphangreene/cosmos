@@ -1,4 +1,4 @@
-TSTR:=  $(shell date --utc +"%Y%m%d%H%M")
+TSTR:=  $(shell date -u +"%Y%m%d%H%M")
 
 BIN:=	cosmos.$(shell uname)-$(shell arch)
 BTAR:=	cosmos_binary.tar.gz
@@ -13,12 +13,12 @@ BINS:=	        cosmos.exe cosmos.Linux-i686 cosmos.Linux-i586 \
 
 
 # Debugging settings
-#CC:=	g++$(COSMOS_CTAIL) -DDEBUG=SDL_INIT_NOPARACHUTE -pipe -Wall `sdl-config --cflags` -g $(COSMOS_FLAGS)
+#CC:=	g++$(COSMOS_CTAIL) -DVERSION=\"pre$(TSTR)\" -DDEBUG=SDL_INIT_NOPARACHUTE -pipe -Wall `sdl-config --cflags` -g $(COSMOS_FLAGS)
 #LIBS:=	`sdl-config --libs` -lefence $(COSMOS_LIBS)
 #STRIP:=	touch
 
 # Production settings
-CC:=	g++$(COSMOS_CTAIL) -O2 -pipe -Wall `sdl-config --cflags` $(COSMOS_FLAGS)
+CC:=	g++$(COSMOS_CTAIL) -DVERSION=\"pre$(TSTR)\" -O2 -pipe -Wall `sdl-config --cflags` $(COSMOS_FLAGS)
 LIBS:=	`sdl-config --libs` $(COSMOS_LIBS)
 STRIP:=	strip
 
@@ -28,48 +28,62 @@ OBJS:=	main.o gui.o audio.o fonts.o graphics.o \
 	ship.o fleet.o game.o galaxy.o system.o planet.o satellite.o player.o \
 	techtree.o tech_tiny.o
 
-WCC:=   win32-gcc -O2 -pipe -Wall `win32-exec sdl-config --cflags` -s
+WCC:=   win32-gcc -DVERSION=\"pre$(TSTR)\" -O2 -pipe -Wall `win32-exec sdl-config --cflags` -s
 WLIBS:= `win32-exec sdl-config --libs` -lstdc++
 WOBJS:= $(shell echo $(OBJS) | sed 's-\.o-.win32_o-g')
 
 local:	$(BIN)
 
-all:	$(BINS) graphics/*.raw
+clean:	.
+	rm -f *.o *.win32_o
+
+%.o:	%.cpp 
+	$(CC) -c $<
+
+dep:	deps.mk
+
+deps.mk:	*.cpp *.h data/*.h
+	gcc -MM `sdl-config --cflags` *.cpp > deps.mk
+
+include deps.mk
+
+$(BIN):	$(OBJS)
+	$(CC) -o $@ $(OBJS) $(LIBS)
+	$(STRIP) $@
+
+########THIS IS WHERE IT SPLITS OFF FROM THE LOCAL FILE!
+
+all:	cosmos_src.tar.gz $(BINS) graphics/*.raw
 
 cosmos.Linux-i586:	cosmos_src.tar.gz $(OBJS)
 	scp cosmos_src.tar.gz reactor:
-	ssh reactor "tar xzf cosmos_src.tar.gz; cd cosmos/; make -j2"
+	ssh reactor "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp TSTR=$(TSTR) -j2"
 	scp reactor:cosmos/$@ .
 	ssh reactor rm -rf cosmos cosmos_src.tar.gz
 
 cosmos.Linux-sparc64:	cosmos_src.tar.gz $(OBJS)
 	scp cosmos_src.tar.gz beta:
-	ssh beta "tar xzf cosmos_src.tar.gz; cd cosmos/; make -j2"
+	ssh beta "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp TSTR=$(TSTR) -j2"
 	scp beta:cosmos/$@ .
 	ssh beta rm -rf cosmos cosmos_src.tar.gz
 
 cosmos.SunOS-sun4:	cosmos_src.tar.gz $(OBJS)
 	scp cosmos_src.tar.gz topaz:
-	ssh topaz "tar xzf cosmos_src.tar.gz; cd cosmos/; make -j8"
+	ssh topaz "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp TSTR=$(TSTR) -j8"
 	scp topaz:cosmos/$@ .
 	ssh topaz rm -rf cosmos cosmos_src.tar.gz
 
 cosmos.Darwin-ppc:	cosmos_src.tar.gz $(OBJS)
 	scp -P 2222 cosmos_src.tar.gz inkhead.org:
-	ssh -p 2222 inkhead.org "tar xzf cosmos_src.tar.gz; cd cosmos/; make"
+	ssh -p 2222 inkhead.org "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp TSTR=$(TSTR)"
 	scp -P 2222 inkhead.org:cosmos/$@ .
 	ssh -p 2222 inkhead.org rm -rf cosmos cosmos_src.tar.gz
 
 cosmos.Linux-ppc:	cosmos_src.tar.gz $(OBJS)
-	scp -P 2222 cosmos_src.tar.gz 128.226.125.100:
-	ssh -p 2222 128.226.125.100 "tar xzf cosmos_src.tar.gz; cd cosmos/; make"
-	scp -P 2222 128.226.125.100:cosmos/$@ .
-	ssh -p 2222 128.226.125.100 rm -rf cosmos cosmos_src.tar.gz
-
-clean:	.
-	rm -f *.o *.win32_o
-
-distrib:	$(BTAR) $(DTAR)
+	scp -P 2223 cosmos_src.tar.gz inkhead.org:
+	ssh -p 2223 inkhead.org "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp TSTR=$(TSTR)"
+	scp -P 2223 inkhead.org:cosmos/$@ .
+	ssh -p 2223 inkhead.org rm -rf cosmos cosmos_src.tar.gz
 
 $(BTAR):	cosmos $(BINS)
 	rm -f $(BTAR)
@@ -88,7 +102,7 @@ $(DTAR):	sounds/* graphics/*
 
 upload:	.updatedweb
 
-.updatedweb:	.buploaded .duploaded
+.updatedweb:	cosmos_src.tar.gz .buploaded .duploaded
 	ssh warp "cd public_html/cosmos; make"
 	touch .updatedweb
 
@@ -100,10 +114,15 @@ upload:	.updatedweb
 	scp cosmos_data-*.tar.gz warp:public_html/cosmos/
 	touch .duploaded
 
-cosmos_src.tar.gz:	*.cpp *.[ch] data/*.h Makefile
+make.tmp:	Makefile
+	csplit -f make.tmp. Makefile /########/
+	mv make.tmp.00 make.tmp
+	rm -f make.tmp.*
+
+cosmos_src.tar.gz:	make.tmp *.cpp *.[ch] data/*.h
 	rm -f cosmos_src.tar.gz
 	cd .. ; tar chvf cosmos/cosmos_src.tar \
-		cosmos/*.[hc] cosmos/*.cpp cosmos/data cosmos/Makefile \
+		cosmos/*.[hc] cosmos/*.cpp cosmos/data cosmos/make.tmp \
 		cosmos/cosmos cosmos/CREDITS cosmos/TODO cosmos/*.csh
 	gzip -9 cosmos_src.tar
 
@@ -120,25 +139,11 @@ archive:	.
 		cosmos/*.pov cosmos/graphics cosmos/*.csh
 	gzip -9	~/c/archive/cosmos.$(TSTR).tar
 
-$(BIN):	$(OBJS)
-	$(CC) -o $@ $(OBJS) $(LIBS)
-	$(STRIP) $@
-
 cosmos.exe:	$(WOBJS)
 	$(WCC) -o $@ $(WOBJS) $(WLIBS)
 
-%.o:	%.cpp 
-	$(CC) -c $<
-
 %.win32_o:	%.cpp %.o
 	$(WCC) -c $< -o $@
-
-dep:	deps.mk
-
-deps.mk:	*.cpp *.h data/*.h
-	gcc -MM `sdl-config --cflags` *.cpp > deps.mk
-
-include deps.mk
 
 graphics/planet00.raw:	planet00.pov
 	povray -W768 -H768 planet00.pov

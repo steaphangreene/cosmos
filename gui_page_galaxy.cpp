@@ -28,12 +28,6 @@ void gui_init_galaxy() {
 //  ambient[PAGE_GALAXY] = audio_loadsound("sounds/ambient00.wav");
   }
 
-//void gui_button_clicked_galaxy(int button) {
-//  if(button == BUTTON_TURN) {
-//    cur_game->TakeTurn();
-//    }
-//  }
-
 void page_init_galaxy() {
   if(panel < PANEL_GAME) panel = PANEL_GAME;
   bfleet = cur_fleet;

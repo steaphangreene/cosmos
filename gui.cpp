@@ -407,16 +407,14 @@ void button_clicked(int button) {
     case(PANEL_SHIP): {
       button_clicked_ship(button);
       } break;
-    }
-  switch(page) {
-    case(PAGE_ROOT): {
+    case(PANEL_ROOT): {
       switch(button) {
 	case(BUTTON_QUITGAME): {
 	  done = 1;
 	  } break;
 	}
       } break;
-    case(PAGE_NEW): {
+    case(PANEL_NEW): {
       switch(button) {
 	case(BUTTON_RANDOMIZE): {
 	  cur_game->Randomize();
@@ -440,10 +438,16 @@ void button_clicked(int button) {
 	  } break;
 	}
       } break;
-    case(PAGE_SYSOPT): {
+    case(PANEL_SYSOPT): {
       if(button == BUTTON_CANCEL) {
 	memcpy(syscnf, syscnf_back, sizeof(syscnf));
 	audio_setvol(cur_mus, syscnf[0] ? syscnf[1]/20 : 0);
+	}
+      }
+    case(PANEL_GAME): {
+      if(button == BUTTON_TURN) {
+	cur_game->TakeTurn();
+	page_draw();
 	}
       }
     }
