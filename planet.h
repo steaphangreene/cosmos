@@ -1,4 +1,5 @@
 #include <vector>
+#include <deque>
 
 using namespace std;
 
@@ -22,6 +23,7 @@ public:
   int Minerals();
 
   int Industry();
+  int SpareIndustry();
 
   int Growth();
   int GrowthM();
@@ -40,6 +42,8 @@ public:
   Satellite **satellites;
   vector<int> objs;
   vector<int> oqty;
+  deque<int> projs;
+  deque<int> prog;
 
   int claimed;
 private:

@@ -1,3 +1,4 @@
+#include <cmath>
 #include <cstdio>
 
 #include "planet.h"
@@ -62,3 +63,12 @@ int TechTree::Security(int tnum, int tqty, Planet *plan) {
 int TechTree::Happiness(int tnum, int tqty, Planet *plan) {
   return hap_tiny(tnum, tqty, plan);
   }
+
+int tech_reduce(int v, int t) {
+  return 0 >? (v - int(double(v)*log10(double(t)))/4);
+  }
+
+int tech_enhance(int v, int t) {
+  return v;
+  }
+

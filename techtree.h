@@ -17,6 +17,9 @@ enum {	TECH_NONE=0,
 	TECH_SHIPITEM
 	};
 
+int tech_reduce(int, int);
+int tech_enhance(int, int);
+
 class Tech {
 public:
   Tech(int tp, const char *nm, const char *nms, const char *ds,

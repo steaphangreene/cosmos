@@ -95,9 +95,17 @@ int Planet::Minerals() {
   }
 
 int Planet::Industry() {
-  int ind = 0;
+  int ind = Population()/1000;
   for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
     ind += cur_tree->Industry(objs[ctr], oqty[ctr], this);
+    }
+  return 0 >? ind;
+  }
+
+int Planet::SpareIndustry() {
+  int ind = Industry();
+  for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
+    ind -= cur_tree->Upkeep(objs[ctr], oqty[ctr], this);
     }
   return 0 >? ind;
   }
@@ -126,7 +134,7 @@ int Planet::Growth() {
   long long ret = population;
   ret *= Happiness();
   ret *= Security();
-  ret /= 1000000;
+  ret /= 100000000;
   return ret;
   }
 
@@ -134,16 +142,16 @@ int Planet::GrowthM() {
   long long ret = population;
   ret *= Happiness();
   ret *= Security();
-  ret %= 1000000;
+  ret %= 100000000;
   return ret;
   }
 
 int Planet::Happiness() {
-  int hap = FreePop()/10;
+  int hap = FreePop()*100/Population();
   for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
     hap += cur_tree->Happiness(objs[ctr], oqty[ctr], this);
     }
-  return hap;
+  return hap <? 1000;
   }
 
 int Planet::Security() {
@@ -151,7 +159,7 @@ int Planet::Security() {
   for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
     sec += cur_tree->Security(objs[ctr], oqty[ctr], this);
     }
-  return sec;
+  return sec <? 1000;
   }
 
 int Planet::Loyalty() {
@@ -169,4 +177,28 @@ void Planet::TakeTurn() {
   pop_minor %= 1000000;
   population += Growth();
   for(int ctr=0; ctr<num_satellites; ++ctr) satellites[ctr]->TakeTurn();
+  if(SpareIndustry() > 0 && projs.size() > 0) {
+    int indus = SpareIndustry(), need, ctr;
+    Tech *tc;
+    while(projs.size() > 0 && indus > 0) {
+      tc = cur_tree->GetTech(projs[0]);
+      need = tc->icost >? 1;
+      if(prog[0]+indus >= need) {
+	indus -= need-prog[0];
+	for(ctr=0; ctr < (int)objs.size(); ++ctr) {
+	  if(objs[ctr] == projs[0]) { ++oqty[ctr]; break; }
+	  }
+	if(ctr == (int)objs.size()) {
+	  objs.push_back(projs[0]);
+	  oqty.push_back(1);
+	  }
+	projs.pop_front();
+	prog.pop_front();
+	}
+      else {
+	prog[0] += indus;
+	indus = 0;
+	}
+      }
+    }
   }

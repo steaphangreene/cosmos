@@ -175,14 +175,14 @@ void gui_main() {
 	  SDL_WarpMouse(mousex, mousey);
 	  }
 	}
-      else if(event.key.keysym.sym == SDLK_t) {
-	if(event.key.keysym.mod & (KMOD_LCTRL|KMOD_RCTRL)) {
+      else if(event.key.keysym.sym == SDLK_TAB) {
+//	if(event.key.keysym.mod & (KMOD_LCTRL|KMOD_RCTRL)) {
 	  if(cur_game) {
 	    cur_game->TakeTurn();
 	    page_init();
 	    }
 	  }
-	}
+//	}
       }
     else if(event.type == SDL_MOUSEMOTION) {
       if(curbutt != update_buttons()) curbutt = 0;

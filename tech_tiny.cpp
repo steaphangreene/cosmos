@@ -27,7 +27,7 @@ void TechTree::init_tiny(int techl) {
 	"The use of Industry to make population feel secure and be more loyal.",
 	25, 10, 10, 10, -1, -1, 0,
 	-1, -1, -1, -1));
-  lst.push_back(new Tech(TECH_STRUCTURE, "Lunar Mining", "Lunar Mining",
+  lst.push_back(new Tech(TECH_STRUCTURE, "Sat Mine", "Sat Mines",
 	"The mining of the resources of a planet's natural satellites.",
 	30, 100, 10, 100, 0, 0, 0,
 	-1, -1, -1, -1));
@@ -80,6 +80,7 @@ int tmp_tiny(int tnum, int tqty, Planet *plan) {
 
 int upk_tiny(int tnum, int tqty, Planet *plan) {
   int ret = cur_tree->GetTech(tnum)->upkeep * tqty;
+  ret = tech_reduce(ret, cur_tree->GetTech(tnum)->known[plan->claimed]);
   return ret;
   }
 
