@@ -18,6 +18,7 @@ extern unsigned long black;
 
 extern SDL_Surface *screen;
 extern font *cur_font[9];
+extern int click1, click2;
 
 static SDL_Surface *planet[4], *satellite[4];
 
@@ -31,7 +32,8 @@ extern int cur_planet;
 
 void cursor_draw();
 void stats_draw_planet(Planet *);
-void stats_redraw_planet(Planet *, SDL_Rect *);
+
+int selection = -1;
 
 void gui_init_planet() {
   planet[0] = get_alpha_image("graphics/planet00.raw", 768, 768);
@@ -39,17 +41,33 @@ void gui_init_planet() {
   satellite[1] = get_alpha_image("graphics/moon01.raw", 64, 64);
   satellite[2] = get_alpha_image("graphics/satellite00.raw", 8, 8);
 
+  buttlist[PAGE_PLANET][BUTTON_NEWPROJECT] =	10;
   buttlist[PAGE_PLANET][BUTTON_EXIT] =		11;
   pagemap[PAGE_PLANET][BUTTON_EXIT] =		PAGE_SYSTEM;
   }
 
 void gui_button_clicked_planet(int button) {
+  System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+  Planet *plan = sys->planets[cur_planet];
+  switch(button) {
+    case(BUTTON_CANCELPROJECT): {
+      update(800, 12+24*(6+selection), 224, 24*(plan->objs.size()-selection));
+      plan->objs[selection] = plan->objs[plan->objs.size()-1];
+      plan->objs.pop_back();
+      plan->oqty[selection] = plan->oqty[plan->oqty.size()-1];
+      plan->oqty.pop_back();
+      page_init_planet();
+      SDL_Rect butrec = { 800, 576, 224, 64 };
+      SDL_FillRect(screen, &butrec, black);
+      stats_draw_planet(plan);
+      } break;
+    }
   }
 
 void panel_redraw_planet(SDL_Rect *area) {
   Planet *plan;
   plan =cur_game->galaxys[cur_galaxy]->systems[cur_system]->planets[cur_planet];
-  stats_redraw_planet(plan, area);
+  stats_draw_planet(plan);
   }
 
 void page_redraw_planet(SDL_Rect *area) {
@@ -93,6 +111,11 @@ void page_redraw_planet(SDL_Rect *area) {
 
 static int lasttick = -1;
 
+void page_init_planet() {
+  buttlist[PAGE_PLANET][BUTTON_CANCELPROJECT] =	0;
+  selection = -1;
+  }
+
 void page_draw_planet() {
   Planet *plan;
   SDL_Rect destr = {0, 0, 768, 768};
@@ -117,7 +140,6 @@ void page_update_planet() {
       destr.y = sat->YPos(lasttick) - 32;
       SDL_FillRect(screen, &destr, black);
       SDL_BlitSurface(planet[plan->Type()], &srcr, screen, &destr);
-//      if(overlaps(destr, mouser)) cursor_draw();
       update(&destr);
       }
     }
@@ -130,7 +152,6 @@ void page_update_planet() {
       destr.y = sat->YPos(cur_game->tick) - 32;
       SDL_BlitSurface(satellite[sat->Type()], NULL, screen, &destr);
       SDL_BlitSurface(planet[plan->Type()], &srcr, screen, &destr);
-//      if(overlaps(destr, mouser)) cursor_draw();
       update(&destr);
       }
     }
@@ -142,7 +163,6 @@ void page_update_planet() {
       destr.x = sat->XPos(cur_game->tick) - 32;
       destr.y = sat->YPos(cur_game->tick) - 32;
       SDL_BlitSurface(satellite[sat->Type()], NULL, screen, &destr);
-//      if(overlaps(destr, mouser)) cursor_draw();
       update(&destr);
       }
     }
@@ -152,67 +172,69 @@ void page_update_planet() {
 void page_clicked_planet(int mx, int my, int mb) {
   }
 
-static SDL_Surface *panel = NULL;
+void panel_clicked_planet(int mx, int my, int mb) {
+  System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+  Planet *plan = sys->planets[cur_planet];
+  int line = my;
 
-void stats_redraw_planet(Planet *plan, SDL_Rect *area) {
-  SDL_Rect todo = *area;
-  SDL_Rect parea = todo;
-  parea.x -= 800;
-  if(parea.x < 0) {
-    todo.x -= parea.x;
-    todo.w += parea.x;
-    parea = todo;
-    parea.x -= 800;
+  line -= (12+24*6);
+  if(line < 0) return;
+  line /= 24;
+  if(line >= (int)plan->objs.size()) return;
+
+  if(mb == 3) {
+    do_dialog("%s\n\n%s",
+	cur_tree->GetTech(plan->objs[line])->name,
+	cur_tree->GetTech(plan->objs[line])->desc);
     }
-  SDL_BlitSurface(panel, &parea, screen, &todo);
+  else if(mb == 1 && selection != line) {
+    update(800, 12+24*(6+selection), 224, 24);
+    selection = line;
+    audio_play(click2, 8, 8);
+    stats_draw_planet(plan);
+    update(800, 12+24*(6+selection), 224, 24);
+    buttlist[PAGE_PLANET][BUTTON_CANCELPROJECT] =	9;
+    }
   }
 
+static SDL_Surface *panel = NULL;
+
 void stats_draw_planet(Planet *plan) {
-  SDL_Rect panelrec = {0, 0, 224, 768};
-  SDL_Rect screenrec = {800, 0, 224, 768};
+  SDL_Rect screenrec = {800, 12, 224, 768};
+  screenrec.h = 24*(plan->objs.size()+7);
+  SDL_FillRect(screen, &screenrec, black);
 
-  if(panel == NULL) {
-    SDL_Surface *tmp = SDL_CreateRGBSurface(SDL_HWSURFACE,
-	224, 768, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
-    panel = SDL_DisplayFormat(tmp);
-    SDL_FreeSurface(tmp);
-    }
-
-  SDL_FillRect(panel, &panelrec, black);
   char buf[80];
+  int col = 7;
+  if(plan->claimed >= 0) col = cur_game->players[plan->claimed]->color;
 
   int line = 0;
-  sprintf(buf, "Minerals: %d", plan->Minerals());
-  string_draw(panel, 0, 12+24*(line++), cur_font[7], buf);
-  
-  sprintf(buf, "Atmosphere: %d", plan->Atmosphere());
-  string_draw(panel, 0, 12+24*(line++), cur_font[7], buf);
-
   sprintf(buf, "Avg. Temp: %d", plan->Temperature());
-  string_draw(panel, 0, 12+24*(line++), cur_font[7], buf);
+  string_draw(screen, 800, 12+24*(line++), cur_font[col], buf);
 
   sprintf(buf, "Surf. Rad: %d", plan->Radiation());
-  string_draw(panel, 0, 12+24*(line++), cur_font[7], buf);
+  string_draw(screen, 800, 12+24*(line++), cur_font[col], buf);
+
+  sprintf(buf, "Minerals: %d", plan->Minerals());
+  string_draw(screen, 800, 12+24*(line++), cur_font[col], buf);
+  
+  sprintf(buf, "Atmosphere: %d", plan->Atmosphere());
+  string_draw(screen, 800, 12+24*(line++), cur_font[col], buf);
 
   sprintf(buf, "Satellites: %d", plan->num_satellites);
-  string_draw(panel, 0, 12+24*(line++), cur_font[7], buf);
+  string_draw(screen, 800, 12+24*(line++), cur_font[col], buf);
 
   if(plan->claimed >= 0) {
     ++line;
 
-    sprintf(buf, "Player %d", plan->claimed+1);
-    string_draw(panel, 0, 12+24*(line++), cur_font[
-		cur_game->players[plan->claimed]->color], buf);
-
+    int indus = 0;
     for(int ctr=0; ctr<(int)plan->objs.size(); ++ctr) {
+      int clr = col;
+      if(selection == line - 6) clr = 8;
       Tech *tc = cur_tree->GetTech(plan->objs[ctr]);
-//      if(tc->type == TECH_PROJECT || tc->type == TECH_BUILDING) {
-	sprintf(buf, "%s: %d", tc->name, plan->oqty[ctr]);
-	string_draw(panel, 0, 12+24*(line++), cur_font[
-		cur_game->players[plan->claimed]->color], buf);
-//	}
+      indus += cur_tree->Industry(plan->objs[ctr], plan->oqty[ctr], indus, plan);
+      sprintf(buf, "%3d %s: %d", indus >? 0, tc->name, plan->oqty[ctr]);
+      string_draw(screen, 800, 12+24*(line++), cur_font[clr], buf);
       }
     }
-
-  SDL_BlitSurface(panel, NULL, screen, &screenrec);
   }

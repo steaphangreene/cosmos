@@ -104,6 +104,10 @@ void string_draw(SDL_Surface *s, int x, int y, font *f, const char *t) {
       SDL_BlitSurface(f->img, &sr, s, &dr);
       xpos += f->len[t[ctr]];
       }
+    else if(t[ctr] == '\n') {
+      xpos = x;
+      dr.y += 24;
+      }
     }
   }
 

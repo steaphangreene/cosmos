@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cstdlib>
+#include <cstdarg>
 #include <cstring>
 #include <unistd.h>
 
@@ -44,10 +45,13 @@ int cur_galaxy=0;
 int cur_system=0;
 int cur_planet=0;
 
+static char dialog_message[4096] = {0};
+
 SDL_Surface *build_button0(const char *);
 SDL_Surface *build_button1(const char *);
 void gui_button_clicked(int button);
 void page_clicked(int mx, int my, int mb);
+void panel_clicked(int mx, int my, int mb);
 void page_draw();
 void page_update();
 void page_redraw(SDL_Rect *);
@@ -94,6 +98,16 @@ int update_buttons() {
   }
 
 void page_init() {
+  if(page == PAGE_GALAXY) {
+    page_init_galaxy();
+    }
+  if(page == PAGE_SYSTEM) {
+    page_init_system();
+    }
+  if(page == PAGE_PLANET) {
+    page_init_planet();
+    }
+
   page_draw();
 
   buttlist[PAGE_ROOT][BUTTON_RESUMEGAME] = (cur_game->InProgress())? 6 : 0;
@@ -163,9 +177,15 @@ void gui_main() {
 	else if(mousex < 768) {
 	  page_clicked(mousex, mousey, event.button.button);
 	  }
+	else {
+	  panel_clicked(mousex, mousey, event.button.button);
+	  }
 	}
       else if(mousex < 768) {
 	page_clicked(mousex, mousey, event.button.button);
+	}
+      else {
+	panel_clicked(mousex, mousey, event.button.button);
 	}
       }
     else if(event.type == SDL_MOUSEBUTTONUP) {
@@ -224,6 +244,10 @@ void gui_init() {
   button[BUTTON_CLEARALL][1] = build_button1("Clear All");
   button[BUTTON_RANDOMIZE][0] = build_button0("Randomize");
   button[BUTTON_RANDOMIZE][1] = build_button1("Randomize");
+  button[BUTTON_NEWPROJECT][0] = build_button0("New Project");;
+  button[BUTTON_NEWPROJECT][1] = build_button1("New Project");
+  button[BUTTON_CANCELPROJECT][0] = build_button0("Cancel Project");;
+  button[BUTTON_CANCELPROJECT][1] = build_button1("Cancel Project");
 
   buttlist[PAGE_ROOT][BUTTON_LOADGAME] = 7;
   buttlist[PAGE_ROOT][BUTTON_NEWGAME] =		8;
@@ -259,6 +283,8 @@ void gui_init() {
   pagemap[PAGE_SYSOPT][BUTTON_ACCEPT] =		PAGE_ROOT;
   pagemap[PAGE_SYSOPT][BUTTON_CANCEL] =		PAGE_ROOT;
 //  ambient[PAGE_SYSOPT] = audio_loadsound("sounds/ambient00.wav");
+
+  buttlist[PAGE_DIALOG][BUTTON_EXIT] =		11;
 
   music[PAGE_GALAXY] = audio_loadmusic("sounds/music01.wav");
 
@@ -409,6 +435,9 @@ void page_draw() {
 	}
       }
     }
+  if(page == PAGE_DIALOG) {
+    string_draw(screen, 8, 12, cur_font[4], dialog_message);
+    }
   if(page == PAGE_GALAXY) {
     page_draw_galaxy();
     }
@@ -464,4 +493,26 @@ void page_clicked(int mx, int my, int mb) {
   else if(page == PAGE_PLANET) {
     page_clicked_planet(mx, my, mb);
     }
+  }
+
+void panel_clicked(int mx, int my, int mb) {
+  if(page == PAGE_GALAXY) {
+    panel_clicked_galaxy(mx, my, mb);
+    }
+  else if(page == PAGE_SYSTEM) {
+    panel_clicked_system(mx, my, mb);
+    }
+  else if(page == PAGE_PLANET) {
+    panel_clicked_planet(mx, my, mb);
+    }
+  }
+
+void do_dialog(const char *fmt, ...) {
+  va_list stuff;
+  va_start(stuff, fmt);
+  vsprintf(dialog_message, fmt, stuff);
+  va_end(stuff);
+  pagemap[PAGE_DIALOG][BUTTON_EXIT] = page;
+  page = PAGE_DIALOG;
+  page_init();
   }

@@ -1,5 +1,6 @@
 #include <vector>
 
+class Planet;
 
 enum {	TECH_NONE=0,
 	TECH_PROJECT,
@@ -31,7 +32,14 @@ public:
   int NumSciences() { return num_sciences; };
   int NumTechs() { return num_techs; };
 
+  int Minerals(int tnum, int tqty, Planet *plan);
+  int Atmosphere(int tnum, int tqty, Planet *plan);
+  int Industry(int tnum, int tqty, int ind, Planet *plan);
+  int Radiation(int tnum, int tqty, Planet *plan);
+  int Temperature(int tnum, int tqty, Planet *plan);
+
 private:
+  void init_tiny(int);
   vector<Tech *> lst;
   int num_sciences;
   int num_techs;

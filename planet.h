@@ -1,5 +1,8 @@
 #include <vector>
 
+#ifndef PLANET_H
+#define PLANET_H
+
 #include "techtree.h"
 #include "satellite.h"
 
@@ -14,6 +17,7 @@ public:
   int Atmosphere();
   int Temperature();
   int Minerals();
+  int Industry();
   int claimed;
   int num_satellites;
   Satellite **satellites;
@@ -24,3 +28,5 @@ private:
   int order, size, minerals, atmosphere, temperature, radiation;
   int startpos, period;
   };
+
+#endif

@@ -7,6 +7,7 @@ enum {PAGE_INVALID = 0,
 	PAGE_GALAXY,
 	PAGE_SYSTEM,
 	PAGE_PLANET,
+	PAGE_DIALOG,
 	PAGE_MAX
 	};
 
@@ -14,6 +15,8 @@ enum {BUTTON_INVALID = 0,
 	BUTTON_CANCEL,
 	BUTTON_ACCEPT,
 	BUTTON_EXIT,
+	BUTTON_NEWPROJECT,
+	BUTTON_CANCELPROJECT,
 	BUTTON_OPTIONS,
 	BUTTON_RANDOMIZE,
 	BUTTON_RESETALL,
@@ -29,3 +32,5 @@ enum {BUTTON_INVALID = 0,
 
 void gui_init();
 void gui_main();
+void do_dialog(const char *, ...)
+	__attribute__ ((format (printf, 1, 2)));

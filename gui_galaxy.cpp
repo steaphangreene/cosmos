@@ -75,6 +75,9 @@ void page_redraw_galaxy(SDL_Rect *area) {
     }
   }
 
+void page_init_galaxy() {
+  }
+
 void page_draw_galaxy() {
   SDL_Rect rec = {0, 0, 3, 3};
   for(int sys=0; sys < cur_game->galaxys[cur_galaxy]->num_systems; ++sys) {
@@ -107,4 +110,7 @@ void page_clicked_galaxy(int mx, int my, int mb) {
       break;
       }
     }
+  }
+
+void panel_clicked_galaxy(int mx, int my, int mb) {
   }

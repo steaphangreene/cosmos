@@ -15,6 +15,10 @@ using namespace std;
 
 int use_sound = 1;
 
+#ifndef DEBUG
+#define DEBUG	0
+#endif
+
 Uint32 ticktock(Uint32 interval, void *param) {
   SDL_Event ev;
   ev.type = SDL_USEREVENT;
@@ -23,7 +27,7 @@ Uint32 ticktock(Uint32 interval, void *param) {
   }
 
 int main(int argc, char **argv) {
-  if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER)) {
+  if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER|DEBUG)) {
     fprintf(stderr, "Error initializing SDL!\n");
     exit(1);
     }

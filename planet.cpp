@@ -54,19 +54,41 @@ int Planet::Type() {
   }
 
 int Planet::Radiation() {
-  return 0 >? radiation-atmosphere;
+  int rad = radiation-Atmosphere();
+  for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
+    rad += cur_tree->Radiation(objs[ctr], oqty[ctr], this);
+    }
+  return 0 >? rad;
   }
 
 int Planet::Temperature() {
-  return 0 >? temperature;
+  int tmp = temperature;
+  for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
+    tmp += cur_tree->Temperature(objs[ctr], oqty[ctr], this);
+    }
+  return 0 >? tmp;
   }
 
 int Planet::Atmosphere() {
-  return 0 >? atmosphere;
+  int atm = atmosphere;
+  for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
+    atm += cur_tree->Atmosphere(objs[ctr], oqty[ctr], this);
+    }
+  return 0 >? atm;
   }
 
 int Planet::Minerals() {
   int min = minerals;
-//  min += features[FEAT_LUNARMINING] <? num_satellites;
+  for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
+    min += cur_tree->Minerals(objs[ctr], oqty[ctr], this);
+    }
   return 0 >? min;
+  }
+
+int Planet::Industry() {
+  int ind = 0;
+  for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
+    ind += cur_tree->Industry(objs[ctr], oqty[ctr], ind, this);
+    }
+  return 0 >? ind;
   }

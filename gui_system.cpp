@@ -74,6 +74,9 @@ void page_redraw_system(SDL_Rect *area) {
   todo = *area;
   }
 
+void page_init_system() {
+  }
+
 void page_draw_system() {
   SDL_Rect destr = {(768-32)/2, (768-32)/2, 32, 32};
   SDL_BlitSurface(star, NULL, screen, &destr);
@@ -110,3 +113,7 @@ void page_clicked_system(int mx, int my, int mb) {
       }
     }
   }
+
+void panel_clicked_system(int mx, int my, int mb) {
+  }
+

@@ -7,7 +7,7 @@ DTAR:=	cosmos_data.tar.gz
 DTARD:=	cosmos_data-$(TSTR).tar.gz
 
 # Debugging settings
-#CC:=	gcc -pipe -Wall `sdl-config --cflags` -g
+#CC:=	gcc -DDEBUG=SDL_INIT_NOPARACHUTE -pipe -Wall `sdl-config --cflags` -g
 #LIBS:=	`sdl-config --libs` -lefence
 
 # Production settings
