@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <cstring>
 //#include <unistd.h>
 //#include <sys/mman.h>
 
@@ -8,6 +9,8 @@
 #include "data/cursor.h"
 #include "data/blank0.h"
 #include "data/blank1.h"
+#include "data/check0.h"
+#include "data/check1.h"
 #include "data/star00.h"
 #include "data/gstar00.h"
 #include "data/splanet00.h"
@@ -41,6 +44,28 @@ SDL_Surface *get_blank1_image() {
   SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)blank1_image.pixel_data,
 	blank1_image.width, blank1_image.height,
 	32, 4*blank1_image.width,
+	rchan, gchan, bchan, achan);
+  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
+  SDL_FreeSurface(orig);
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
+  return optim;
+  }
+
+SDL_Surface *get_check0_image() {
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)check0_image.pixel_data,
+	check0_image.width, check0_image.height,
+	32, 4*check0_image.width,
+	rchan, gchan, bchan, achan);
+  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
+  SDL_FreeSurface(orig);
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
+  return optim;
+  }
+
+SDL_Surface *get_check1_image() {
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)check1_image.pixel_data,
+	check1_image.width, check1_image.height,
+	32, 4*check1_image.width,
 	rchan, gchan, bchan, achan);
   SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
   SDL_FreeSurface(orig);
@@ -199,6 +224,9 @@ unsigned int color3(int c) {
   }
 
 void toggle_fullscreen() {
+  char drv[16] = {0};
+  SDL_VideoDriverName((char *)drv, 15);
+  if(strcmp(drv, "x11")) return;
   SDL_WM_ToggleFullScreen(framebuffer);
   }
 

@@ -32,6 +32,8 @@ public:
   int GetTechLevel();
   int GetSystemQuality();
 
+  void TakeTurn();
+
 //private:
   void Finalize();
   int started;

@@ -51,30 +51,32 @@ void audio_callback(void *userdata, Uint8 *stream, int len) {
 	free_blocks = it;
 	continue;
 	}
-      if((*sptr)->flags & SOUND_STEREO) { // Stereo Source
-	if((*sptr)->pos+ctr >= (*sptr)->length) {
-	  sptr = &((*sptr)->next);
-	  continue;
+      if((*sptr)->vol > 0) {
+	if((*sptr)->flags & SOUND_STEREO) { // Stereo Source
+	  if((*sptr)->pos+ctr >= (*sptr)->length) {
+	    sptr = &((*sptr)->next);
+	    continue;
+	    }
+	  long val_l = Sint8((*sptr)->data[(*sptr)->pos+ctr+1]);
+	  val_l <<= 8;
+	  val_l |= (*sptr)->data[(*sptr)->pos+ctr+0] & 0xFF;
+	  buf_l += val_l * (*sptr)->vol * 16;
+	  long val_r = Sint8((*sptr)->data[(*sptr)->pos+ctr+3]);
+	  val_r <<= 8;
+	  val_r |= (*sptr)->data[(*sptr)->pos+ctr+2] & 0xFF;
+	  buf_r += val_r * (*sptr)->vol * 16;
 	  }
-	long val_l = Sint8((*sptr)->data[(*sptr)->pos+ctr+1]);
-	val_l <<= 8;
-	val_l |= (*sptr)->data[(*sptr)->pos+ctr+0] & 0xFF;
-	buf_l += val_l * (*sptr)->vol * 16;
-	long val_r = Sint8((*sptr)->data[(*sptr)->pos+ctr+3]);
-	val_r <<= 8;
-	val_r |= (*sptr)->data[(*sptr)->pos+ctr+2] & 0xFF;
-	buf_r += val_r * (*sptr)->vol * 16;
-	}
-      else { // Mono Source with software panning
-	if((*sptr)->pos+(ctr>>1) >= (*sptr)->length) {
-	  sptr = &((*sptr)->next);
-	  continue;
+        else { // Mono Source with software panning
+	  if((*sptr)->pos+(ctr>>1) >= (*sptr)->length) {
+	    sptr = &((*sptr)->next);
+	    continue;
+	    }
+	  long val = Sint8((*sptr)->data[(*sptr)->pos+(ctr>>1)+1]);
+	  val <<= 8;
+	  val |= (*sptr)->data[(*sptr)->pos+(ctr>>1)+0] & 0xFF;
+	  buf_l += val * (*sptr)->vol * (16-(*sptr)->pan);
+	  buf_r += val * (*sptr)->vol * (16+(*sptr)->pan);
 	  }
-	long val = Sint8((*sptr)->data[(*sptr)->pos+(ctr>>1)+1]);
-	val <<= 8;
-	val |= (*sptr)->data[(*sptr)->pos+(ctr>>1)+0] & 0xFF;
-	buf_l += val * (*sptr)->vol * (16-(*sptr)->pan);
-	buf_r += val * (*sptr)->vol * (16+(*sptr)->pan);
 	}
 
       sptr = &((*sptr)->next);
@@ -162,6 +164,16 @@ Sound *audio_loop(int snd, int vol, int pan) {
   s->next = play_blocks;
   play_blocks = s;
   return s;
+  }
+
+void audio_setvol(Sound *s, int v) {
+  if(!audio_initialized) return;
+  if(s) s->vol = v;
+  }
+
+void audio_setpan(Sound *s, int p) {
+  if(!audio_initialized) return;
+  if(s) s->pan = p;
   }
 
 void audio_stop(Sound *s) {

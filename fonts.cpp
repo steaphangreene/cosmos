@@ -111,6 +111,11 @@ void string_draw(SDL_Surface *s, int x, int y, font *f, const char *t) {
     }
   }
 
+void string_drawr(SDL_Surface *s, int x, int y, font *f, const char *t) {
+  x -= string_len(t, f);
+  string_draw(s, x, y, f, t);
+  }
+
 font *font_colored(font *f, unsigned long c) {
   font *ret = new font;
   (*ret) = (*f);

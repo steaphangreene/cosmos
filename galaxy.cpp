@@ -23,3 +23,7 @@ Galaxy::Galaxy(int numsys, int minl, int atmosl, int devl, int nump, Player **pl
       }
     }
   }
+
+void Galaxy::TakeTurn() {
+  for(int ctr=0; ctr<num_systems; ++ctr) systems[ctr]->TakeTurn();  
+  }

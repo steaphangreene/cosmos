@@ -18,6 +18,9 @@ SDL_Surface *get_cursor_image();
 SDL_Surface *get_blank0_image();
 SDL_Surface *get_blank1_image();
 
+SDL_Surface *get_check0_image();
+SDL_Surface *get_check1_image();
+
 SDL_Surface *get_star_image();
 SDL_Surface *get_gstar_image();
 SDL_Surface *get_splanet_image();

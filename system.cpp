@@ -13,11 +13,32 @@ System::System(int xp, int yp, int nump, int minl, int atmosl, int devl, int pl)
     if(pl >= 0 && ctr == 2) {
       planets[ctr] = new Planet(ctr, (rand()%10000)+1, 30, 30);
       planets[ctr]->claimed = pl;
+      planets[ctr]->population = 500;
       for(int ctr2=0; ctr2<cur_tree->NumTechs(); ++ctr2) {
 	Tech *tc = cur_tree->GetTech(ctr2);
-	if(tc->known[pl] && devl/(tc->icost*tc->rcost)) {
+	if(tc->type == TECH_STRUCTURE && tc->known[pl]) {
+				// && devl/(tc->icost*tc->rcost)) {
 	  planets[ctr]->objs.push_back(ctr2);
 	  planets[ctr]->oqty.push_back(devl/(tc->icost*tc->rcost));
+	  planets[ctr]->population += tc->crew * (devl/(tc->icost*tc->rcost));
+	  }
+	}
+      for(int ctr2=0; ctr2<cur_tree->NumTechs(); ++ctr2) {
+	Tech *tc = cur_tree->GetTech(ctr2);
+	if(tc->type == TECH_SHIP && tc->known[pl]) {
+				// && devl/(tc->icost*tc->rcost)) {
+	  planets[ctr]->objs.push_back(ctr2);
+	  planets[ctr]->oqty.push_back(1);
+	  planets[ctr]->population += tc->crew * (devl/(tc->icost*tc->rcost));
+	  }
+	}
+      for(int ctr2=0; ctr2<cur_tree->NumTechs(); ++ctr2) {
+	Tech *tc = cur_tree->GetTech(ctr2);
+	if(tc->type == TECH_PROJECT && tc->known[pl]) {
+				// && devl/(tc->icost*tc->rcost)) {
+	  planets[ctr]->objs.push_back(ctr2);
+	  planets[ctr]->oqty.push_back(1);
+	  planets[ctr]->population += tc->crew * (devl/(tc->icost*tc->rcost));
 	  }
 	}
       }
@@ -42,4 +63,8 @@ System::~System() {
     }
   delete [] planets;
   planets = NULL;
+  }
+
+void System::TakeTurn() {
+  for(int ctr=0; ctr<num_planets; ++ctr) planets[ctr]->TakeTurn();
   }

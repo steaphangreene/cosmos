@@ -24,6 +24,7 @@ static SDL_Surface *planet[4], *satellite[4];
 
 extern int buttlist[PAGE_MAX][BUTTON_MAX];
 extern int pagemap[PAGE_MAX][BUTTON_MAX];
+extern int mo[BUTTON_MAX];
 
 extern int page;
 extern int cur_galaxy;
@@ -31,9 +32,10 @@ extern int cur_system;
 extern int cur_planet;
 
 void cursor_draw();
-void stats_draw_planet(Planet *);
+void stats_draw_planet(Planet *, int update = 0);
+char *popstr(int, int mpop=0);
 
-int selection = -1;
+int selection = -1, grabbed = -1;
 
 void gui_init_planet() {
   planet[0] = get_alpha_image("graphics/planet00.raw", 768, 768);
@@ -41,7 +43,6 @@ void gui_init_planet() {
   satellite[1] = get_alpha_image("graphics/moon01.raw", 64, 64);
   satellite[2] = get_alpha_image("graphics/moon02.raw", 64, 64);
 
-  buttlist[PAGE_PLANET][BUTTON_NEWPROJECT] =	10;
   buttlist[PAGE_PLANET][BUTTON_EXIT] =		11;
   pagemap[PAGE_PLANET][BUTTON_EXIT] =		PAGE_SYSTEM;
   }
@@ -50,16 +51,26 @@ void gui_button_clicked_planet(int button) {
   System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
   Planet *plan = sys->planets[cur_planet];
   switch(button) {
+    case(BUTTON_ABANDON):
     case(BUTTON_CANCELPROJECT): {
-      update(800, 12+24*(6+selection), 224, 24*(plan->objs.size()-selection));
-      plan->objs[selection] = plan->objs[plan->objs.size()-1];
+/*
+      for(int ctr=selection; ctr < int(plan->objs.size()-1); ++ctr) {
+	plan->objs[ctr] = plan->objs[ctr+1];
+	plan->oqty[ctr] = plan->oqty[ctr+1];
+	}
       plan->objs.pop_back();
-      plan->oqty[selection] = plan->oqty[plan->oqty.size()-1];
       plan->oqty.pop_back();
       page_init_planet();
       SDL_Rect butrec = { 800, 576, 224, 64 };
       SDL_FillRect(screen, &butrec, black);
-      stats_draw_planet(plan);
+*/
+      plan->oqty[selection] = 0 >? (plan->oqty[selection] - 1);
+      stats_draw_planet(plan, 1);
+      } break;
+    case(BUTTON_NEWPROJECT):
+    case(BUTTON_BUILD): {
+      plan->oqty[selection] = plan->oqty[selection] + 1;
+      stats_draw_planet(plan, 1);
       } break;
     }
   }
@@ -112,8 +123,12 @@ void page_redraw_planet(SDL_Rect *area) {
 static int lasttick = -1;
 
 void page_init_planet() {
+  buttlist[PAGE_PLANET][BUTTON_NEWPROJECT] =	0;
   buttlist[PAGE_PLANET][BUTTON_CANCELPROJECT] =	0;
+  buttlist[PAGE_PLANET][BUTTON_BUILD] =		0;
+  buttlist[PAGE_PLANET][BUTTON_ABANDON] =	0;
   selection = -1;
+  grabbed = -1;
   }
 
 void page_draw_planet() {
@@ -177,62 +192,203 @@ void panel_clicked_planet(int mx, int my, int mb) {
   Planet *plan = sys->planets[cur_planet];
   int line = my;
 
-  line -= (12+24*6);
+  line -= 12;
   if(line < 0) return;
   line /= 24;
   if(line >= (int)plan->objs.size()) return;
 
   if(mb == 3) {
     do_dialog("%s\n\n%s",
-	cur_tree->GetTech(plan->objs[line])->name,
+	cur_tree->GetTech(plan->objs[line])->names,
 	cur_tree->GetTech(plan->objs[line])->desc);
     }
-  else if(mb == 1 && selection != line) {
-    update(800, 12+24*(6+selection), 224, 24);
-    selection = line;
-    audio_play(click2, 8, 8);
-    stats_draw_planet(plan);
-    update(800, 12+24*(6+selection), 224, 24);
-    buttlist[PAGE_PLANET][BUTTON_CANCELPROJECT] =	9;
+  else if(mb == 1) {
+    grabbed = line;
+    if(selection != line) {
+      update(800, 12+24*selection, 224, 24);
+      selection = line;
+      audio_play(click2, 8, 8);
+      stats_draw_planet(plan);
+      update(800, 12+24*selection, 224, 24);
+      if(cur_tree->GetTech(plan->objs[line])->type == TECH_PROJECT) {
+	buttlist[PAGE_PLANET][BUTTON_NEWPROJECT] =	9;
+	buttlist[PAGE_PLANET][BUTTON_CANCELPROJECT] =	10;
+	mo[BUTTON_CANCELPROJECT] = -1;
+	mo[BUTTON_NEWPROJECT] = -1;
+	buttlist[PAGE_PLANET][BUTTON_BUILD] =		0;
+	buttlist[PAGE_PLANET][BUTTON_ABANDON] =		0;
+	}
+      else if(cur_tree->GetTech(plan->objs[line])->type == TECH_STRUCTURE) {
+	buttlist[PAGE_PLANET][BUTTON_BUILD] =		9;
+	buttlist[PAGE_PLANET][BUTTON_ABANDON] =		10;
+	mo[BUTTON_BUILD] = -1;
+	mo[BUTTON_ABANDON] = -1;
+	buttlist[PAGE_PLANET][BUTTON_CANCELPROJECT] =	0;
+	buttlist[PAGE_PLANET][BUTTON_NEWPROJECT] =	0;
+	}
+      else if(cur_tree->GetTech(plan->objs[line])->type == TECH_SHIP) {
+	buttlist[PAGE_PLANET][BUTTON_BUILD] =		9;
+	buttlist[PAGE_PLANET][BUTTON_ABANDON] =		10;
+	mo[BUTTON_BUILD] = -1;
+	mo[BUTTON_ABANDON] = -1;
+	buttlist[PAGE_PLANET][BUTTON_CANCELPROJECT] =	0;
+	buttlist[PAGE_PLANET][BUTTON_NEWPROJECT] =	0;
+	}
+      else {
+        SDL_Rect canrec = {800, 768-64*3, 224, 128};
+        SDL_FillRect(screen, &canrec, black);
+	buttlist[PAGE_PLANET][BUTTON_CANCELPROJECT] =	0;
+	buttlist[PAGE_PLANET][BUTTON_NEWPROJECT] =	0;
+	buttlist[PAGE_PLANET][BUTTON_BUILD] =		0;
+	buttlist[PAGE_PLANET][BUTTON_ABANDON] =		0;
+        update(&canrec);
+        }
+      }
     }
   }
 
-void stats_draw_planet(Planet *plan) {
+void stats_draw_planet(Planet *plan, int upd) {
   SDL_Rect screenrec = {800, 12, 224, 768};
+  SDL_Rect screenrectl = {0, 12, 192, 72};
+  SDL_Rect screenrectr = {576, 12, 192, 72};
+  SDL_Rect screenrecbl = {0, 768-24*3-12, 192, 72};
+  SDL_Rect screenrecbr = {576, 768-24*3-12, 192, 72};
   screenrec.h = 24*(plan->objs.size()+7);
   SDL_FillRect(screen, &screenrec, black);
+  SDL_FillRect(screen, &screenrectl, black);
+  SDL_FillRect(screen, &screenrectr, black);
+  SDL_FillRect(screen, &screenrecbl, black);
+  SDL_FillRect(screen, &screenrecbr, black);
+  if(upd) {
+    update(&screenrec);
+    update(&screenrectl);
+    update(&screenrectr);
+    update(&screenrecbl);
+    update(&screenrecbr);
+    }
 
+  int line = 0;
   char buf[80];
   int col = 7;
   if(plan->claimed >= 0) col = cur_game->players[plan->claimed]->color;
 
-  int line = 0;
-  sprintf(buf, "Avg. Temp: %d", plan->Temperature());
-  string_draw(screen, 800, 12+24*(line++), cur_font[col], buf);
 
-  sprintf(buf, "Surf. Rad: %d", plan->Radiation());
-  string_draw(screen, 800, 12+24*(line++), cur_font[col], buf);
+  line = 0;
+  sprintf(buf, "Atmosphere: %d", plan->Atmosphere());
+  string_draw(screen, 5, 13+24*(line++), cur_font[col], buf);
 
   sprintf(buf, "Minerals: %d", plan->Minerals());
-  string_draw(screen, 800, 12+24*(line++), cur_font[col], buf);
+  string_draw(screen, 5, 13+24*(line++), cur_font[col], buf);
   
-  sprintf(buf, "Atmosphere: %d", plan->Atmosphere());
-  string_draw(screen, 800, 12+24*(line++), cur_font[col], buf);
-
   sprintf(buf, "Satellites: %d", plan->num_satellites);
-  string_draw(screen, 800, 12+24*(line++), cur_font[col], buf);
+  string_draw(screen, 5, 13+24*(line++), cur_font[col], buf);
+
+
+  line = 0;
+  sprintf(buf, "Avg. Temp: %d", plan->Temperature());
+  string_drawr(screen, 768, 13+24*(line++), cur_font[col], buf);
+
+  sprintf(buf, "Surf. Rad: %d", plan->Radiation());
+  string_drawr(screen, 768, 13+24*(line++), cur_font[col], buf);
+
 
   if(plan->claimed >= 0) {
-    ++line;
+    line = 0;
+    sprintf(buf, "Pop: %s", popstr(plan->Population(), plan->PopulationM()));
+    string_draw(screen, 12, (768-24*3-11)+24*(line++), cur_font[col], buf);
 
+    sprintf(buf, "Free: %s", popstr(plan->FreePop(), plan->FreePopM()));
+    string_draw(screen, 12, (768-24*3-11)+24*(line++), cur_font[col], buf);
+
+    sprintf(buf, "Growth: %s", popstr(plan->Growth(), plan->GrowthM()));
+    string_draw(screen, 12, (768-24*3-11)+24*(line++), cur_font[col], buf);
+
+
+    line = 0;
+    sprintf(buf, "Loyalty: %d", plan->Loyalty());
+    string_drawr(screen, 768, (768-24*3-11)+24*(line++), cur_font[col], buf);
+
+    sprintf(buf, "Security: %d", plan->Security());
+    string_drawr(screen, 768, (768-24*3-11)+24*(line++), cur_font[col], buf);
+
+    sprintf(buf, "Happiness: %d", plan->Happiness());
+    string_drawr(screen, 768, (768-24*3-11)+24*(line++), cur_font[col], buf);
+
+
+    line = 0;
     int indus = 0;
     for(int ctr=0; ctr<(int)plan->objs.size(); ++ctr) {
       int clr = col;
-      if(selection == line - 6) clr = 8;
+      if(selection == line) clr = 8;
       Tech *tc = cur_tree->GetTech(plan->objs[ctr]);
-      indus += cur_tree->Industry(plan->objs[ctr], plan->oqty[ctr], indus, plan);
-      sprintf(buf, "%3d %s: %d", indus >? 0, tc->name, plan->oqty[ctr]);
-      string_draw(screen, 800, 12+24*(line++), cur_font[clr], buf);
+      indus += cur_tree->Industry(plan->objs[ctr], plan->oqty[ctr], plan);
+      if(plan->oqty[ctr] == 1) {
+	sprintf(buf, "%d %s: %d", indus >? 0, tc->name, plan->oqty[ctr]);
+	}
+      else {
+	sprintf(buf, "%d %s: %d", indus >? 0, tc->names, plan->oqty[ctr]);
+	}
+      string_draw(screen, 800, 13+24*(line++), cur_font[clr], buf);
       }
     }
+  }
+
+void mouse_released_planet() {
+  grabbed = -1;
+  }
+
+void mouse_moved_planet(int mx, int my) {
+  if(grabbed == -1) return;
+
+  System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+  Planet *plan = sys->planets[cur_planet];
+  int line;
+  line = (my - 12)/24;
+  line = (0 >? line) <? (plan->objs.size() - 1);
+  if(mx >= 800 && line != grabbed) {
+    int vec = (line-grabbed)/(abs(line-grabbed));  // Direction: 1 or -1
+    for(int ctr=grabbed; ctr != line; ctr += vec) {
+      int e1 = ctr <? (ctr + vec);
+      int e2 = ctr >? (ctr + vec);
+      int tmpo = plan->objs[e1];
+      int tmpq = plan->oqty[e1];
+      plan->objs[e1] = plan->objs[e2];
+      plan->oqty[e1] = plan->oqty[e2];
+      plan->objs[e2] = tmpo;
+      plan->oqty[e2] = tmpq;
+      }
+    update(800, 12+24*(grabbed<?line), 224, 24*(1+abs(grabbed-line)));
+    selection = line;
+    grabbed = line;
+    stats_draw_planet(plan);
+    audio_play(click2, 8, 8);
+    }
+  }
+
+
+char *popstr(int pop, int mpop) {
+  static char buf[64];
+
+  pop += mpop / 1000000;
+  mpop %= 1000000;
+
+  if(abs(pop) == 0 && abs(mpop) < 1000) {
+    sprintf(buf, "%d", mpop);
+    }
+  if(abs(pop) == 0 && abs(mpop) < 100000) {
+    sprintf(buf, "%d.%dK", mpop/1000, abs((mpop%1000)/100));
+    }
+  else if(abs(pop) == 0) {
+    sprintf(buf, "%dK", mpop/1000);
+    }
+  else if(abs(pop) < 10) {
+    sprintf(buf, "%d.%.2dM", pop, abs(mpop/10000));
+    }
+  else if(abs(pop) < 1000) {
+    sprintf(buf, "%dM", pop);
+    }
+  else {
+    sprintf(buf, "%d.%dG", pop/1000, abs((pop%1000)/100));
+    }
+  return buf;
   }

@@ -11,6 +11,8 @@ TechTree *cur_tree = NULL;
 
 using namespace std;
 
+int max_factions = 64;
+
 void game_init() {
   srand(time(NULL));
   for(int ctr=0; ctr<num_configs; ++ctr) {
@@ -30,11 +32,16 @@ Game::Game() {
   num_galaxys = 0;
   galaxys = NULL;
   started = 0;
-  turn = 0;
   }
 
 Game::~Game() {
   Clear();
+  }
+
+void Game::TakeTurn() {
+  for(int ctr=0; ctr<num_players; ++ctr) players[ctr]->TakeTurn();
+  for(int ctr=0; ctr<num_galaxys; ++ctr) galaxys[ctr]->TakeTurn();
+  turn++;
   }
 
 void Game::Randomize() {
@@ -82,6 +89,7 @@ void Game::Fill() {
   if(started) return;
   Finalize();
   started = 1;
+  turn = 0;
 
   cur_tree = new TechTree(setting[7], setting[8]);
 

@@ -117,3 +117,8 @@ void page_clicked_system(int mx, int my, int mb) {
 void panel_clicked_system(int mx, int my, int mb) {
   }
 
+void mouse_released_system() {
+  }
+
+void mouse_moved_system(int xp, int yp) {
+  }

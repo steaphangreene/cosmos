@@ -20,6 +20,8 @@ Planet::Planet(int ord, int sz, int min, int atmos) {
   order = ord;
   size = sz;
   minerals = min;
+  population = 0;
+  pop_minor = 0;
   atmosphere = atmos;
   temperature = (10-order)*(10-order)*4-240;
   radiation = (10-order)*(10-order)/2;
@@ -27,7 +29,7 @@ Planet::Planet(int ord, int sz, int min, int atmos) {
   int dist = (ord+1)*700;
   period = int(sqrt(double(dist)*double(dist)*double(dist)));
   startpos = rand()&65535;
-  num_satellites = rand()%5;
+  num_satellites = (rand()%4)+1;
   satellites = new (Satellite*)[num_satellites];
   for(int ctr=0; ctr<num_satellites; ++ctr) {
     satellites[ctr] = new Satellite(rand()&65535, sattp[num_satellites][ctr]);
@@ -95,7 +97,76 @@ int Planet::Minerals() {
 int Planet::Industry() {
   int ind = 0;
   for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
-    ind += cur_tree->Industry(objs[ctr], oqty[ctr], ind, this);
+    ind += cur_tree->Industry(objs[ctr], oqty[ctr], this);
     }
   return 0 >? ind;
+  }
+
+int Planet::Population() {
+  return population;
+  }
+
+int Planet::PopulationM() {
+  return pop_minor;
+  }
+
+int Planet::FreePop() {
+  int pop = population;
+  for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
+    pop -= cur_tree->Crew(objs[ctr], oqty[ctr], this);
+    }
+  return pop;
+  }
+
+int Planet::FreePopM() {
+  return pop_minor;
+  }
+
+int Planet::Growth() {
+  long long ret = population;
+  ret *= Happiness();
+  ret *= Security();
+  ret /= 1000000;
+  return ret;
+  }
+
+int Planet::GrowthM() {
+  long long ret = population;
+  ret *= Happiness();
+  ret *= Security();
+  ret %= 1000000;
+  return ret;
+  }
+
+int Planet::Happiness() {
+  int hap = FreePop()/10;
+  for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
+    hap += cur_tree->Happiness(objs[ctr], oqty[ctr], this);
+    }
+  return hap;
+  }
+
+int Planet::Security() {
+  int sec = 0;
+  for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
+    sec += cur_tree->Security(objs[ctr], oqty[ctr], this);
+    }
+  return sec;
+  }
+
+int Planet::Loyalty() {
+  int loy = 0;
+  for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
+    loy += cur_tree->Loyalty(objs[ctr], oqty[ctr], this);
+    }
+  return loy;
+  }
+
+void Planet::TakeTurn() {
+  if(claimed < 0) return;
+  pop_minor += GrowthM();
+  population += pop_minor / 1000000;
+  pop_minor %= 1000000;
+  population += Growth();
+  for(int ctr=0; ctr<num_satellites; ++ctr) satellites[ctr]->TakeTurn();
   }

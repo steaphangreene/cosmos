@@ -35,12 +35,16 @@ void cursor_draw();
 void gui_init_galaxy() {
   gstar = get_gstar_image();
 
+  buttlist[PAGE_GALAXY][BUTTON_TURN] =		10;
   buttlist[PAGE_GALAXY][BUTTON_EXIT] =		11;
   pagemap[PAGE_GALAXY][BUTTON_EXIT] =		PAGE_ROOT;
 //  ambient[PAGE_GALAXY] = audio_loadsound("sounds/ambient00.wav");
   }
 
 void gui_button_clicked_galaxy(int button) {
+  if(button == BUTTON_TURN) {
+    cur_game->TakeTurn();
+    }
   }
 
 void panel_redraw_galaxy(SDL_Rect *area) {
@@ -113,4 +117,10 @@ void page_clicked_galaxy(int mx, int my, int mb) {
   }
 
 void panel_clicked_galaxy(int mx, int my, int mb) {
+  }
+
+void mouse_released_galaxy() {
+  }
+
+void mouse_moved_galaxy(int xp, int yp) {
   }

@@ -7,6 +7,8 @@ public:
   int Type() { return type; }
   int InFront(int);
 
+  void TakeTurn();
+
 private:
   int startpos, angle, type;
   };

@@ -7,6 +7,8 @@ void page_init_galaxy();
 void page_update_galaxy();
 void panel_clicked_galaxy(int, int, int);
 void page_clicked_galaxy(int, int, int);
+void mouse_moved_galaxy(int, int);
+void mouse_released_galaxy();
 
 void gui_init_system();
 void gui_button_clicked_system(int);
@@ -17,6 +19,8 @@ void page_init_system();
 void page_update_system();
 void panel_clicked_system(int, int, int);
 void page_clicked_system(int, int, int);
+void mouse_moved_system(int, int);
+void mouse_released_system();
 
 void gui_init_planet();
 void gui_button_clicked_planet(int);
@@ -27,3 +31,5 @@ void page_init_planet();
 void page_update_planet();
 void panel_clicked_planet(int, int, int);
 void page_clicked_planet(int, int, int);
+void mouse_moved_planet(int, int);
+void mouse_released_planet();

@@ -37,3 +37,6 @@ int Satellite::InFront(int tick) {
   if(pos&32768) return 1;
   return 0;
   }
+
+void Satellite::TakeTurn() {
+  }
