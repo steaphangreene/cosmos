@@ -44,6 +44,9 @@ void gui_init_system() {
 void gui_button_clicked_system(int button) {
   }
 
+void panel_redraw_system(SDL_Rect *area) {
+  }
+
 void page_redraw_system(SDL_Rect *area) {
   SDL_Rect todo = *area;
   SDL_FillRect(screen, &todo, black);

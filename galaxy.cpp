@@ -3,7 +3,7 @@
 
 #include "galaxy.h"
 
-Galaxy::Galaxy(int numsys, int minl, int atmosl, int nump, Player **pl) {
+Galaxy::Galaxy(int numsys, int minl, int atmosl, int devl, int nump, Player **pl) {
   num_systems = numsys;
   systems = new (System*)[numsys];
   for(int ctr=0; ctr<numsys; ++ctr) {
@@ -16,12 +16,10 @@ Galaxy::Galaxy(int numsys, int minl, int atmosl, int nump, Player **pl) {
       }
     if(xpos == 0) { --ctr; continue; }  //Abort - too close;
     if(ctr < nump) {
-      systems[ctr] = new System(xpos, ypos, 10, minl, atmosl, ctr);
+      systems[ctr] = new System(xpos, ypos, 10, minl, atmosl, devl, ctr);
       }
     else {
-      systems[ctr] = new System(xpos, ypos, rand()%10, minl, atmosl);
+      systems[ctr] = new System(xpos, ypos, rand()%10, minl, atmosl, devl);
       }
     }
   }
-
-

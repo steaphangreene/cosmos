@@ -21,6 +21,9 @@ const unsigned int bchan = *((unsigned long *)bchanc);
 const unsigned char achanc[] = { 0, 0, 0, 0xFF };
 const unsigned int achan = *((unsigned long *)achanc);
 
+static SDL_Surface *cursor = NULL, *cursorb = NULL;
+static SDL_Rect mouser = { -1, -1, 0, 0 };
+
 SDL_Surface *get_blank0_image() {
   SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)blank0_image.pixel_data,
 	blank0_image.width, blank0_image.height,
@@ -151,6 +154,23 @@ void update(int x, int y, unsigned int w, unsigned int h) {
   }
 
 void do_updates() {
+  int x, y, moved = 0;
+  static SDL_Rect cursorr;
+  SDL_GetMouseState(&x, &y);
+  if(x != mouser.x || y != mouser.y) {
+    update(&mouser);
+    moved = 1;
+    mouser.x = x;
+    mouser.y = y;
+    }
+  mouser.w = cursor->w;
+  mouser.h = cursor->h;
+  cursorr = mouser;
+  cursorr.x = 0; cursorr.y = 0;
+  SDL_BlitSurface(screen, &mouser, cursorb, &cursorr);
+  SDL_BlitSurface(cursor, NULL, screen, &mouser);
+  if(moved) update(&mouser);
+
   if(num_updaterecs < 0) {
     SDL_BlitSurface(screen, NULL, framebuffer, NULL);
     SDL_UpdateRect(framebuffer, 0, 0, 0, 0);
@@ -161,6 +181,8 @@ void do_updates() {
     SDL_UpdateRects(framebuffer, num_updaterecs, updaterecs);
     }
   num_updaterecs = 0;
+
+  SDL_BlitSurface(cursorb, &cursorr, screen, &mouser);
   }
 
 unsigned int color3(int c) {
@@ -173,4 +195,9 @@ unsigned int color3(int c) {
 
 void toggle_fullscreen() {
   SDL_WM_ToggleFullScreen(framebuffer);
+  }
+
+void set_cursor(SDL_Surface *c) {
+  cursor = c;
+  cursorb = SDL_DisplayFormat(cursor);
   }

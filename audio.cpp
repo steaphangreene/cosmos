@@ -16,6 +16,7 @@ static int audio_initialized = 0;
 
 #define SOUND_LOOP	1
 #define SOUND_TERMINATE	2
+#define SOUND_STEREO	4
 
 struct Sound {
   Uint32 pos;
@@ -43,10 +44,6 @@ void audio_callback(void *userdata, Uint8 *stream, int len) {
     long buf_l = 0, buf_r = 0;
     Sound **sptr = &play_blocks;
     while((*sptr) != NULL) {
-      if((*sptr)->pos+(ctr>>1) >= (*sptr)->length) {
-	sptr = &((*sptr)->next);
-	continue;
-	}
       if((*sptr)->flags & SOUND_TERMINATE) {
 	Sound *it = (*sptr);
 	(*sptr) = (*sptr)->next;
@@ -54,11 +51,31 @@ void audio_callback(void *userdata, Uint8 *stream, int len) {
 	free_blocks = it;
 	continue;
 	}
-      long val = Sint8((*sptr)->data[(*sptr)->pos+(ctr>>1)+1]);
-      val <<= 8;
-      val |= (*sptr)->data[(*sptr)->pos+(ctr>>1)+0] & 0xFF;
-      buf_l += val * (*sptr)->vol * (16-(*sptr)->pan);
-      buf_r += val * (*sptr)->vol * (16+(*sptr)->pan);
+      if((*sptr)->flags & SOUND_STEREO) { // Stereo Source
+	if((*sptr)->pos+ctr >= (*sptr)->length) {
+	  sptr = &((*sptr)->next);
+	  continue;
+	  }
+	long val_l = Sint8((*sptr)->data[(*sptr)->pos+ctr+1]);
+	val_l <<= 8;
+	val_l |= (*sptr)->data[(*sptr)->pos+ctr+0] & 0xFF;
+	buf_l += val_l * (*sptr)->vol * 16;
+	long val_r = Sint8((*sptr)->data[(*sptr)->pos+ctr+3]);
+	val_r <<= 8;
+	val_r |= (*sptr)->data[(*sptr)->pos+ctr+2] & 0xFF;
+	buf_r += val_r * (*sptr)->vol * 16;
+	}
+      else { // Mono Source with software panning
+	if((*sptr)->pos+(ctr>>1) >= (*sptr)->length) {
+	  sptr = &((*sptr)->next);
+	  continue;
+	  }
+	long val = Sint8((*sptr)->data[(*sptr)->pos+(ctr>>1)+1]);
+	val <<= 8;
+	val |= (*sptr)->data[(*sptr)->pos+(ctr>>1)+0] & 0xFF;
+	buf_l += val * (*sptr)->vol * (16-(*sptr)->pan);
+	buf_r += val * (*sptr)->vol * (16+(*sptr)->pan);
+	}
 
       sptr = &((*sptr)->next);
       }
@@ -74,7 +91,8 @@ void audio_callback(void *userdata, Uint8 *stream, int len) {
 
   Sound **sptr = &play_blocks;
   while((*sptr) != NULL) {
-    (*sptr)->pos += len>>1;
+    if((*sptr)->flags & SOUND_STEREO) (*sptr)->pos += len;
+    else (*sptr)->pos += len>>1;
     if((*sptr)->pos >= (*sptr)->length) {
       if((*sptr)->flags & SOUND_LOOP) (*sptr)->pos = 0;
       else {
@@ -89,6 +107,14 @@ void audio_callback(void *userdata, Uint8 *stream, int len) {
     }
   }
 
+int audio_buildsound(const unsigned char *data, unsigned long len) {
+  if(!audio_initialized) return 0;
+  SFX[num_sounds].data = (unsigned char *)data;
+  SFX[num_sounds].length = len;
+  ++num_sounds;
+  return num_sounds;
+  }
+
 int audio_loadsound(const char *fn) {
   if(!audio_initialized) return 0;
   SDL_AudioSpec spec;
@@ -98,6 +124,12 @@ int audio_loadsound(const char *fn) {
     }
   ++num_sounds;
   return num_sounds;
+  }
+
+int audio_loadmusic(const char *fn) {
+  int ret = audio_loadsound(fn);
+  SFX[ret-1].flags |= SOUND_STEREO;
+  return ret;
   }
 
 Sound *get_block() {
@@ -126,7 +158,7 @@ Sound *audio_loop(int snd, int vol, int pan) {
   s->pos = 0;
   s->vol = vol;
   s->pan = pan;
-  s->flags = SOUND_LOOP;
+  s->flags |= SOUND_LOOP;
   s->next = play_blocks;
   play_blocks = s;
   return s;

@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     exit(1);
     }
 
-  SDL_AddTimer(25, &ticktock, NULL);
+  SDL_AddTimer(100, &ticktock, NULL);
 
   Uint32 flags = SDL_HWSURFACE|SDL_FULLSCREEN;
   for(int ctr=1; ctr<argc; ++ctr) {

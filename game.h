@@ -2,7 +2,7 @@
 
 void game_init();
 
-const int num_configs = 14;
+const int num_configs = 15;
 extern int num_options[];
 extern const char **config[];
 

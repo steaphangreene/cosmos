@@ -1,4 +1,9 @@
+#include <SDL.h>
+
 void graphics_init(int, int, int, Uint32);
+
+void set_cursor(SDL_Surface *);
+
 void update_all();
 void update(SDL_Rect *r);
 void update(int x, int y, unsigned int w, unsigned int h);

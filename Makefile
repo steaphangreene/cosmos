@@ -1,52 +1,76 @@
-TSTR:=  $(shell date +"%Y%m%d%H%M")
+TSTR:=  $(shell date --utc +"%Y%m%d%H%M")
+
+BIN:=	cosmos.$(shell uname)-$(shell arch)
+BTAR:=	cosmos_binary.tar.gz
+BTARD:=	cosmos_binary-$(TSTR).tar.gz
+DTAR:=	cosmos_data.tar.gz
+DTARD:=	cosmos_data-$(TSTR).tar.gz
 
 # Debugging settings
-CC:=	g++ -O2 -pipe -Wall `sdl-config --cflags` -g
-LIBS:=	`sdl-config --libs` -lefence
+#CC:=	gcc -pipe -Wall `sdl-config --cflags` -g
+#LIBS:=	`sdl-config --libs` -lefence
 
-#CC:=	g++ -O2 -pipe -Wall `sdl-config --cflags` -s
-#LIBS:=	`sdl-config --libs`
-OBJS:=	main.o gui.o gui_galaxy.o gui_system.o \
-	game.o galaxy.o system.o planet.o satellite.o \
+# Production settings
+CC:=	gcc -O2 -pipe -Wall `sdl-config --cflags` -s
+LIBS:=	`sdl-config --libs`
+
+OBJS:=	main.o gui.o gui_galaxy.o gui_system.o gui_planet.o \
+	game.o galaxy.o system.o planet.o satellite.o techtree.o \
 	audio.o fonts.o graphics.o
 # graphics_intro.o
 
 WCC:=   win32-gcc -O2 -pipe -Wall `win32-exec sdl-config --cflags` -s
-WLIBS:= `win32-exec sdl-config --libs`
+WLIBS:= `win32-exec sdl-config --libs` -lstdc++
 WOBJS:= $(shell echo $(OBJS) | sed 's-\.o-.win32_o-g')
 
-basic:	x86
+basic:	unix
 
-all:	x86 win
+all:	unix win
 
-x86:	cosmos
+unix:	$(BIN)
 
 win:	cosmos.exe
 
 clean:	.
-	rm -f cosmos cosmos.* *.o *.win32_o
+	rm -f *.o *.win32_o
 
-distrib:	all
-	cd .. ; tar czhvf cosmos_i386.tar.gz cosmos/cosmos \
-		cosmos/sounds cosmos/graphics
-	cd .. ; tar czhvf cosmos_win32.tar.gz cosmos/cosmos.exe \
-		cosmos/README-SDL.txt cosmos/sdl.dll \
-		cosmos/sounds cosmos/graphics
+distrib:	$(BTAR) $(DTAR)
 
-upload:	distrib
-	scp ../cosmos_*.tar.gz warp:public_html/cosmos/
+$(BTAR):	cosmos $(BIN) cosmos.exe
+	cd .. ; tar czhvf cosmos/$(BTAR) cosmos/cosmos cosmos/cosmos.* \
+		cosmos/README-SDL.txt cosmos/sdl.dll
+	rm -f cosmos_binary-*
+	ln $(BTAR) $(BTARD)
+
+$(DTAR):	sounds/* graphics/*
+	cd .. ; tar czhvf cosmos/$(DTAR) cosmos/graphics cosmos/sounds/*
+	rm -f cosmos_data-*
+	ln $(DTAR) $(DTARD)
+
+upload:	.buploaded .duploaded
+	ssh warp "cd public_html/cosmos; make"
+
+.buploaded:	$(BTAR)
+	scp cosmos_binary-*.tar.gz warp:public_html/cosmos/
+	touch .buploaded
+
+.duploaded:	$(DTAR)
+	scp cosmos_data-*.tar.gz warp:public_html/cosmos/
+	touch .duploaded
 
 tar:	archive
 archive:	.
 	cd .. ; tar czhvf ~/c/archive/cosmos.$(TSTR).tar.gz \
 		cosmos/*.[hc] cosmos/*.cpp cosmos/data cosmos/Makefile \
+		cosmos/cosmos cosmos/cosmos.* \
+		cosmos/CREDITS \
 		cosmos/sounds cosmos/graphics cosmos/*.csh
 
-cosmos:	$(OBJS)
-	$(CC) -o cosmos $(OBJS) $(LIBS)
+$(BIN):	$(OBJS)
+	$(CC) -o $@ $(OBJS) $(LIBS)
 
 cosmos.exe:	$(WOBJS)
-	$(WCC) -o cosmos.exe $(WOBJS) $(WLIBS)
+	$(WCC) -o $@ $(WOBJS) $(WLIBS)
 
 %.o:	%.cpp 
 	$(CC) -c $<
@@ -54,22 +78,9 @@ cosmos.exe:	$(WOBJS)
 %.win32_o:	%.cpp %.o
 	$(WCC) -c $< -o $@
 
-#AUTO-GENERATED DEPS BELOW (gcc -MM `sdl-config --cflags` *.cpp to regen)
-audio.o: audio.cpp
-fonts.o: fonts.cpp data/font22_black.h data/font22_blue.h \
- data/font22_red.h data/font22_green.h data/font22_white.h
-galaxy.o: galaxy.cpp galaxy.h system.h planet.h satellite.h
-game.o: game.cpp game.h player.h galaxy.h system.h planet.h \
- satellite.h
-graphics.o: graphics.cpp graphics.h data/cursor.h data/blank0.h \
- data/blank1.h data/star00.h data/gstar00.h data/splanet00.h fonts.h
-gui.o: gui.cpp gui.h game.h player.h galaxy.h system.h planet.h \
- satellite.h audio.h fonts.h graphics.h gui_local.h
-gui_galaxy.o: gui_galaxy.cpp gui.h game.h player.h galaxy.h system.h \
- planet.h satellite.h audio.h fonts.h graphics.h gui_local.h
-main.o: main.cpp gui.h game.h player.h galaxy.h system.h planet.h \
- satellite.h fonts.h audio.h graphics.h
-planet.o: planet.cpp math.h game.h player.h galaxy.h system.h planet.h \
- satellite.h
-satellite.o: satellite.cpp math.h satellite.h
-system.o: system.cpp system.h planet.h satellite.h
+dep:	deps.mk
+
+deps.mk:	*.cpp *.h data/*.h
+	gcc -MM `sdl-config --cflags` *.cpp > deps.mk
+
+include deps.mk

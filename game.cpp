@@ -7,6 +7,7 @@
 #include "game.h"
 
 Game *cur_game = NULL;
+TechTree *cur_tree = NULL;
 
 using namespace std;
 
@@ -82,29 +83,33 @@ void Game::Fill() {
   Finalize();
   started = 1;
 
+  cur_tree = new TechTree(setting[7], setting[8]);
+
   num_players = setting[6];
   players = new (Player*)[num_players];
   for(int ctr=0; ctr<num_players; ++ctr) {
     players[ctr] = new Player;
     }
-  players[0]->color = setting[13]+1;
+  players[0]->color = setting[14]+1;
   int numcol = 6;
   int colors[7] = {1, 2, 3, 4, 5, 6, 7};
-  colors[setting[13]] = 20;
+  colors[setting[14]] = 20;
   for(int ctr=1; ctr<num_players; ++ctr) {
-    sort(colors, colors+8);
+    sort(colors, colors+7);
     int pick = rand()%numcol;
     players[ctr]->color = colors[pick];
     colors[pick] = 20;
     --numcol;
     }
 
-  num_galaxys = setting[9];
+  num_galaxys = setting[10];
   galaxys = new (Galaxy*)[num_galaxys];
-  galaxys[0] = new Galaxy(setting[10]*20, setting[11], setting[12],
+  galaxys[0] = new Galaxy(setting[11]*20,
+	setting[12], setting[13], 2500*(setting[9]+1),
 	num_players, players);
   for(int ctr=1; ctr<num_galaxys; ++ctr) {
-    galaxys[ctr] = new Galaxy(setting[10]*20, setting[11], setting[12]);
+    galaxys[ctr] = new Galaxy(setting[11]*20,
+	setting[12], setting[13], 5000*(setting[9]+1));
     }
   }
 
@@ -156,20 +161,27 @@ const char *config06[] = {	"Number of Races",
 	NULL };
 
 const char *config07[] = {	"Tech Tree",
-	"MOO2",
+	"Tiny Test",
+//	"MOO2",
 //	"MOO2-Dynamic",
-	"Ascend",
+//	"Ascend",
 //	"Ascend-Dynamic",
 //	"Dynamic",
 	NULL };
 
 const char *config08[] = {	"Starting Tech Level",
+	"Low",
 	"Average",
 	"High",
-	"Low",
 	NULL };
 
-const char *config09[] = {	"Number of Galaxys",
+const char *config09[] = {	"Starting Devel Level",
+	"Low",
+	"Average",
+	"High",
+	NULL };
+
+const char *config10[] = {	"Number of Galaxys",
 	"Unknown",
 	"1",
 //	"2",
@@ -178,7 +190,7 @@ const char *config09[] = {	"Number of Galaxys",
 //	"Unlimited",
 	NULL };
 
-const char *config10[] = {	"Galaxy Density",
+const char *config11[] = {	"Galaxy Density",
 	"Unknown",
 	"Tiny",
 	"Small",
@@ -189,21 +201,21 @@ const char *config10[] = {	"Galaxy Density",
 //	"Realistic",
 	NULL };
 
-const char *config11[] = {	"Planetary Minerals",
+const char *config12[] = {	"Planetary Minerals",
 	"Unknown",
 	"Low",
 	"Average",
 	"High",
 	NULL };
 
-const char *config12[] = {	"Planetary Atmosphere",
+const char *config13[] = {	"Planetary Atmosphere",
 	"Unknown",
 	"Thin",
 	"Average",
 	"Thick",
 	NULL };
 
-const char *config13[] = {	"Player Color",
+const char *config14[] = {	"Player Color",
 	"@Blue",
 	"@Green",
 	"@Cyan",
@@ -228,5 +240,6 @@ const char **config[num_configs] = {
   config10,
   config11,
   config12,
-  config13
+  config13,
+  config14
   };

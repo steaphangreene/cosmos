@@ -1,3 +1,6 @@
+#include <vector>
+
+#include "techtree.h"
 #include "satellite.h"
 
 class Planet {
@@ -6,9 +9,18 @@ public:
   ~Planet();
   int XPos(int);
   int YPos(int);
-  int order, size, minerals, atmosphere, type;
-  int startpos, period;
-  int num_satellites;
+  int Type();
+  int Radiation();
+  int Atmosphere();
+  int Temperature();
+  int Minerals();
   int claimed;
+  int num_satellites;
   Satellite **satellites;
+  vector<int> objs;
+  vector<int> oqty;
+
+private:
+  int order, size, minerals, atmosphere, temperature, radiation;
+  int startpos, period;
   };

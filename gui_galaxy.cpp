@@ -43,6 +43,9 @@ void gui_init_galaxy() {
 void gui_button_clicked_galaxy(int button) {
   }
 
+void panel_redraw_galaxy(SDL_Rect *area) {
+  }
+
 void page_redraw_galaxy(SDL_Rect *area) {
 //  MUST NOT CALL "page_update" - MOUSE CURSOR LOOP!!!!
   SDL_Rect todo = *area;
