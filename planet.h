@@ -21,8 +21,8 @@ public:
   int Type();
   virtual int Owner();
   virtual int SType() { return SOBJECT_PLANET; }
-  virtual int CanMoveS();
-  virtual int CanMoveG();
+  virtual int SMove();
+  virtual int GMove();
 
   int Radiation();
   int Atmosphere();

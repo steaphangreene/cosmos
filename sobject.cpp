@@ -7,6 +7,7 @@
 #include "sobject.h"
 #include "system.h"
 #include "game.h"
+#include "gui.h"
 
 extern int max_factions;
 
@@ -170,6 +171,7 @@ void SObject::TakeTurn() {
   if(destination && cur_game->turn >= arrive_turn) Arrive();
   }
 
+void panel_draw();  // From gui.cpp
 extern SObject *cur_object;  // From gui.cpp
 void SObject::Arrive() {
   if(destination->SType() == SOBJECT_PLANET) {
@@ -200,12 +202,24 @@ void SObject::Arrive() {
     destination->Know(Owner());
     destination = NULL;
     }
-  else if(destination->SType() == SOBJECT_FLEET && SType() == SOBJECT_FLEET) {
+  else if(destination->SType() == SOBJECT_FLEET && SType() == SOBJECT_FLEET
+	&& Owner() == destination->Owner()) {
     Fleet *flt = (Fleet *)this;
     for(int shp=0; shp < flt->NumShips(); ++shp)
       ((Fleet*)destination)->AddShip(flt->GetShip(shp));
-    flt->RemoveShips(0);
     if(cur_object == this) cur_object = destination;
+    panel_draw();
+    flt->RemoveShips(0);
+    }
+  else if(destination->SType() == SOBJECT_FLEET && SType() == SOBJECT_FLEET) {
+    Fleet *flt = (Fleet*)this;
+    flt->Attack((Fleet*)destination);
+    system = destination->system;
+    orbit = destination->orbit;
+    period = destination->period;
+    startpos = destination->startpos;
+    location = destination->location;
+    destination = destination->destination;  //FIXME! Two attacking each other!
     }
   else if(destination->SType() == SOBJECT_FLEET) {
     system = destination->system;
@@ -222,18 +236,18 @@ int SObject::Owner() {
   }
 
 int SObject::TimeToLocal(int sqdist) {
-  if(CanMoveS() <= 0) return INT_MIN;
+  if(SMove() <= 0) return INT_MIN;
   int ret = (int(sqrt(double(sqdist)))+19)/20;
-  ret += CanMoveS()-1;
-  ret /= CanMoveS();
+  ret += SMove()-1;
+  ret /= SMove();
   return ret;
   }
 
 int SObject::TimeToGalactic(int sqdist) {
-  if(CanMoveG() <= 0) return INT_MIN;
+  if(GMove() <= 0) return INT_MIN;
   int ret = TimeToLocal(sqdist)*1000000;
-  ret += CanMoveG()-1;
-  ret /= CanMoveG();
+  ret += GMove()-1;
+  ret /= GMove();
   return ret;
   }
 

@@ -22,8 +22,8 @@ public:
   SObject(System *s, int orb = 0);
   virtual ~SObject();
   virtual int SType() { return SOBJECT_NONE; }
-  virtual int CanMoveS() { return 0; }
-  virtual int CanMoveG() { return 0; }
+  virtual int SMove() { return 0; }
+  virtual int GMove() { return 0; }
 
   virtual void TakeTurn();
 

@@ -97,10 +97,10 @@ int Planet::Owner() {
   return colonies[0]->Owner();
   }
 
-int Planet::CanMoveS() {
+int Planet::SMove() {
   return 0;
   }
 
-int Planet::CanMoveG() {
+int Planet::GMove() {
   return 0;
   }

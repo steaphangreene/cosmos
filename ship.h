@@ -42,8 +42,11 @@ public:
   void TakeTurn();
 
   int CanLand();
-  int CanMoveS();
-  int CanMoveG();
+  int SMove();
+  int GMove();
+
+  int Offense();
+  int Defense();
 
 //private:
   int tech;

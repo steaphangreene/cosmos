@@ -21,8 +21,8 @@ public:
   virtual void TakeTurn();
 
   virtual int SType() { return SOBJECT_SYSTEM; }
-  virtual int CanMoveS() { return 0; }
-  virtual int CanMoveG() { return 0; }
+  virtual int SMove() { return 0; }
+  virtual int GMove() { return 0; }
 
   void FleetLeaves(Fleet *);
   void FleetArrives(Fleet *);

@@ -48,7 +48,7 @@ int Ship::CanLand() {
   return 0;
   }
 
-int Ship::CanMoveS() {
+int Ship::SMove() {
   switch(sclass) {
     case(SCLASS_FIGHTER):
     case(SCLASS_TRANSPORT):
@@ -64,7 +64,7 @@ int Ship::CanMoveS() {
   return 0;
   }
 
-int Ship::CanMoveG() {
+int Ship::GMove() {
   switch(sclass) {
     case(SCLASS_FIGHTER):
     case(SCLASS_TRANSPORT):
@@ -82,4 +82,28 @@ int Ship::CanMoveG() {
       } break;
     }
   return 0;
+  }
+
+int Ship::Offense() {
+  switch(sclass) {
+    case(SCLASS_FIGHTER):	return 100;
+    case(SCLASS_TRANSPORT):	return 1;
+    case(SCLASS_COLONIZER):	return 5;
+    case(SCLASS_COLONYSHIP):	return 5;
+    case(SCLASS_DESTROYER):	return 150;
+    case(SCLASS_MAX):break;
+    }
+  return 1;
+  }
+
+int Ship::Defense() {
+  switch(sclass) {
+    case(SCLASS_FIGHTER):	return 50;
+    case(SCLASS_TRANSPORT):	return 50;
+    case(SCLASS_COLONIZER):	return 250;
+    case(SCLASS_COLONYSHIP):	return 250;
+    case(SCLASS_DESTROYER):	return 100;
+    case(SCLASS_MAX):break;
+    }
+  return 1;
   }

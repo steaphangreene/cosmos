@@ -59,7 +59,7 @@ void page_draw_galaxy() {
     SDL_BlitSurface(gstar, NULL, screen, &rec);
 
     for(int obj = 0; obj < int(sys->objects.size()); ++obj) {
-      if(sys->objects[obj]->CanMoveG() && sys->objects[obj]->Owner() >= 0
+      if(sys->objects[obj]->GMove() && sys->objects[obj]->Owner() >= 0
 		&& (cheat1 || sys->objects[obj]->SeenBy(local_player))) {
 	SDL_Rect rec2 = {0, 0, 4, 4};
 	rec2.x = sys->objects[obj]->GXPos(cur_game->turn) - 2;

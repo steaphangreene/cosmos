@@ -19,8 +19,8 @@ public:
   void TakeTurn();
   virtual int Owner();
   virtual int SType() { return SOBJECT_FLEET; }
-  virtual int CanMoveS();             
-  virtual int CanMoveG(); 
+  virtual int SMove();             
+  virtual int GMove(); 
 
   int CanLand();
   int NumShips();
@@ -28,6 +28,12 @@ public:
   Ship *GetShip(int n);
   void RemoveShip(int n);
   void RemoveShips(int s, int e=-1);
+  void DestroyShip(int n);
+  void DestroyShips(int s, int e=-1);
+
+  int Offense();
+  int Defense();
+  void Attack(Fleet *);
 
 private:
   vector<Ship*> ships;
