@@ -91,6 +91,7 @@ void page_clicked_galaxy(int mx, int my, int mb) {
     offx = abs(cur_game->galaxys[cur_galaxy]->systems[sys]->xpos - mx);
     offy = abs(cur_game->galaxys[cur_galaxy]->systems[sys]->ypos - my);
     if(offx*offx + offy*offy <= 36) {
+      audio_play(click2, 8, 8);
       cur_system = sys;
       page = PAGE_SYSTEM;
       return;
@@ -100,6 +101,7 @@ void page_clicked_galaxy(int mx, int my, int mb) {
     offx = abs(cur_game->fleets[flt]->XPos() - mx);
     offy = abs(cur_game->fleets[flt]->YPos() - my);
     if(offx*offx + offy*offy <= 9) {
+      audio_play(click2, 8, 8);
       bfleet = flt;
       bpanel = PANEL_FLEET;
       cur_fleet = flt;
@@ -145,6 +147,40 @@ void mouse_moved_galaxy(int mx, int my) {
 	cur_fleet = flt;
 	panel = PANEL_FLEET;
 	panel_init();
+	}
+      return;
+      }
+    }
+  for(int sys=0; sys < cur_game->galaxys[cur_galaxy]->num_systems; ++sys) {
+    offx = abs(cur_game->galaxys[cur_galaxy]->systems[sys]->xpos - mx);
+    offy = abs(cur_game->galaxys[cur_galaxy]->systems[sys]->ypos - my);
+    if(offx*offx + offy*offy <= 36) {
+      if(cur_system != sys) {
+	if(mouse_over) {
+	  panel = bpanel;
+	  cur_fleet = bfleet;
+	  panel_init();
+	  mouse_over = 0;
+	  }	
+	if(panel == PANEL_FLEET) {
+	  update_sprite(1);
+	  SDL_Surface *line = getline(
+		cur_game->fleets[cur_fleet]->XPos(),
+		cur_game->fleets[cur_fleet]->YPos(),
+		cur_game->galaxys[cur_galaxy]->systems[sys]->xpos,
+		cur_game->galaxys[cur_galaxy]->systems[sys]->ypos,
+		0xFFFFFFFF, 0x0F0F0F0F
+		);
+	  set_sprite(1, line);
+	  move_sprite(1,
+		cur_game->fleets[cur_fleet]->XPos()
+			<? cur_game->galaxys[cur_galaxy]->systems[sys]->xpos,
+		cur_game->fleets[cur_fleet]->YPos()
+			<? cur_game->galaxys[cur_galaxy]->systems[sys]->ypos
+		);
+	  update_sprite(1);
+	  }
+	cur_system = sys;
 	}
       return;
       }

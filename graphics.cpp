@@ -1,5 +1,6 @@
 #include <fcntl.h>
 #include <cstring>
+#include <cmath>
 #include <vector>
 //#include <unistd.h>
 //#include <sys/mman.h>
@@ -214,7 +215,7 @@ void do_updates() {
       }
     SDL_BlitSurface(screen, &spriter[ctr], spriteb[ctr], &wholer);
     }
-  for(int ctr=0; ctr<int(sprite.size()); ++ctr) if(sprite[ctr]) {
+  for(int ctr=int(sprite.size())-1; ctr >= 0; --ctr) if(sprite[ctr]) {
     SDL_BlitSurface(sprite[ctr], NULL, screen, &spriter[ctr]);
     }
 
@@ -290,20 +291,29 @@ SDL_Surface *getline(int x1, int y1, int x2, int y2, Uint32 col, Uint32 pat) {
 	0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
   SDL_FillRect(tmp, NULL, 0);
 
-  int rot = 0, slp = 0;
+  int rot = 0, slp = 1;
   if(abs(y1-y2) > abs(x1-x2)) rot = 1;
   int rng = (abs(y1-y2) >? abs(x1-x2));
   int div = (abs(y1-y2) <? abs(x1-x2));
-  if((x1 < x2 && y2 < y1) || (x2 < x1 && y1 < y2)) slp = 1;
+  if((x1 < x2 && y2 < y1) || (x2 < x1 && y1 < y2)) slp = -1;
 
   for(int ind=0; ind <= rng; ++ind) {
     if(!(pat & (1<<(ind&31)))) continue;
     int bas = ind;
-    int sub = ind*div/rng;
-    if(slp) sub = div-sub;
+    int sub = (ind*div)/rng;
+    if(slp == -1) sub = div-sub;
+    Uint32 rem = ((ind*div)%rng) * 255 / rng;
+    Uint32 c1 = (col & 0xFFFFFFFF) ^ (rem << 24);
+    Uint32 c2 = (col & 0x00FFFFFF) ^ (rem << 24);
     SDL_LockSurface(tmp);
-    if(!rot) ((long*)(tmp->pixels))[tmp->pitch/4*sub+bas] = col;
-    else ((long*)(tmp->pixels))[tmp->pitch/4*bas+sub] = col;
+    if(!rot) {
+      ((long*)(tmp->pixels))[tmp->pitch/4*sub+bas] = c1;
+      if(rem) ((long*)(tmp->pixels))[tmp->pitch/4*(sub+slp)+bas] = c2;
+      }
+    else {
+      ((long*)(tmp->pixels))[tmp->pitch/4*bas+sub] = c1;
+      if(rem) ((long*)(tmp->pixels))[tmp->pitch/4*bas+(sub+slp)] = c2;
+      }
     SDL_UnlockSurface(tmp);
     }
   SDL_Surface *ret = SDL_DisplayFormatAlpha(tmp);

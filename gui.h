@@ -18,6 +18,8 @@ enum {PANEL_NONE = 0,
 	PANEL_NET,
 	PANEL_SYSOPT,
 	PANEL_GAME, //Order important!  All after are in-game!
+	PANEL_SYSTEM,
+	PANEL_PLANET,
 	PANEL_COLONY,
 	PANEL_FLEET,
 	PANEL_SHIP,

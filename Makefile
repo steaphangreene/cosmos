@@ -7,6 +7,10 @@ BTARD:=	cosmos_binary-$(TSTR).tar.gz
 DTAR:=	cosmos_data.tar.gz
 DTARU:=	cosmos_data.tar
 DTARD:=	cosmos_data-$(TSTR).tar.gz
+BINS:=	        cosmos.exe cosmos.Linux-i686 cosmos.Linux-i586 \
+        cosmos.Linux-sparc64 cosmos.SunOS-sun4 cosmos.Darwin-ppc
+#       cosmos.Linux-ppc \
+
 
 # Debugging settings
 #CC:=	g++$(COSMOS_CTAIL) -DDEBUG=SDL_INIT_NOPARACHUTE -pipe -Wall `sdl-config --cflags` -g $(COSMOS_FLAGS)
@@ -28,37 +32,35 @@ WCC:=   win32-gcc -O2 -pipe -Wall `win32-exec sdl-config --cflags` -s
 WLIBS:= `win32-exec sdl-config --libs` -lstdc++
 WOBJS:= $(shell echo $(OBJS) | sed 's-\.o-.win32_o-g')
 
-basic:	$(BIN)
+local:	$(BIN)
 
-all:	$(BIN) graphics/*.raw cosmos.exe srctar cosmos.Linux-i586 \
-	cosmos.Linux-sparc64 cosmos.SunOS-sun4 cosmos.Darwin-ppc
-#	cosmos.Linux-ppc \
+all:	$(BINS) graphics/*.raw
 
-cosmos.Linux-i586:	$(OBJS)
+cosmos.Linux-i586:	cosmos_src.tar.gz $(OBJS)
 	scp cosmos_src.tar.gz reactor:
 	ssh reactor "tar xzf cosmos_src.tar.gz; cd cosmos/; make -j2"
 	scp reactor:cosmos/$@ .
 	ssh reactor rm -rf cosmos cosmos_src.tar.gz
 
-cosmos.Linux-sparc64:	$(OBJS)
-	scp cosmos_src.tar.gz alpha:
-	ssh alpha "tar xzf cosmos_src.tar.gz; cd cosmos/; make -j2"
-	scp alpha:cosmos/$@ .
-	ssh alpha rm -rf cosmos cosmos_src.tar.gz
+cosmos.Linux-sparc64:	cosmos_src.tar.gz $(OBJS)
+	scp cosmos_src.tar.gz beta:
+	ssh beta "tar xzf cosmos_src.tar.gz; cd cosmos/; make -j2"
+	scp beta:cosmos/$@ .
+	ssh beta rm -rf cosmos cosmos_src.tar.gz
 
-cosmos.SunOS-sun4:	$(OBJS)
+cosmos.SunOS-sun4:	cosmos_src.tar.gz $(OBJS)
 	scp cosmos_src.tar.gz topaz:
 	ssh topaz "tar xzf cosmos_src.tar.gz; cd cosmos/; make -j8"
 	scp topaz:cosmos/$@ .
 	ssh topaz rm -rf cosmos cosmos_src.tar.gz
 
-cosmos.Darwin-ppc:	$(OBJS)
+cosmos.Darwin-ppc:	cosmos_src.tar.gz $(OBJS)
 	scp -P 2222 cosmos_src.tar.gz inkhead.org:
 	ssh -p 2222 inkhead.org "tar xzf cosmos_src.tar.gz; cd cosmos/; make"
 	scp -P 2222 inkhead.org:cosmos/$@ .
 	ssh -p 2222 inkhead.org rm -rf cosmos cosmos_src.tar.gz
 
-cosmos.Linux-ppc:	$(OBJS)
+cosmos.Linux-ppc:	cosmos_src.tar.gz $(OBJS)
 	scp -P 2222 cosmos_src.tar.gz 128.226.125.100:
 	ssh -p 2222 128.226.125.100 "tar xzf cosmos_src.tar.gz; cd cosmos/; make"
 	scp -P 2222 128.226.125.100:cosmos/$@ .
@@ -69,7 +71,7 @@ clean:	.
 
 distrib:	$(BTAR) $(DTAR)
 
-$(BTAR):	cosmos all
+$(BTAR):	cosmos $(BINS)
 	rm -f $(BTAR)
 	cd .. ; tar chvf cosmos/$(BTARU) cosmos/cosmos cosmos/cosmos.* \
 		cosmos/README-SDL.txt cosmos/sdl.dll
@@ -84,8 +86,11 @@ $(DTAR):	sounds/* graphics/*
 	rm -f cosmos_data-*
 	ln $(DTAR) $(DTARD)
 
-upload:	.buploaded .duploaded
+upload:	.updatedweb
+
+.updatedweb:	.buploaded .duploaded
 	ssh warp "cd public_html/cosmos; make"
+	touch .updatedweb
 
 .buploaded:	$(BTAR)
 	scp cosmos_binary-*.tar.gz warp:public_html/cosmos/
@@ -95,7 +100,6 @@ upload:	.buploaded .duploaded
 	scp cosmos_data-*.tar.gz warp:public_html/cosmos/
 	touch .duploaded
 
-srctar:	cosmos_src.tar.gz
 cosmos_src.tar.gz:	*.cpp *.[ch] data/*.h Makefile
 	rm -f cosmos_src.tar.gz
 	cd .. ; tar chvf cosmos/cosmos_src.tar \
