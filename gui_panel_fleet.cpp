@@ -193,6 +193,7 @@ void button_clicked_fleet(int button) {
     int which = 0;
     while(!flt->GetShip(which)->CanLand()) ++which;
     ((Planet*)flt->Location()->Represents())->colonies[0]->LandShip(flt->GetShip(which));
+    if(flt->NumShips() <= 1) clear_sprites(1, 10);
     flt->DestroyShip(which);
     panel_draw();
     page_draw();
