@@ -8,6 +8,13 @@
 
 //Orbital Period = sqrt(Distance From Star ^ 3)
 
+int sattp[5][5] = {
+	{ },
+	{ 0 },
+	{ 1, 1 },
+	{ 1, 2, 2 },
+	{ 2, 2, 2, 2 },
+	};
 
 Planet::Planet(int ord, int sz, int min, int atmos) {
   order = ord;
@@ -20,10 +27,10 @@ Planet::Planet(int ord, int sz, int min, int atmos) {
   int dist = (ord+1)*700;
   period = int(sqrt(double(dist)*double(dist)*double(dist)));
   startpos = rand()&65535;
-  num_satellites = rand()%7;
+  num_satellites = rand()%5;
   satellites = new (Satellite*)[num_satellites];
   for(int ctr=0; ctr<num_satellites; ++ctr) {
-    satellites[ctr] = new Satellite(rand()&65535, (rand()&7) <? 1);
+    satellites[ctr] = new Satellite(rand()&65535, sattp[num_satellites][ctr]);
     }
   };
 

@@ -39,7 +39,7 @@ void gui_init_planet() {
   planet[0] = get_alpha_image("graphics/planet00.raw", 768, 768);
   satellite[0] = get_alpha_image("graphics/moon00.raw", 64, 64);
   satellite[1] = get_alpha_image("graphics/moon01.raw", 64, 64);
-  satellite[2] = get_alpha_image("graphics/satellite00.raw", 8, 8);
+  satellite[2] = get_alpha_image("graphics/moon02.raw", 64, 64);
 
   buttlist[PAGE_PLANET][BUTTON_NEWPROJECT] =	10;
   buttlist[PAGE_PLANET][BUTTON_EXIT] =		11;

@@ -11,7 +11,7 @@ DTARD:=	cosmos_data-$(TSTR).tar.gz
 #LIBS:=	`sdl-config --libs` -lefence $(COSMOS_LIBS)
 
 # Production settings
-CC:=	gcc -O2 -pipe -Wall `sdl-config --cflags` -s $(COSMOS_FLAGS)
+CC:=	gcc -O2 -pipe -Wall `sdl-config --cflags` $(COSMOS_FLAGS)
 LIBS:=	`sdl-config --libs` $(COSMOS_LIBS)
 
 OBJS:=	main.o gui.o gui_galaxy.o gui_system.o gui_planet.o \
@@ -25,9 +25,8 @@ WOBJS:= $(shell echo $(OBJS) | sed 's-\.o-.win32_o-g')
 
 basic:	$(BIN)
 
-all:	$(BIN) cosmos.exe srctar cosmos.Linux-i586 \
-	cosmos.Linux-sparc64 cosmos.SunOS-sun4 \
-#	cosmos.Darwin-ppc \
+all:	$(BIN) graphics/*.raw cosmos.exe srctar cosmos.Linux-i586 \
+	cosmos.Linux-sparc64 cosmos.SunOS-sun4 cosmos.Darwin-ppc \
 #	cosmos.Linux-ppc
 
 cosmos.Linux-i586:	$(OBJS)
@@ -65,7 +64,7 @@ clean:	.
 
 distrib:	$(BTAR) $(DTAR)
 
-$(BTAR):	cosmos cosmos.*
+$(BTAR):	cosmos
 	cd .. ; tar czhvf cosmos/$(BTAR) cosmos/cosmos cosmos/cosmos.* \
 		cosmos/README-SDL.txt cosmos/sdl.dll
 	rm -f cosmos_binary-*
@@ -96,15 +95,15 @@ tar:	archive
 archive:	.
 	cd .. ; tar czhvf ~/c/archive/cosmos.$(TSTR).tar.gz \
 		cosmos/*.[hc] cosmos/*.cpp cosmos/data cosmos/Makefile \
-		cosmos/cosmos cosmos/cosmos.* \
-		cosmos/CREDITS \
-		cosmos/sounds cosmos/graphics cosmos/*.csh
+		cosmos/cosmos cosmos/cosmos.* cosmos/CREDITS \
+		cosmos/*.pov cosmos/sounds cosmos/graphics cosmos/*.csh
 
 $(BIN):	$(OBJS)
 	$(CC) -o $@ $(OBJS) $(LIBS)
+	strip $@
 
 cosmos.exe:	$(WOBJS)
-	$(WCC) -o $@ $(WOBJS) $(WLIBS)
+	$(WCC) -o -s $@ $(WOBJS) $(WLIBS)
 
 %.o:	%.cpp 
 	$(CC) -c $<
@@ -118,3 +117,35 @@ deps.mk:	*.cpp *.h data/*.h
 	gcc -MM `sdl-config --cflags` *.cpp > deps.mk
 
 include deps.mk
+
+graphics/planet00.raw:	planet00.pov
+	povray -W768 -H768 planet00.pov
+	convert planet00.png planet00.tga
+	./tga2raw.csh planet00
+	mv planet00.raw graphics/
+	rm -f planet00.png
+	rm -f planet00.tga
+
+graphics/moon00.raw:	moon00.pov
+	povray +W64 +H64 moon00.pov
+	convert moon00.png moon00.tga
+	./tga2raw.csh moon00
+	mv moon00.raw graphics/
+	rm -f moon00.png
+	rm -f moon00.tga
+
+graphics/moon01.raw:	moon01.pov
+	povray +W64 +H64 moon01.pov
+	convert moon01.png moon01.tga
+	./tga2raw.csh moon01
+	mv moon01.raw graphics/
+	rm -f moon01.png
+	rm -f moon01.tga
+
+graphics/moon02.raw:	moon02.pov
+	povray +W64 +H64 moon02.pov
+	convert moon02.png moon02.tga
+	./tga2raw.csh moon02
+	mv moon02.raw graphics/
+	rm -f moon02.png
+	rm -f moon02.tga

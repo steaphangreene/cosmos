@@ -23,10 +23,10 @@ System::System(int xp, int yp, int nump, int minl, int atmosl, int devl, int pl)
       }
     else {
       int at=0, mi=0;
-      if(atmosl == 3) at = int(sqrt(rand()%901));
+      if(atmosl == 3) at = int(double(sqrt(double(rand()%901))));
       else if(atmosl == 2) at = rand()%30;
       else if(atmosl == 1) at = (rand()%30)*(rand()%30)/30;
-      if(minl == 3) mi = int(sqrt(rand()%901));
+      if(minl == 3) mi = int(double(sqrt(double(rand()%901))));
       else if(minl == 2) mi = rand()%30;
       else if(minl == 1) mi = (rand()%30)*(rand()%30)/30;
       planets[ctr] = new Planet(ctr, (rand()%10000)+1, mi, at);

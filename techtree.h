@@ -1,5 +1,7 @@
 #include <vector>
 
+using namespace std;
+
 class Planet;
 
 enum {	TECH_NONE=0,

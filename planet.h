@@ -1,5 +1,7 @@
 #include <vector>
 
+using namespace std;
+
 #ifndef PLANET_H
 #define PLANET_H
 
