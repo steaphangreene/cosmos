@@ -68,6 +68,7 @@ int TechTree::Happiness(int tnum, int tqty, Colony *col) {
   }
 
 int tech_reduce(int v, int t) {
+  if(v <= 1) return 0;
   return 0 >? (v - int(double(v)*log10(double(t)))/4);
   }
 

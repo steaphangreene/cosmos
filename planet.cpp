@@ -17,6 +17,8 @@ int sattp[5][5] = {
 	{ 2, 2, 2, 2 },
 	};
 
+extern int max_factions;
+
 Planet::Planet(System *s, int ord, int sz, int min, int atmos) {
   system = s;
   order = ord;
@@ -33,6 +35,7 @@ Planet::Planet(System *s, int ord, int sz, int min, int atmos) {
   for(int ctr=0; ctr<num_satellites; ++ctr) {
     satellites[ctr] = new Satellite(rand()&65535, sattp[num_satellites][ctr]);
     }
+  explored.resize(max_factions, 0);
   };
 
 Planet::~Planet() {
@@ -123,4 +126,13 @@ void Planet::FleetLeaves(Fleet *f) {
 
 void Planet::FleetArrives(Fleet *f) {
   fleets.push_back(f);
+  Explore(f->Owner());
+  }
+
+int Planet::ExploredBy(int n) {
+  return explored[n];
+  }
+
+void Planet::Explore(int n) {
+  explored[n] = 1;
   }

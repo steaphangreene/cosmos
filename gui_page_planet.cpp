@@ -5,6 +5,8 @@
 
 using namespace std;
 
+extern int cheat1;
+
 #include <SDL.h>
 
 #include "gui.h"
@@ -126,20 +128,35 @@ void stats_draw_planet(Planet *plan, int upd) {
   int col = 7;
 
   line = 0;
-  sprintf(buf, "Atmosphere: %d", plan->Atmosphere());
+  if(cheat1 || plan->ExploredBy(local_player))
+    sprintf(buf, "Atmosphere: %d", plan->Atmosphere());
+  else
+    sprintf(buf, "Atmosphere: ?");
   string_draw(screen, 5, 13+24*(line++), cur_font[col], buf);
 
-  sprintf(buf, "Minerals: %d", plan->Minerals());
+  if(cheat1 || plan->ExploredBy(local_player))
+    sprintf(buf, "Minerals: %d", plan->Minerals());
+  else
+    sprintf(buf, "Minerals: ?");
   string_draw(screen, 5, 13+24*(line++), cur_font[col], buf);
   
-  sprintf(buf, "Satellites: %d", plan->num_satellites);
+  if(cheat1 || plan->ExploredBy(local_player))
+    sprintf(buf, "Satellites: %d", plan->num_satellites);
+  else
+    sprintf(buf, "Satellites: ?");
   string_draw(screen, 5, 13+24*(line++), cur_font[col], buf);
 
   line = 0;
-  sprintf(buf, "Avg. Temp: %d", plan->Temperature());
+  if(cheat1 || plan->ExploredBy(local_player))
+    sprintf(buf, "Avg. Temp: %d", plan->Temperature());
+  else
+    sprintf(buf, "Avg. Temp: ?");
   string_drawr(screen, 768, 13+24*(line++), cur_font[col], buf);
 
-  sprintf(buf, "Surf. Rad: %d", plan->Radiation());
+  if(cheat1 || plan->ExploredBy(local_player))
+    sprintf(buf, "Surf. Rad: %d", plan->Radiation());
+  else
+    sprintf(buf, "Surf. Rad: ?");
   string_drawr(screen, 768, 13+24*(line++), cur_font[col], buf);
 
 

@@ -20,6 +20,8 @@ static SDL_Surface *gstar;
 static int bpanel = -1;
 static Fleet *bfleet = NULL;
 
+extern int cheat1;
+
 void gui_init_galaxy() {
   gstar = get_gstar_image();
 
@@ -43,7 +45,7 @@ void page_draw_galaxy() {
   SDL_Rect rec = {0, 0, 3, 3};
   for(int snum=0; snum < cur_game->galaxys[cur_galaxy]->num_systems; ++snum) {
     System *sys = cur_game->galaxys[cur_galaxy]->systems[snum];
-    if(sys->Owner() > -1) {
+    if((cheat1 || sys->ExploredBy(local_player)) && sys->Owner() > -1) {
       SDL_Rect rec2 = {0, 0, 9, 9};
       rec2.x = sys->xpos - 4;
       rec2.y = sys->ypos - 4;
@@ -57,13 +59,13 @@ void page_draw_galaxy() {
 
     vector<Fleet *> present;
     for(int fn = 0; fn < int(sys->fleets.size()); ++fn) {
-      if(sys->fleets[fn]->ships.size() <= 0) continue;
-      present.push_back(sys->fleets[fn]);
+      if(cheat1 || sys->fleets[fn]->DetectedBy(local_player))
+        present.push_back(sys->fleets[fn]);
       }
     for(int plan=0; plan < sys->num_planets; ++plan) {
       for(int fn = 0; fn < int(sys->planets[plan]->fleets.size()); ++fn) {
-	if(sys->planets[plan]->fleets[fn]->ships.size() <= 0) continue;
-	present.push_back(sys->planets[plan]->fleets[fn]);
+	if(cheat1 || sys->planets[plan]->fleets[fn]->DetectedBy(local_player))
+	  present.push_back(sys->planets[plan]->fleets[fn]);
 	}
       }
     if(present.size() > 0) {
@@ -97,7 +99,7 @@ void page_clicked_galaxy(int mx, int my, int mb) {
       }
     }
   for(int flt=0; flt < int(cur_game->fleets.size()); ++flt) {
-    if(cur_game->fleets[flt]->ships.size() <= 0) continue;
+    if((!cheat1) && (!cur_game->fleets[flt]->DetectedBy(local_player))) continue;
     offx = abs(cur_game->fleets[flt]->XPos() - mx);
     offy = abs(cur_game->fleets[flt]->YPos() - my);
     if(offx*offx + offy*offy <= 9) {
@@ -119,7 +121,7 @@ void mouse_moved_galaxy(int mx, int my) {
   static int mouse_over = 0;
   int offx, offy;
   for(int flt=0; flt < int(cur_game->fleets.size()); ++flt) {
-    if(cur_game->fleets[flt]->ships.size() <= 0) continue;
+    if((!cheat1) && (!cur_game->fleets[flt]->DetectedBy(local_player))) continue;
     offx = abs(cur_game->fleets[flt]->XPos() - mx);
     offy = abs(cur_game->fleets[flt]->YPos() - my);
     if(offx*offx + offy*offy <= 9) {

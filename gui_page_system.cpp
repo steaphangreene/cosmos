@@ -16,6 +16,8 @@ using namespace std;
 
 static SDL_Surface *splanet[4], *star;
 
+extern int cheat1;
+
 void gui_init_system() {
   star = get_star_image();
   splanet[0] = get_splanet_image();
@@ -28,6 +30,7 @@ void page_init_system() {
 
 void page_cleanup_system() {
   set_sprite(1, NULL);
+  set_sprite(2, NULL);
   }
 
 void page_draw_system() {
@@ -35,6 +38,12 @@ void page_draw_system() {
   SDL_BlitSurface(star, NULL, screen, &destr);
   destr.w = 3;  destr.h = 3;
   System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+
+  if((!cheat1) && (!cur_game->galaxys[cur_galaxy]->systems[cur_system]->ExploredBy(local_player))) {
+    string_drawc(screen, 384, 384-11, cur_font[4], "Unexplored");
+    return;
+    }
+
   ++cur_game->frame;
   SDL_Rect shiprec = {0, 0, 4, 4};
   for(int plan=0; plan < sys->num_planets; ++plan) {
@@ -49,7 +58,7 @@ void page_draw_system() {
     destr.y = sys->planets[plan]->YPos(cur_game->turn) - 1;
     SDL_BlitSurface(splanet[0], NULL, screen, &destr);
     for(int ctr=0; ctr < int(sys->planets[plan]->fleets.size()); ++ctr) {
-      if(sys->planets[plan]->fleets[ctr]->ships.size() < 1) continue;
+      if((!cheat1) && (!sys->planets[plan]->fleets[ctr]->DetectedBy(local_player))) continue;
       sys->planets[plan]->fleets[ctr]->SetPos(
 	sys->planets[plan]->XPos(cur_game->turn) + 8,
 	sys->planets[plan]->YPos(cur_game->turn) + 6*ctr - 2,
@@ -63,7 +72,7 @@ void page_draw_system() {
     }
   for(int f=0; f < int(sys->fleets.size()); ++f) {
     Fleet *flt = sys->fleets[f];
-    if(flt->ships.size() < 1) continue;
+    if((!cheat1) && (!flt->DetectedBy(local_player))) continue;
     Planet *p1 = flt->Location();
     Planet *p2 = flt->Destination();
     int tt = flt->TripTime(), dn = flt->Progress(), tg = tt-dn;
@@ -82,9 +91,64 @@ void page_draw_system() {
   }
 
 void page_update_system() {
+  vector<Fleet *> present;
+  vector<Fleet *>::iterator cur;
+  System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
+
+  int spnum = 10;
+  clear_sprites(spnum);
+
+  for(int plan=0; plan < sys->num_planets; ++plan) {
+    for(int ctr=0; ctr < int(sys->planets[plan]->fleets.size()); ++ctr) {
+      present.push_back(sys->planets[plan]->fleets[ctr]);
+      }
+    }
+  for(int f=0; f < int(sys->fleets.size()); ++f) {
+    present.push_back(sys->fleets[f]);
+    }
+
+  for(cur = present.begin(); cur != present.end(); ++cur) {
+    if((*cur)->Destination()) {
+      SDL_Surface *line;
+      int tm = (*cur)->TripTime() - (*cur)->Progress();
+
+      update_sprite(spnum);
+      line = getline(
+	(*cur)->XPos(),
+	(*cur)->YPos(),
+	(*cur)->Destination()->XPos(cur_game->turn + tm),
+	(*cur)->Destination()->YPos(cur_game->turn + tm),
+	0xFFFFFFFF, 0x0F0F0F0F
+	);
+      set_sprite(spnum, line);
+      move_sprite(spnum,
+	(*cur)->XPos() <? (*cur)->Destination()->XPos(cur_game->turn + tm),
+	(*cur)->YPos() <? (*cur)->Destination()->YPos(cur_game->turn + tm)
+	);
+      update_sprite(spnum++);
+
+      update_sprite(spnum);
+      line = getline(
+	(*cur)->Destination()->XPos(cur_game->turn),
+	(*cur)->Destination()->YPos(cur_game->turn),
+	(*cur)->Destination()->XPos(cur_game->turn + tm),
+	(*cur)->Destination()->YPos(cur_game->turn + tm),
+	0xFFFFFFFF, 0x0F0F0F0F
+	);
+      set_sprite(spnum, line);
+      move_sprite(spnum,
+	(*cur)->Destination()->XPos(cur_game->turn)
+		<? (*cur)->Destination()->XPos(cur_game->turn + tm),
+	(*cur)->Destination()->YPos(cur_game->turn)
+		<? (*cur)->Destination()->YPos(cur_game->turn + tm)
+	);
+      update_sprite(spnum++);
+      }
+    }
   }
 
 void page_clicked_system(int mx, int my, int mb) {
+  if((!cheat1) && (!cur_game->galaxys[cur_galaxy]->systems[cur_system]->ExploredBy(local_player))) return;
   if(mb != 1 && mb != 3) return;
 
   int offx, offy, fr;
@@ -102,30 +166,11 @@ void page_clicked_system(int mx, int my, int mb) {
 	}
       else if(mb == 3 && panel == PANEL_FLEET) {
 	if(sys->planets[plan] == cur_fleet->Location()) continue;
-	int sqd, tm;
-	audio_play(click2, 8, 8);
-	offx = abs(sys->planets[plan]->XPos(cur_game->turn)
-		- cur_fleet->XPos());
-	offy = abs(sys->planets[plan]->YPos(cur_game->turn)
-		- cur_fleet->YPos());
-	sqd = offx*offx + offy*offy;
-	tm = 1;
-	for(int trip=0; ; ++trip) {
-	  offx = abs(sys->planets[plan]->XPos(cur_game->turn + trip)
-		- cur_fleet->XPos());
-	  offy = abs(sys->planets[plan]->YPos(cur_game->turn + trip)
-		- cur_fleet->YPos());
-	  sqd = offx*offx + offy*offy;
-
-	  tm = cur_fleet->TimeToLocal(sqd);
-	  if(abs(tm) <= trip) {
-	    tm = (tm/abs(tm))*trip;
-	    break;
-	    }
-	  }
-	if(tm >= 0) {
-	  cur_fleet->SetCourse(sys->planets[plan], tm);
+	if(cur_fleet->Target() && cur_fleet->Distance() >= 0) {
+	  audio_play(click2, 8, 8);
+	  cur_fleet->Engage();
 	  set_sprite(1, NULL);
+	  set_sprite(2, NULL);
 	  page_draw();
 	  }
 	}
@@ -133,6 +178,7 @@ void page_clicked_system(int mx, int my, int mb) {
       }
     }
   for(int flt=0; flt < int(cur_game->fleets.size()); ++flt) {
+    if((!cheat1) && (!cur_game->fleets[flt]->DetectedBy(local_player))) continue;
     if(cur_game->fleets[flt] == cur_fleet && panel == PANEL_FLEET) continue;
     offx = abs(cur_game->fleets[flt]->XPos() - mx);
     offy = abs(cur_game->fleets[flt]->YPos() - my);
@@ -140,7 +186,9 @@ void page_clicked_system(int mx, int my, int mb) {
     if(cur_game->frame == fr && offx*offx + offy*offy <= 9) {
       if(mb == 1) {
 	update_sprite(1);
+	update_sprite(2);
 	set_sprite(1, NULL);
+	set_sprite(2, NULL);
 	audio_play(click2, 8, 8);
 	cur_fleet = cur_game->fleets[flt];
 	panel = PANEL_FLEET;
@@ -169,6 +217,7 @@ void mouse_released_system() {
   }
 
 void mouse_moved_system(int mx, int my) {
+  if((!cheat1) && (!cur_game->galaxys[cur_galaxy]->systems[cur_system]->ExploredBy(local_player))) return;
   if(panel != PANEL_FLEET) return;
   if(cur_game->frame != cur_fleet->OnFrame()) return;
 
@@ -195,11 +244,14 @@ void mouse_moved_system(int mx, int my) {
 	  break;
 	  }
 	}
-      if(tm < 0) col = 0xFF0000FF;
-      else if(tm > 0) col = 0xFF00FF00;
+      cur_fleet->SetCourse(sys->planets[plan], tm);
+      if(cur_fleet->Distance() < 0) col = 0xFF0000FF;
+      else if(cur_fleet->Distance() >= 0) col = 0xFF00FF00;
+
+      SDL_Surface *line;
 
       update_sprite(1);
-      SDL_Surface *line = getline(
+      line = getline(
 	cur_fleet->XPos(),
 	cur_fleet->YPos(),
 	sys->planets[plan]->XPos(cur_game->turn + tm),
@@ -214,11 +266,30 @@ void mouse_moved_system(int mx, int my) {
 		<? sys->planets[plan]->YPos(cur_game->turn + tm)
 	);
       update_sprite(1);
+
+      update_sprite(2);
+      line = getline(
+	sys->planets[plan]->XPos(cur_game->turn),
+	sys->planets[plan]->YPos(cur_game->turn),
+	sys->planets[plan]->XPos(cur_game->turn + tm),
+	sys->planets[plan]->YPos(cur_game->turn + tm),
+	col, 0x0F0F0F0F
+	);
+      set_sprite(2, line);
+      move_sprite(2,
+	sys->planets[plan]->XPos(cur_game->turn)
+		<? sys->planets[plan]->XPos(cur_game->turn + tm),
+	sys->planets[plan]->YPos(cur_game->turn)
+		<? sys->planets[plan]->YPos(cur_game->turn + tm)
+	);
+      update_sprite(2);
+
       cur_planet = plan;
       return;
       }
     }
   for(int flt=0; flt < int(cur_game->fleets.size()); ++flt) {
+    if((!cheat1) && (!cur_game->fleets[flt]->DetectedBy(local_player))) continue;
     offx = abs(cur_game->fleets[flt]->XPos() - mx);
     offy = abs(cur_game->fleets[flt]->YPos() - my);
     sqd = offx*offx + offy*offy;
@@ -251,6 +322,11 @@ void mouse_moved_system(int mx, int my) {
 		<? cur_game->fleets[flt]->YPos()
 	);
       update_sprite(1);
+
+      update_sprite(2);
+      set_sprite(2, NULL);
+      update_sprite(2);
+
 //      cur_fleet = cur_game->fleets[flt];
       return;
       }

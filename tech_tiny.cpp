@@ -9,7 +9,7 @@ extern int base_tech;
 enum {	TECH_TINY_CITY = 0,
 	TECH_TINY_ENTERTAINMENT,
 	TECH_TINY_PROPOGANDA,
-	TECH_TINY_LINARMINING,
+	TECH_TINY_SATMINE,
 	TECH_TINY_COLONIZER,
 	TECH_TINY_FIGHTER,
 	TECH_TINY_COLONYSHIP,
@@ -67,14 +67,14 @@ void TechTree::init_tiny(int techl, int devl) {
 	TECH_TINY_FIGHTER, -1, -1, -1));
 
   num_sciences = 0;
-  num_techs = 6;
+  num_techs = 8;
   homeworld = start;
   }
 
 int min_tiny(int tnum, int tqty, Colony *col) {
   switch(tnum) {
     case(TECH_TINY_CITY): return -tqty;
-    case(TECH_TINY_LINARMINING): {
+    case(TECH_TINY_SATMINE): {
       if(col->Plan() == NULL) return 0;
       return ((col->Plan()->num_satellites ? 4:0) <? tqty);
       }

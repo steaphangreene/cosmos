@@ -277,6 +277,14 @@ void set_sprite(int n, SDL_Surface *c) {
     }
   }
 
+void clear_sprites(int s, int e) {
+  if(e == -1) e = sprite.size();
+  for(int ctr=s; ctr<e; ++ctr) {
+    update_sprite(ctr);
+    set_sprite(ctr, NULL);
+    }
+  }
+
 void update_sprite(int n) {
   if(n < int(spritef.size())) spritef[n] |= (SPRITE_UPDATE);
   }
@@ -291,7 +299,7 @@ void move_sprite(int n, int x, int y) {
   }
 
 SDL_Surface *getline(int x1, int y1, int x2, int y2, Uint32 col, Uint32 pat) {
-  if(abs(x1-x2) == 0 || abs(y1-y2) == 0) return NULL;
+  if(abs(x1-x2) == 0 && abs(y1-y2) == 0) return NULL;
 
   SDL_Surface *tmp = SDL_CreateRGBSurface(SDL_SWSURFACE|SDL_SRCALPHA,
 	abs(x1-x2)+1, abs(y1-y2)+1, 32,

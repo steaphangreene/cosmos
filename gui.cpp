@@ -23,6 +23,8 @@ unsigned long black;
 
 int done = 0;
 
+int cheat1 = 0;
+
 #define	NUM_SYSCNF 1
 static int syscnf[NUM_SYSCNF*2] = {1, 160};
 static int syscnf_back[NUM_SYSCNF*2];
@@ -205,6 +207,15 @@ void gui_main() {
       if(cur_game->tick > 65535) cur_game->tick = 0;
       page_update();
       }
+    else if(event.type == SDL_KEYUP) {
+      if(event.key.keysym.sym == SDLK_F5) {
+	cheat1 = 0;
+	set_sprite(1, NULL);
+	set_sprite(2, NULL);
+	page_draw();
+	panel_draw();
+	}
+      }
     else if(event.type == SDL_KEYDOWN) {
       if(event.key.keysym.sym == SDLK_ESCAPE) {
         if(pagemap[page][BUTTON_CANCEL]) {
@@ -228,12 +239,18 @@ void gui_main() {
 	  if(cur_game) {
 	    update_sprite(1);
 	    set_sprite(1, NULL);
+	    set_sprite(2, NULL);
 	    cur_game->TakeTurn();
 	    page_init();
 	    panel_init();
 	    }
 	  }
 //	}
+      else if(event.key.keysym.sym == SDLK_F5) {
+	cheat1 = 1;
+	page_draw();
+	panel_draw();
+	}
       }
     else if(event.type == SDL_MOUSEMOTION) {
       if(curbutt != update_buttons()) curbutt = 0;
@@ -465,6 +482,7 @@ void button_clicked(int button) {
       if(button == BUTTON_TURN) {
 	update_sprite(1);
 	set_sprite(1, NULL);
+	set_sprite(2, NULL);
 	cur_game->TakeTurn();
 	page_draw();
 	}

@@ -4,3 +4,5 @@ struct Player {
   int color;
   int number;
   };
+
+extern int local_player;

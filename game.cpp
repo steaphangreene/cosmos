@@ -27,6 +27,7 @@ Game::Game() {
   memset(working_setting, 0, sizeof(working_setting));
   memset(game_setting, 0, sizeof(game_setting));
   memset(setting, 0, sizeof(setting));
+  local_player = 0;
   started = 0;
   frame = 0;
   }

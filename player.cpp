@@ -2,3 +2,5 @@
 
 void Player::TakeTurn() {
   }
+
+int local_player;

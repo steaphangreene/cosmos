@@ -5,13 +5,17 @@
 
 #include "system.h"
 
+extern int max_factions;
+
 System::System(int xp, int yp, int nump, int minl, int atmosl, int pl) {
   num_planets = nump;
   planets = new (Planet*)[nump];
+  explored.resize(max_factions, 0);
   for(int ctr=0; ctr<nump; ++ctr) {
     if(pl >= 0 && ctr == 2) {
       planets[ctr] = new Planet(this, ctr, (rand()%10000)+1, 30, 30);
       planets[ctr]->colonies.push_back(new Colony(pl, planets[ctr], 1));
+      Explore(pl);
       }
     else {
       int at=0, mi=0;
@@ -61,4 +65,12 @@ int System::Owner() {
       return planets[ctr]->colonies[0]->Owner();
     }
   return -1;
+  }
+
+int System::ExploredBy(int n) {
+  return explored[n];
+  }
+
+void System::Explore(int n) {
+  explored[n] = 1;
   }

@@ -5,15 +5,21 @@ using namespace std;
 #include "game.h"
 #include "fleet.h"
 
+extern int max_factions;
+
 Fleet::Fleet(int o, const char *nm) {
   cur_game->fleets.push_back(this);
+  detected.resize(max_factions, 0);
+  detected[o] = 1;
   name = nm;
   owner = o;
   frame = 0;
   loc = NULL;
   dest = NULL;
-  prog = 0;
+  targ = NULL;
+  prog = -1;
   trip = 0;
+  dist = -1;
   }
 
 Fleet::~Fleet() {
@@ -46,7 +52,7 @@ Fleet::~Fleet() {
   }
 
 void Fleet::Arrive() {
-  prog = 0;
+  prog = -1;
   loc = dest;
   dest = NULL;
   loc->FleetArrives(this);
@@ -54,7 +60,9 @@ void Fleet::Arrive() {
   }
 
 void Fleet::TakeTurn() {
-  if(dest) {
+  targ = NULL;
+  dist = -1;
+  if(prog >= 0) {
     ++prog;
     if(prog >= abs(trip)) Arrive();
     }
@@ -64,27 +72,31 @@ void Fleet::TakeTurn() {
   }
 
 int Fleet::TimeToLocal(int sqdist) {
-  return (int(sqrt(double(sqdist))))+19/20;
+  return (int(sqrt(double(sqdist)))+19)/20;
   }
 
 int Fleet::TimeToGalactic(int sqdist) {
-  return -1020;
+  return TimeToLocal(sqdist)*1000000;
+  }
+
+void Fleet::Engage() {
+  if(targ == NULL) return;
+  dest = targ;
+  trip = dist;
+  loc->FleetLeaves(this);
+  loc->Sys()->FleetArrives(this);
+  prog = 0;
+  if(trip == 0) Arrive();
   }
 
 void Fleet::SetCourse(Planet *p, int d) {
-  loc->FleetLeaves(this);
-  loc->Sys()->FleetArrives(this);
-  dest = p;
-  prog = 0;
-  trip = d;
-  if(trip == 0) Arrive();
+  targ = p;
+  dist = d;
   }
 
 void Fleet::SetCourse(System *s, int d) {
-//  dest = p;
-  prog = 0;
-  trip = d;
-  if(trip == 0) Arrive();
+//  targ = p;
+  dist = d;
   }
 
 int Fleet::CanLand() {
@@ -92,4 +104,12 @@ int Fleet::CanLand() {
     if(ships[ctr]->CanLand()) return 1;
     }
   return 0;
+  }
+
+int Fleet::DetectedBy(int n) {
+  return detected[n];
+  }
+
+void Fleet::Detect(int n) {
+  detected[n] = 1;
   }

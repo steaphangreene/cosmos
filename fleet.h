@@ -24,12 +24,17 @@ public:
   void SetPos(int x, int y, int f=0) { xpos = x; ypos = y; frame = f; };
   int TimeToLocal(int);
   int TimeToGalactic(int);
+  Planet *Target() { return targ; };
+  int Distance() { return dist; };
   Planet *Location() { return loc; };
   Planet *Destination() { return dest; };
   int Progress() { return prog; };
   int TripTime() { return trip; };
   void SetCourse(Planet *, int);
   void SetCourse(System *, int);
+  void Engage();
+  int DetectedBy(int);
+  void Detect(int);
   int CanLand();
 
 //private:
@@ -42,6 +47,9 @@ public:
   Planet *loc;
   Planet *dest;
   int prog, trip;
+  Planet *targ;
+  int dist;
+  vector<int> detected;
   };
 
 #endif

@@ -34,21 +34,21 @@ void Colony::Init(int initial) {
       }
     }
   int fn = 0;
-  Planet *plan = planet;
-  if(!plan) return;
+  if(!planet) return;
+  planet->Explore(owner);
   for(int ctr=0; ctr<cur_tree->NumTechs(); ++ctr) {
     Tech *tc = cur_tree->GetTech(ctr);
     if(tc->type == TECH_SHIP) {
       objs.push_back(ctr);
       oqty.push_back(0);
-      if(initial) {
-	plan->fleets.push_back(new Fleet(owner, tc->names));
+      if(initial && cur_tree->Homeworld(ctr) > 0) {
+	planet->fleets.push_back(new Fleet(owner, tc->names));
 	for(int shp=0 ; shp < cur_tree->Homeworld(ctr); ++shp) {
-	  plan->fleets[fn]->ships.push_back(new Ship(ctr, owner));
-	  (*(plan->fleets[fn]->ships.end()-1))->AddCrew(
-		(*(plan->fleets[fn]->ships.end()-1))->MaxCrew());
+	  planet->fleets[fn]->ships.push_back(new Ship(ctr, owner));
+	  (*(planet->fleets[fn]->ships.end()-1))->AddCrew(
+		(*(planet->fleets[fn]->ships.end()-1))->MaxCrew());
 	  }
-	(*(plan->fleets.end()-1))->loc = plan;
+	(*(planet->fleets.end()-1))->loc = planet;
 	++fn;
 	}
       }
@@ -204,7 +204,7 @@ void Colony::TakeTurn() {
       need = tc->icost;
       if(prog[0]+indus >= need) {
 	indus -= need-prog[0];
-	if(cur_tree->GetTech(projs[0])->type == TECH_SHIP) {
+	if(tc->type == TECH_SHIP) {
 	  if(planet) {
 	    Fleet *flt = new Fleet(owner, tc->names);
 	    planet->fleets.push_back(flt);

@@ -18,10 +18,13 @@ public:
   void TakeTurn();
   void FleetLeaves(Fleet *);
   void FleetArrives(Fleet *);
+  int ExploredBy(int);
+  void Explore(int);
   int Owner();
 
 //private:
   vector<Fleet*> fleets;
+  vector<int> explored;
   Planet **planets;
   int num_planets;
   int xpos;

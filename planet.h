@@ -38,11 +38,15 @@ public:
 
   System *Sys() { return system; };
 
+  int ExploredBy(int);
+  void Explore(int);
+
 private:
   System *system;
   friend class System;
   int order, size, minerals, atmosphere, temperature, radiation;
   int startpos, period;
+  vector<int> explored;
   };
 
 #endif

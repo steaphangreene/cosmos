@@ -5,6 +5,7 @@ void graphics_init(int, int, int, Uint32);
 void set_sprite(int, SDL_Surface *);
 void move_sprite(int, int, int);
 void update_sprite(int);
+void clear_sprites(int s = 1, int e = -1);
 
 void set_cursor(SDL_Surface *s);
 
