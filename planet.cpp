@@ -7,8 +7,6 @@
 #include "game.h"
 #include "ship.h"
 
-//Orbital Period = sqrt(Distance From Star ^ 3)
-
 int sattp[5][5] = {
 	{ },
 	{ 0 },
@@ -19,17 +17,13 @@ int sattp[5][5] = {
 
 extern int max_factions;
 
-Planet::Planet(System *s, int ord, int sz, int min, int atmos) {
-  system = s;
-  order = ord;
+Planet::Planet(System *s, int ord, int sz, int min, int atmos)
+  : SObject(s, (ord+1)*600){
   size = sz;
   minerals = min;
   atmosphere = atmos;
-  temperature = (10-order)*(10-order)*4-240;
-  radiation = (10-order)*(10-order)/2;
-  int dist = (ord+1)*700;
-  period = int(sqrt(double(dist)*double(dist)*double(dist)));
-  startpos = rand()&65535;
+  temperature = (10-ord)*(10-ord)*4-240;
+  radiation = (10-ord)*(10-ord)/2;
   num_satellites = (rand()%4)+1;
   satellites = new (Satellite*)[num_satellites];
   for(int ctr=0; ctr<num_satellites; ++ctr) {
@@ -45,20 +39,6 @@ Planet::~Planet() {
   delete [] satellites;
   satellites = NULL;
   }
-
-int Planet::XPos(int turn) {
-  double ang = double(startpos) + double(turn)*double(256*256*256) / double(period);
-  double dist = double(order+1) * double(30);
-  double xpos = dist * cos(ang * 2.0 * M_PIl / double(65536));
-  return int(384+xpos);
-  };
-
-int Planet::YPos(int turn) {
-  double ang = double(startpos) + double(turn)*double(256*256*256) / double(period);
-  double dist = double(order+1) * double(30);
-  double ypos = dist * sin(ang * 2.0 * M_PIl / double(65536));
-  return int(384+ypos);
-  };
 
 int Planet::Type() {
   return 0;
@@ -111,27 +91,6 @@ int Planet::Minerals() {
 void Planet::TakeTurn() {
   for(int ctr=0; ctr<int(colonies.size()); ++ctr) colonies[ctr]->TakeTurn();
   for(int ctr=0; ctr<num_satellites; ++ctr) satellites[ctr]->TakeTurn();
-  }
-
-void Planet::FleetLeaves(Fleet *f) {
-  vector<Fleet *>::iterator cur = fleets.begin();
-  while(cur < fleets.end()) {
-    if(*cur == f) {
-      cur = fleets.erase(cur);
-      continue;
-      }
-    ++cur;
-    }
-  }
-
-void Planet::FleetArrives(Fleet *f) {
-  vector<Fleet *>::iterator cur = fleets.begin();
-  while(cur < fleets.end()) {
-    if(*cur == f) return;      
-    ++cur;
-    }
-  fleets.push_back(f);
-  Explore(f->Owner());
   }
 
 int Planet::ExploredBy(int n) {

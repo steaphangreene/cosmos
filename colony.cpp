@@ -42,13 +42,13 @@ void Colony::Init(int initial) {
       objs.push_back(ctr);
       oqty.push_back(0);
       if(initial && cur_tree->Homeworld(ctr) > 0) {
-	planet->fleets.push_back(new Fleet(owner, tc->names));
+	planet->Sys()->fleets.push_back(new Fleet(planet->Sys(), owner, tc->names));
 	for(int shp=0 ; shp < cur_tree->Homeworld(ctr); ++shp) {
-	  planet->fleets[fn]->ships.push_back(new Ship(ctr, owner));
-	  (*(planet->fleets[fn]->ships.end()-1))->AddCrew(
-		(*(planet->fleets[fn]->ships.end()-1))->MaxCrew());
+	  ((Fleet*)planet->Sys()->fleets[fn])->ships.push_back(new Ship(ctr, owner));
+	  (*(((Fleet*)planet->Sys()->fleets[fn])->ships.end()-1))->AddCrew(
+		(*(((Fleet*)planet->Sys()->fleets[fn])->ships.end()-1))->MaxCrew());
 	  }
-	(*(planet->fleets.end()-1))->loc = planet;
+	((Fleet*)(*(planet->Sys()->fleets.end()-1)))->loc = planet;
 	++fn;
 	}
       }
@@ -64,9 +64,9 @@ int Colony::Industry() {
     ind += cur_tree->Industry(objs[ctr], oqty[ctr], this);
     }
   if(planet) {
-    for(int flt=0; flt<int(planet->fleets.size()); ++flt) {
-      for(int shp=0; shp<int(planet->fleets[flt]->ships.size()); ++shp) {
-	ind += cur_tree->Industry(planet->fleets[flt]->ships[shp]->tech, 1, this);
+    for(int flt=0; flt<int(planet->Sys()->fleets.size()); ++flt) {
+      for(int shp=0; shp<int(((Fleet*)planet->Sys()->fleets[flt])->ships.size()); ++shp) {
+	ind += cur_tree->Industry(((Fleet*)planet->Sys()->fleets[flt])->ships[shp]->tech, 1, this);
 	}
       }
     }
@@ -142,9 +142,9 @@ int Colony::Happiness() {
     hap += cur_tree->Happiness(objs[ctr], oqty[ctr], this);
     }
   if(planet) {
-    for(int flt=0; flt<int(planet->fleets.size()); ++flt) {
-      for(int shp=0; shp<int(planet->fleets[flt]->ships.size()); ++shp) {
-	hap += cur_tree->Happiness(planet->fleets[flt]->ships[shp]->tech, 1, this);
+    for(int flt=0; flt<int(planet->Sys()->fleets.size()); ++flt) {
+      for(int shp=0; shp<int(((Fleet*)planet->Sys()->fleets[flt])->ships.size()); ++shp) {
+	hap += cur_tree->Happiness(((Fleet*)planet->Sys()->fleets[flt])->ships[shp]->tech, 1, this);
 	}
       }
     }
@@ -157,9 +157,9 @@ int Colony::Security() {
     sec += cur_tree->Security(objs[ctr], oqty[ctr], this);
     }
   if(planet) {
-    for(int flt=0; flt<int(planet->fleets.size()); ++flt) {
-      for(int shp=0; shp<int(planet->fleets[flt]->ships.size()); ++shp) {
-	sec += cur_tree->Security(planet->fleets[flt]->ships[shp]->tech, 1, this);
+    for(int flt=0; flt<int(planet->Sys()->fleets.size()); ++flt) {
+      for(int shp=0; shp<int(((Fleet*)planet->Sys()->fleets[flt])->ships.size()); ++shp) {
+	sec += cur_tree->Security(((Fleet*)planet->Sys()->fleets[flt])->ships[shp]->tech, 1, this);
 	}
       }
     }
@@ -172,9 +172,9 @@ int Colony::Loyalty() {
     loy += cur_tree->Loyalty(objs[ctr], oqty[ctr], this);
     }
   if(planet) {
-    for(int flt=0; flt<int(planet->fleets.size()); ++flt) {
-      for(int shp=0; shp<int(planet->fleets[flt]->ships.size()); ++shp) {
-	loy += cur_tree->Loyalty(planet->fleets[flt]->ships[shp]->tech, 1, this);
+    for(int flt=0; flt<int(planet->Sys()->fleets.size()); ++flt) {
+      for(int shp=0; shp<int(((Fleet*)planet->Sys()->fleets[flt])->ships.size()); ++shp) {
+	loy += cur_tree->Loyalty(((Fleet*)planet->Sys()->fleets[flt])->ships[shp]->tech, 1, this);
 	}
       }
     }
@@ -208,8 +208,8 @@ void Colony::TakeTurn() {
 	indus -= need-prog[0];
 	if(tc->type == TECH_SHIP) {
 	  if(planet) {
-	    Fleet *flt = new Fleet(owner, tc->names);
-	    planet->fleets.push_back(flt);
+	    Fleet *flt = new Fleet(planet->Sys(), owner, tc->names);
+	    planet->Sys()->fleets.push_back(flt);
 	    flt->ships.push_back(new Ship(projs[0], owner));
 	    flt->ships[0]->AddCrew(flt->ships[0]->MaxCrew());
 	    population -= flt->ships[0]->MaxCrew();

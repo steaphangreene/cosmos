@@ -7,6 +7,7 @@ class System;
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
+#include "sobject.h"
 #include "planet.h"
 #include "fleet.h"
 
@@ -23,10 +24,9 @@ public:
   int Owner();
 
 //private:
-  vector<Fleet*> fleets;
+  vector<SObject*> objects;
+  vector<SObject*> fleets;
   vector<int> explored;
-  Planet **planets;
-  int num_planets;
   int xpos;
   int ypos;
   };

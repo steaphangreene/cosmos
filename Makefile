@@ -25,7 +25,7 @@ STRIP:=	strip
 OBJS:=	main.o data.o gui.o audio.o fonts.o graphics.o \
 	gui_page_galaxy.o gui_page_system.o gui_page_planet.o \
 	gui_panel_colony.o gui_panel_fleet.o gui_panel_ship.o \
-	ship.o fleet.o game.o player.o colony.o \
+	sobject.o ship.o fleet.o game.o player.o colony.o \
 	galaxy.o system.o planet.o satellite.o \
 	techtree.o tech_tiny.o \
 

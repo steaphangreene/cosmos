@@ -39,7 +39,6 @@ Game::~Game() {
 void Game::TakeTurn() {
   for(int ctr=0; ctr<int(players.size()); ++ctr) players[ctr]->TakeTurn();
   for(int ctr=0; ctr<int(galaxys.size()); ++ctr) galaxys[ctr]->TakeTurn();
-  for(int ctr=0; ctr<int(fleets.size()); ++ctr) fleets[ctr]->TakeTurn();
   turn++;
   }
 
@@ -76,7 +75,7 @@ void Game::Clear() {
   started = 0;
   players.clear();
   galaxys.clear();
-  fleets.clear();
+  //FIXME!!!
   }
 
 void Game::Fill() {

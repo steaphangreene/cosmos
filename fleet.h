@@ -8,20 +8,17 @@ class Fleet;
 #ifndef FLEET_H
 #define FLEET_H
 
+#include "sobject.h"
 #include "ship.h"
 #include "planet.h"
 #include "system.h"
 
-class Fleet {
+class Fleet : public SObject {
 public:
-  Fleet(int, const char *nm = "Some Fleet");
+  Fleet(System *, int, const char *nm = "Some Fleet");
   ~Fleet();
   void TakeTurn();
   int Owner() { return owner; };
-  int XPos() { return xpos; };
-  int YPos() { return ypos; };
-  int OnFrame() { return frame; }
-  void SetPos(int x, int y, int f=0) { xpos = x; ypos = y; frame = f; };
   int TimeToLocal(int);
   int TimeToGalactic(int);
   Planet *Target() { return targ; };
@@ -40,9 +37,7 @@ public:
 //private:
   void Arrive();
   int owner;
-  int frame;
   string name;
-  int xpos, ypos;
   vector<Ship*> ships;
   Planet *loc;
   Planet *dest;

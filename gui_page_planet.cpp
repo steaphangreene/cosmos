@@ -48,7 +48,7 @@ void page_cleanup_planet() {
 void page_draw_planet() {
   Planet *plan;
   SDL_Rect destr = {0, 0, 768, 768};
-  plan =cur_game->galaxys[cur_galaxy]->systems[cur_system]->planets[cur_planet];
+  plan = (Planet*)cur_game->galaxys[cur_galaxy]->systems[cur_system]->objects[cur_planet];
   SDL_BlitSurface(planet[plan->Type()], NULL, screen, &destr);
   lasttick = -1;
   page_update_planet();
@@ -59,7 +59,7 @@ void page_update_planet() {
   SDL_Rect srcr = {0, 0, 64, 64};
   SDL_Rect destr = {0, 0, 64, 64};
   System *sys = cur_game->galaxys[cur_galaxy]->systems[cur_system];
-  Planet *plan = sys->planets[cur_planet];
+  Planet *plan = (Planet*)sys->objects[cur_planet];
   if(lasttick != -1) {
     for(int sctr=0; sctr < plan->num_satellites; ++sctr) {
       Satellite *sat = plan->satellites[sctr];

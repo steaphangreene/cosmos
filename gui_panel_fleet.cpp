@@ -159,10 +159,10 @@ void button_clicked_fleet(int button) {
   if(button == BUTTON_SPLIT) {
     vector<Ship*>::iterator shp = cur_fleet->ships.begin()+1;
     for(; shp != cur_fleet->ships.end(); ++shp) {
-      Fleet *newfleet = new Fleet(cur_fleet->owner, cur_fleet->name.c_str());
+      Fleet *newfleet = new Fleet(cur_fleet->Sys(), cur_fleet->owner, cur_fleet->name.c_str());
       newfleet->loc = cur_fleet->loc;
       newfleet->ships.push_back(*shp);
-      newfleet->Location()->fleets.push_back(newfleet);
+      newfleet->Location()->Sys()->fleets.push_back(newfleet);
       }
     cur_fleet->ships.erase(cur_fleet->ships.begin()+1, cur_fleet->ships.end());
     page_draw();

@@ -7,8 +7,7 @@ using namespace std;
 
 extern int max_factions;
 
-Fleet::Fleet(int o, const char *nm) {
-  cur_game->fleets.push_back(this);
+Fleet::Fleet(System *s, int o, const char *nm) : SObject(s, 0) {
   detected.resize(max_factions, 0);
   detected[o] = 1;
   name = nm;
@@ -23,23 +22,8 @@ Fleet::Fleet(int o, const char *nm) {
   }
 
 Fleet::~Fleet() {
-  vector<Fleet *>::iterator cur = cur_game->fleets.begin();
-  while(cur < cur_game->fleets.end()) {
-    if(*cur == this) {
-      cur = cur_game->fleets.erase(cur);
-      continue;
-      }
-    ++cur;
-    }
+  vector<SObject *>::iterator cur;
   if(loc) {
-    cur = loc->fleets.begin();
-    while(cur < loc->fleets.end()) {
-      if(*cur == this) {
-	cur = loc->fleets.erase(cur);
-	continue;
-	}
-      ++cur;
-      }
     cur = loc->Sys()->fleets.begin();
     while(cur < loc->Sys()->fleets.end()) {
       if(*cur == this) {
@@ -55,8 +39,8 @@ void Fleet::Arrive() {
   prog = -1;
   loc = dest;
   dest = NULL;
-  loc->FleetArrives(this);
-  loc->Sys()->FleetLeaves(this);
+  loc->Explore(owner);
+//  loc->Sys()->FleetLeaves(this);
   }
 
 void Fleet::TakeTurn() {
@@ -83,8 +67,7 @@ void Fleet::Engage() {
   if(targ == NULL) return;
   dest = targ;
   trip = dist;
-  loc->FleetLeaves(this);
-  loc->Sys()->FleetArrives(this);
+//  loc->Sys()->FleetArrives(this);
   prog = 0;
   if(trip == 0) Arrive();
   }

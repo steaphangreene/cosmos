@@ -9,7 +9,6 @@ extern Game *cur_game;
 #define GAME_H
 
 #include "galaxy.h"
-#include "fleet.h"
 
 void game_init();
 
@@ -55,7 +54,6 @@ public:
   int turn, tick, frame;
 
   vector<Galaxy *>galaxys;
-  vector<Fleet *>fleets;
   vector<Player *>players;
   };
 
