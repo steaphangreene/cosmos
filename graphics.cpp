@@ -77,6 +77,13 @@ SDL_Surface *framebuffer, *screen;
 void graphics_init(int w, int h, int bpp, Uint32 flags) {
   framebuffer = SDL_SetVideoMode(w, h, bpp, flags);
   screen = SDL_DisplayFormat(framebuffer);
+//  screen = SDL_CreateRGBSurface(
+//	SDL_SWSURFACE, w, h, bpp,
+//	framebuffer->format->Rmask,
+//	framebuffer->format->Gmask,
+//	framebuffer->format->Bmask,
+//	framebuffer->format->Amask
+//	);
   }
 
 void update_all() {
@@ -189,13 +196,13 @@ void do_updates() {
     for(int ctr=0; success && ctr<num_updaterecs; ++ctr)
       if(SDL_BlitSurface(
 		screen, updaterecs+ctr, framebuffer, updaterecs+ctr
-		) == 2)
+		) == -2)
 	success = 0;
     if(success) SDL_UpdateRects(framebuffer, num_updaterecs, updaterecs);
     }
   if(!success) {
     while(SDL_BlitSurface(screen, NULL, framebuffer, NULL) == -2) {
-      SDL_Delay(5000);
+      SDL_Delay(10);
       }
     SDL_UpdateRect(framebuffer, 0, 0, 0, 0);
     }
