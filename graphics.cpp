@@ -6,7 +6,7 @@
 #include "data/cursor.h"
 #include "data/blank0.h"
 #include "data/blank1.h"
-#include "data/star.h"
+#include "data/star00.h"
 
 #include "fonts.h"
 
@@ -53,9 +53,9 @@ SDL_Surface *get_cursor_image() {
   }
 
 SDL_Surface *get_star_image() {
-  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)star_image.pixel_data,
-	star_image.width, star_image.height,
-	32, 4*star_image.width,
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)star00_image.pixel_data,
+	star00_image.width, star00_image.height,
+	32, 4*star00_image.width,
 	rchan, gchan, bchan, achan);
   SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
   SDL_FreeSurface(orig);
@@ -115,4 +115,52 @@ SDL_Surface *build_button1(const char *label) {
   int len = string_len(label);
   string_draw(s, 100-(len/2), 13, 0x0000007F, label);
   return s;
+  }
+
+
+//Double-buffering system
+static int num_updaterecs = 0;
+static SDL_Rect updaterecs[1024];
+
+SDL_Surface *framebuffer, *screen;
+
+void graphics_init(int w, int h, int bpp, Uint32 flags) {
+  framebuffer = SDL_SetVideoMode(w, h, bpp, flags);
+  screen = SDL_DisplayFormat(framebuffer);
+  }
+
+void update_all() {
+  num_updaterecs = -1;
+  }
+
+void update(SDL_Rect *r) {
+  if(num_updaterecs < 0) return;
+  updaterecs[num_updaterecs] = *r;
+  ++num_updaterecs;
+  }
+
+void update(int x, int y, unsigned int w, unsigned int h) {
+  if(num_updaterecs < 0) return;
+  updaterecs[num_updaterecs].x = x;
+  updaterecs[num_updaterecs].y = y;
+  updaterecs[num_updaterecs].w = w;
+  updaterecs[num_updaterecs].h = h;
+  ++num_updaterecs;
+  }
+
+void do_updates() {
+  if(num_updaterecs < 0) {
+    SDL_BlitSurface(screen, NULL, framebuffer, NULL);
+    SDL_UpdateRect(framebuffer, 0, 0, 0, 0);
+    }
+  else {
+    for(int ctr=0; ctr<num_updaterecs; ++ctr)
+      SDL_BlitSurface(screen, updaterecs+ctr, framebuffer, updaterecs+ctr);
+    SDL_UpdateRects(framebuffer, num_updaterecs, updaterecs);
+    }
+  num_updaterecs = 0;
+  }
+
+void toggle_fullscreen() {
+  SDL_WM_ToggleFullScreen(framebuffer);
   }

@@ -22,7 +22,7 @@ Planet::Planet(int ord, int sz, int min, int atmos) {
   num_satellites = rand()%7;
   satellites = new (Satellite*)[num_satellites];
   for(int ctr=0; ctr<num_satellites; ++ctr) {
-    satellites[ctr] = new Satellite(rand()&65535);
+    satellites[ctr] = new Satellite(rand()&65535, (rand()&7) <? 1);
     }
   };
 

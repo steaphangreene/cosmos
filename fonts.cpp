@@ -3,7 +3,11 @@
 
 #include <SDL.h>
 
-#include "data/font22.h"
+#include "data/font22_black.h"
+#include "data/font22_blue.h"
+#include "data/font22_red.h"
+#include "data/font22_green.h"
+#include "data/font22_white.h"
 
 SDL_Surface *font;
 int foff[128];
@@ -24,10 +28,10 @@ void fonts_init() {
     if(let == ' ') {
       int pres = 0;
       foff[let] = 0;
-      while((!pres) && xpos < (int)font22_image.width) {
+      while((!pres) && xpos < (int)font22_red_image.width) {
 	pres = 0;
-	for(int ctr=0; ctr < int(font22_image.height) && (!pres); ++ctr) {
-	  if(font22_image.pixel_data[4*(font22_image.width*ctr+xpos)+3])
+	for(int ctr=0; ctr < int(font22_red_image.height) && (!pres); ++ctr) {
+	  if(font22_red_image.pixel_data[4*(font22_red_image.width*ctr+xpos)+3])
 	    pres = 1;
 	  }
 	++xpos;
@@ -42,20 +46,20 @@ void fonts_init() {
     else {
       int pres = 1;
       foff[let] = xpos;
-      while(pres && xpos < (int)font22_image.width) {
+      while(pres && xpos < (int)font22_red_image.width) {
 	pres = 0;
-	for(int ctr=0; ctr < int(font22_image.height) && (!pres); ++ctr) {
-	  if(font22_image.pixel_data[4*(font22_image.width*ctr+xpos)+3])
+	for(int ctr=0; ctr < int(font22_red_image.height) && (!pres); ++ctr) {
+	  if(font22_red_image.pixel_data[4*(font22_red_image.width*ctr+xpos)+3])
 	    { pres = 1; }
 	  }
 	++xpos;
 	}
 
       flen[let] = xpos-foff[let];
-      while((!pres) && xpos < (int)font22_image.width) {
+      while((!pres) && xpos < (int)font22_red_image.width) {
 	pres = 0;
-	for(int ctr=0; ctr < int(font22_image.height) && (!pres); ++ctr) {
-	  if(font22_image.pixel_data[4*(font22_image.width*ctr+xpos)+3])
+	for(int ctr=0; ctr < int(font22_red_image.height) && (!pres); ++ctr) {
+	  if(font22_red_image.pixel_data[4*(font22_red_image.width*ctr+xpos)+3])
 	    pres = 1;
 	  }
 	++xpos;
@@ -64,9 +68,9 @@ void fonts_init() {
       }
     }
 
-  font = SDL_CreateRGBSurfaceFrom((void*)font22_image.pixel_data,
-		font22_image.width, font22_image.height,
-		32, 4*font22_image.width,
+  font = SDL_CreateRGBSurfaceFrom((void*)font22_red_image.pixel_data,
+		font22_red_image.width, font22_red_image.height,
+		32, 4*font22_red_image.width,
 		rchan, gchan, bchan, achan);
   SDL_SetAlpha(font, SDL_RLEACCEL|SDL_SRCALPHA, SDL_ALPHA_OPAQUE);
   }

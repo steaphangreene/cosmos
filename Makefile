@@ -56,15 +56,16 @@ cosmos.exe:	$(WOBJS)
 
 #AUTO-GENERATED DEPS BELOW (gcc -MM `sdl-config --cflags` *.cpp to regen)
 audio.o: audio.cpp
-fonts.o: fonts.cpp data/font22.h
+fonts.o: fonts.cpp data/font22_black.h data/font22_blue.h \
+ data/font22_red.h data/font22_green.h data/font22_white.h
 galaxy.o: galaxy.cpp galaxy.h system.h planet.h satellite.h
 game.o: game.cpp game.h galaxy.h system.h planet.h satellite.h
 graphics.o: graphics.cpp graphics.h data/cursor.h data/blank0.h \
- data/blank1.h data/star.h fonts.h
+ data/blank1.h data/star00.h fonts.h
 gui.o: gui.cpp gui.h game.h galaxy.h system.h planet.h satellite.h \
- audio.h graphics.h
+ audio.h fonts.h graphics.h
 main.o: main.cpp gui.h game.h galaxy.h system.h planet.h satellite.h \
- fonts.h audio.h
+ fonts.h audio.h graphics.h
 planet.o: planet.cpp math.h game.h galaxy.h system.h planet.h \
  satellite.h
 satellite.o: satellite.cpp math.h satellite.h

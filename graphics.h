@@ -1,3 +1,10 @@
+void graphics_init(int, int, int, Uint32);
+void update_all();
+void update(SDL_Rect *r);
+void update(int x, int y, unsigned int w, unsigned int h);
+void do_updates();
+void toggle_fullscreen();
+
 SDL_Surface *get_image(const char *, int, int);
 SDL_Surface *get_alpha_image(const char *, int, int);
 

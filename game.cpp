@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <ctime>
 
 #include "game.h"
@@ -9,15 +10,23 @@ Game *cur_game = NULL;
 using namespace std;
 
 void game_init() {
+  srand(time(NULL));
+  for(int ctr=0; ctr<num_configs; ++ctr) {
+    int op;
+    for(op=1; config[ctr][op] != NULL; ++op);
+    num_options[ctr] = op-1;
+    }
   cur_game = new Game;
   }
 
 Game::Game() {
+  memset(working_setting, 0, sizeof(working_setting));
+  memset(game_setting, 0, sizeof(game_setting));
+  memset(setting, 0, sizeof(setting));
   num_galaxys = 0;
   galaxys = NULL;
   started = 0;
   turn = 0;
-  Reset();
   }
 
 Game::~Game() {
@@ -25,51 +34,40 @@ Game::~Game() {
   }
 
 void Game::Randomize() {
-  Reset();
-  Finalize();
+  for(int ctr=0; ctr<num_configs; ++ctr) {
+    if(strcmp("Unknown", config[ctr][1]) == 0)
+      working_setting[ctr] = (rand()%(num_options[ctr]-1))+1;
+    else
+      working_setting[ctr] = (rand()%(num_options[ctr]));
+    }
   }
 
 void Game::Reset() {
-  s_techtree = 0;
-  s_ship = 0;
-  s_board = 0;
-  s_planet = 0;
-  s_galaxyview = 0;
-  s_systemview = 0;
-  s_planetview = 0;
-  s_galaxys = 0;
-  s_size = 0;
-  s_races = 0;
-  s_techlevel = 0;
-  s_minerals = 0;
-  s_atmosphere = 0;
+  for(int ctr=0; ctr<num_configs; ++ctr) {
+    working_setting[ctr] = game_setting[ctr];
+    }
+  }
 
-  num_galaxys = 0;
+void Game::ResetToUnknown() {
+  memset(working_setting, 0, sizeof(working_setting));
   }
 
 void Game::Finalize() {
-  srand(time(NULL));
-  if(s_techtree == 0) s_techtree = (rand()%(TECHTREE_MAX-1))+1;
-  if(s_ship == 0) s_ship = (rand()%(SHIP_MAX-1))+1;
-  if(s_board == 0) s_board = (rand()%(BOARD_MAX-1))+1;
-  if(s_planet == 0) s_planet = (rand()%(PLANET_MAX-1))+1;
-  if(s_galaxyview == 0) s_galaxyview = (rand()%(GALAXYVIEW_MAX-1))+1;
-  if(s_systemview == 0) s_systemview = (rand()%(SYSTEMVIEW_MAX-1))+1;
-  if(s_planetview == 0) s_planetview = (rand()%(PLANETVIEW_MAX-1))+1;
-  if(s_galaxys == 0) s_galaxys = (rand()%(GALAXYS_MAX-1))+1;
-  if(s_size == 0) s_size = (rand()%(GSIZE_MAX-1))+1;
-  if(s_races == 0) s_races = (rand()%(RACES_MAX-1))+1;
-  if(s_techlevel == 0) s_techlevel = (rand()%(TECH_MAX-1))+1;
-  if(s_minerals == 0) s_minerals = (rand()%(SMINERALS_MAX-1))+1;
-  if(s_atmosphere == 0) s_atmosphere = (rand()%(SATMOSPHERE_MAX-1))+1;
+  for(int ctr=0; ctr<num_configs; ++ctr) {
+    game_setting[ctr] = working_setting[ctr];
+    setting[ctr] = working_setting[ctr];
+    if(setting[ctr] == 0 && strcmp("Unknown", config[ctr][1]) == 0) {
+      setting[ctr] = (rand()%(num_options[ctr]-1))+1;
+      }
+    }
   }
 
 void Game::Clear() {
   started = 0;
   for(int ctr=0; ctr<num_galaxys; ++ctr) delete galaxys[ctr];
   if(galaxys) delete [] galaxys;
-  galaxys = NULL;
   num_galaxys = 0;
+  galaxys = NULL;
   }
 
 void Game::Fill() {
@@ -77,25 +75,121 @@ void Game::Fill() {
   Finalize();
   started = 1;
 
-/*
-  printf("Tech Tree = %d\n", s_techtree);
-  printf("Ship Combat System = %d\n", s_ship);
-  printf("Boarding Combat System = %d\n", s_board);
-  printf("Planetary Combat System = %d\n", s_planet);
-  printf("Galaxy View = %d\n", s_galaxys);
-  printf("System View = %d\n", s_systemview);
-  printf("Planetary View = %d\n", s_planetview);
-  printf("Numer of Galaxys = %d\n", s_galaxys);
-  printf("Galaxy Size = %d\n", s_size);
-  printf("Number of Races = %d\n", s_races);
-  printf("Tech Level = %d\n", s_techlevel);
-  printf("Planet Minerals = %d\n", s_minerals);
-  printf("Planet Atmosphere = %d\n", s_atmosphere);
-*/
-
-  num_galaxys = s_galaxys;
+  num_galaxys = setting[9];
   galaxys = new (Galaxy*)[num_galaxys];
   for(int ctr=0; ctr<num_galaxys; ++ctr) {
-    galaxys[ctr] = new Galaxy(s_size*20, s_minerals, s_atmosphere);
+    galaxys[ctr] = new Galaxy(setting[10]*20, setting[11], setting[12]);
     }
   }
+
+const char *config00[] = {	"Ship Combat",
+	"Auto Resolution",
+//	"2-D",
+//	"2-D Tactical",
+//	"3-D",
+//	"3-D Tactical",
+	NULL };
+
+const char *config01[] = {	"Boarding Combat",
+	"Auto Resolution",
+//	"2-D",
+//	"2-D Tactical",
+	NULL };
+
+const char *config02[] = {	"Planetary Combat",
+	"Auto Resolution",
+//	"2-D",
+//	"2-D Tactical",
+	NULL };
+
+const char *config03[] = {	"Galaxy View",
+	"2-D",
+//	"3-D",
+	NULL };
+
+const char *config04[] = {	"System View",
+	"2-D",
+//	"3-D",
+	NULL };
+
+const char *config05[] = {	"Planet View",
+	"2-D",
+//	"3-D",
+	NULL };
+
+const char *config06[] = {	"Number of Races",
+	"Unknown",
+	"1",
+	"2",
+	"3",
+	"4",
+	"5",
+	"6",
+	"7",
+	"8",
+	NULL };
+
+const char *config07[] = {	"Tech Tree",
+	"MOO2",
+//	"MOO2-Dynamic",
+	"Ascend",
+//	"Ascend-Dynamic",
+//	"Dynamic",
+	NULL };
+
+const char *config08[] = {	"Starting Tech Level",
+	"Average",
+	"High",
+	"Low",
+	NULL };
+
+const char *config09[] = {	"Number of Galaxys",
+	"Unknown",
+	"1",
+//	"2",
+//	"Few",
+//	"Many",
+//	"Unlimited",
+	NULL };
+
+const char *config10[] = {	"Galaxy Density",
+	"Unknown",
+	"Tiny",
+	"Small",
+	"Medium",
+	"Large",
+	"Huge",
+//	"Massive",
+//	"Realistic",
+	NULL };
+
+const char *config11[] = {	"Planetary Minerals",
+	"Unknown",
+	"Low",
+	"Average",
+	"High",
+	NULL };
+
+const char *config12[] = {	"Planetary Atmosphere",
+	"Unknown",
+	"Thin",
+	"Average",
+	"Thick",
+	NULL };
+
+int num_options[num_configs] = {0};
+const char **config[num_configs] = {
+  config00,
+  config01,
+  config02,
+  config03,
+  config04,
+  config05,
+  config06,
+  config07,
+  config08,
+  config09,
+  config10,
+  config11,
+  config12
+  };

@@ -11,8 +11,7 @@ using namespace std;
 #include "game.h"
 #include "fonts.h"
 #include "audio.h"
-
-SDL_Surface *screen;
+#include "graphics.h"
 
 int use_sound = 1;
 
@@ -29,7 +28,7 @@ int main(int argc, char **argv) {
     exit(1);
     }
 
-  SDL_AddTimer(100, &ticktock, NULL);
+  SDL_AddTimer(25, &ticktock, NULL);
 
   Uint32 flags = SDL_HWSURFACE|SDL_FULLSCREEN;
   for(int ctr=1; ctr<argc; ++ctr) {
@@ -37,7 +36,7 @@ int main(int argc, char **argv) {
     else if(!strcmp(argv[ctr], "--nosound")) use_sound = 0;
     }
 
-  screen = SDL_SetVideoMode(1024, 768, 32, flags);
+  graphics_init(1024, 768, 32, flags);
   SDL_WM_SetCaption("Cosmos", "Cosmos");
 
   if(use_sound) audio_init();
