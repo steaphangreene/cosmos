@@ -100,7 +100,7 @@ cosmos_src.tar.gz:	*.cpp *.[ch] data/*.h Makefile
 	rm -f cosmos_src.tar.gz
 	cd .. ; tar chvf cosmos/cosmos_src.tar \
 		cosmos/*.[hc] cosmos/*.cpp cosmos/data cosmos/Makefile \
-		cosmos/cosmos cosmos/CREDITS cosmos/*.csh
+		cosmos/cosmos cosmos/CREDITS cosmos/TODO cosmos/*.csh
 	gzip -9 cosmos_src.tar
 
 backup:	tar
