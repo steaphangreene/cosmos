@@ -20,17 +20,25 @@ const unsigned char achanc[] = { 0, 0, 0, 0xFF };
 const unsigned int achan = *((unsigned long *)achanc);
 
 SDL_Surface *get_blank0_image() {
-  return SDL_CreateRGBSurfaceFrom((void*)blank0_image.pixel_data,
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)blank0_image.pixel_data,
 	blank0_image.width, blank0_image.height,
 	32, 4*blank0_image.width,
 	rchan, gchan, bchan, achan);
+  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
+  SDL_FreeSurface(orig);
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
+  return optim;
   }
 
 SDL_Surface *get_blank1_image() {
-  return SDL_CreateRGBSurfaceFrom((void*)blank1_image.pixel_data,
+  SDL_Surface *orig = SDL_CreateRGBSurfaceFrom((void*)blank1_image.pixel_data,
 	blank1_image.width, blank1_image.height,
 	32, 4*blank1_image.width,
 	rchan, gchan, bchan, achan);
+  SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
+  SDL_FreeSurface(orig);
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
+  return optim;
   }
 
 SDL_Surface *get_cursor_image() {
@@ -40,6 +48,7 @@ SDL_Surface *get_cursor_image() {
 	rchan, gchan, bchan, achan);
   SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
   SDL_FreeSurface(orig);
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
   return optim;
   }
 
@@ -50,6 +59,7 @@ SDL_Surface *get_star_image() {
 	rchan, gchan, bchan, achan);
   SDL_Surface *optim = SDL_DisplayFormatAlpha(orig);
   SDL_FreeSurface(orig);
+  SDL_SetAlpha(optim, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
   return optim;
   }
 
@@ -66,6 +76,7 @@ SDL_Surface *get_image(const char *filename, int xs, int ys) {
 				bchan, gchan, rchan, achan);
   SDL_Surface *ret = SDL_DisplayFormat(s);
   SDL_FreeSurface(s);
+  SDL_SetAlpha(ret, SDL_SRCALPHA|SDL_RLEACCEL, 0xFF);
   return ret;
   }
 

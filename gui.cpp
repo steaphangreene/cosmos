@@ -17,7 +17,7 @@ int done = 0;
 extern SDL_Surface *screen;
 static SDL_Rect mouser = {-1, -1, 0, 0};
 static SDL_Surface *intro, *cursor, *button[BUTTON_MAX][2];
-static SDL_Surface *planet[4], *star;
+static SDL_Surface *planet[4], *satellite[4], *star;
 
 int lastpage = PAGE_INVALID, page = PAGE_ROOT;
 int buttlist[PAGE_MAX][BUTTON_MAX] = {{0}};
@@ -143,9 +143,7 @@ void gui_init() {
   intro = get_image("graphics/intro.raw", 800, 768);
 
   planet[0] = get_alpha_image("graphics/planet00.raw", 768, 768);
-  planet[1] = get_alpha_image("graphics/planet01.raw", 768, 768);
-  planet[2] = get_alpha_image("graphics/planet02.raw", 768, 768);
-  planet[3] = get_alpha_image("graphics/planet03.raw", 768, 768);
+  satellite[0] = get_alpha_image("graphics/satellite00.raw", 8, 8);
   star = get_star_image();
 
   button[BUTTON_RESUMEGAME][0] = build_button0("Resume Game");;
@@ -294,16 +292,17 @@ void page_redraw(SDL_Rect *area) {
       int ptype = sys->planets[cur_planet]->type;
       SDL_BlitSurface(planet[ptype], &todo, screen, &todo);
 
-      SDL_Rect srcr = {0, 0, 3, 3};
-      SDL_Rect destr = {0, 0, 3, 3};
+      SDL_Rect srcr = {0, 0, 8, 8};
+      SDL_Rect destr = {0, 0, 8, 8};
       Planet *plan = sys->planets[cur_planet];
       for(int sat=0; sat < plan->num_satellites; ++sat) {
-	srcr.x = plan->satellites[sat]->XPos(cur_game->tick) - 1;
-	srcr.y = plan->satellites[sat]->YPos(cur_game->tick) - 1;
-	destr.x = plan->satellites[sat]->XPos(cur_game->tick) - 1;
-	destr.y = plan->satellites[sat]->YPos(cur_game->tick) - 1;
+	srcr.x = plan->satellites[sat]->XPos(cur_game->tick) - 4;
+	srcr.y = plan->satellites[sat]->YPos(cur_game->tick) - 4;
+	destr.x = plan->satellites[sat]->XPos(cur_game->tick) - 4;
+	destr.y = plan->satellites[sat]->YPos(cur_game->tick) - 4;
 	if(overlaps(destr, todo)) {
-	  SDL_FillRect(screen, &destr, SDL_MapRGB(screen->format, 0xFF, 0xFF, 0x00));
+	  //SDL_FillRect(screen, &destr, SDL_MapRGB(screen->format, 0xFF, 0xFF, 0x00));
+	  SDL_BlitSurface(satellite[0], NULL, screen, &destr);
 	  if(plan->satellites[sat]->InFront(cur_game->tick))
 	    SDL_BlitSurface(planet[ptype], &srcr, screen, &destr);
 	  }
@@ -368,16 +367,16 @@ void page_draw() {
 void page_update() {
   static int lasttick = -1;
   if(page == PAGE_PLANET) {
-    SDL_Rect srcr = {0, 0, 3, 3};
-    SDL_Rect destr = {0, 0, 3, 3};
+    SDL_Rect srcr = {0, 0, 8, 8};
+    SDL_Rect destr = {0, 0, 8, 8};
     Planet *plan = cur_game->galaxys[cur_galaxy]->systems[cur_system]->planets[cur_planet];
     int ptype = plan->type;
     if(lasttick != -1) {
       for(int sat=0; sat < plan->num_satellites; ++sat) {
-	srcr.x = plan->satellites[sat]->XPos(lasttick) - 1;
-	srcr.y = plan->satellites[sat]->YPos(lasttick) - 1;
-	destr.x = plan->satellites[sat]->XPos(lasttick) - 1;
-	destr.y = plan->satellites[sat]->YPos(lasttick) - 1;
+	srcr.x = plan->satellites[sat]->XPos(lasttick) - 4;
+	srcr.y = plan->satellites[sat]->YPos(lasttick) - 4;
+	destr.x = plan->satellites[sat]->XPos(lasttick) - 4;
+	destr.y = plan->satellites[sat]->YPos(lasttick) - 4;
 	SDL_FillRect(screen, &destr, SDL_MapRGB(screen->format, 0x00, 0x00, 0x00));
 	SDL_BlitSurface(planet[ptype], &srcr, screen, &destr);
 	if(overlaps(destr, mouser)) cursor_draw();
@@ -385,11 +384,12 @@ void page_update() {
 	}
       }
     for(int sat=0; sat < plan->num_satellites; ++sat) {
-      srcr.x = plan->satellites[sat]->XPos(cur_game->tick) - 1;
-      srcr.y = plan->satellites[sat]->YPos(cur_game->tick) - 1;
-      destr.x = plan->satellites[sat]->XPos(cur_game->tick) - 1;
-      destr.y = plan->satellites[sat]->YPos(cur_game->tick) - 1;
-      SDL_FillRect(screen, &destr, SDL_MapRGB(screen->format, 0xFF, 0xFF, 0x00));
+      srcr.x = plan->satellites[sat]->XPos(cur_game->tick) - 4;
+      srcr.y = plan->satellites[sat]->YPos(cur_game->tick) - 4;
+      destr.x = plan->satellites[sat]->XPos(cur_game->tick) - 4;
+      destr.y = plan->satellites[sat]->YPos(cur_game->tick) - 4;
+      //SDL_FillRect(screen, &destr, SDL_MapRGB(screen->format, 0xFF, 0xFF, 0x00));
+      SDL_BlitSurface(satellite[0], NULL, screen, &destr);
       if(plan->satellites[sat]->InFront(cur_game->tick))
 	SDL_BlitSurface(planet[ptype], &srcr, screen, &destr);
       if(overlaps(destr, mouser)) cursor_draw();

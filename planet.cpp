@@ -17,7 +17,8 @@ Planet::Planet(int ord, int sz, int min, int atmos) {
   int dist = (ord+1)*700;
   period = int(sqrt(double(dist)*double(dist)*double(dist)));
   startpos = rand()&65535;
-  type = rand()%4;
+  type = 0;
+//  type = rand()%4;
   num_satellites = rand()%7;
   satellites = new (Satellite*)[num_satellites];
   for(int ctr=0; ctr<num_satellites; ++ctr) {

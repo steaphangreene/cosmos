@@ -17,7 +17,7 @@ int Satellite::XPos(int tick) {
   int pos = startpos;
   pos += tick*256;
   pos &= 65535;
-  double loc = 384.0 * cos(pos * 2.0 * M_PIl / double(65536));
+  double loc = 380.0 * cos(pos * 2.0 * M_PIl / double(65536));
   return 384+int(loc * cos(angle * 2.0 * M_PIl / double(65536)));
   }
 
@@ -25,7 +25,7 @@ int Satellite::YPos(int tick) {
   int pos = startpos;
   pos += tick*256;
   pos &= 65535;
-  double loc = 384.0 * cos(pos * 2.0 * M_PIl / double(65536));
+  double loc = 380.0 * cos(pos * 2.0 * M_PIl / double(65536));
   return 384+int(loc * sin(angle * 2.0 * M_PIl / double(65536)));
   }
 
