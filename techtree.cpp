@@ -27,44 +27,44 @@ TechTree::TechTree(int which, int techl, int devl) {
     }
   }
 
-int TechTree::Minerals(int tnum, int tqty, Planet *plan) {
-  return min_tiny(tnum, tqty, plan);
+int TechTree::Minerals(int tnum, int tqty, Colony *col) {
+  return min_tiny(tnum, tqty, col);
   }
 
-int TechTree::Atmosphere(int tnum, int tqty, Planet *plan) {
-  return atm_tiny(tnum, tqty, plan);
+int TechTree::Atmosphere(int tnum, int tqty, Colony *col) {
+  return atm_tiny(tnum, tqty, col);
   }
 
-int TechTree::Industry(int tnum, int tqty, Planet *plan) {
-  return ind_tiny(tnum, tqty, plan);
+int TechTree::Industry(int tnum, int tqty, Colony *col) {
+  return ind_tiny(tnum, tqty, col);
   }
 
-int TechTree::Upkeep(int tnum, int tqty, Planet *plan) {
-  return upk_tiny(tnum, tqty, plan);
+int TechTree::Upkeep(int tnum, int tqty, Colony *col) {
+  return upk_tiny(tnum, tqty, col);
   }
 
-int TechTree::Radiation(int tnum, int tqty, Planet *plan) {
-  return rad_tiny(tnum, tqty, plan);
+int TechTree::Radiation(int tnum, int tqty, Colony *col) {
+  return rad_tiny(tnum, tqty, col);
   }
 
-int TechTree::Temperature(int tnum, int tqty, Planet *plan) {
-  return tmp_tiny(tnum, tqty, plan);
+int TechTree::Temperature(int tnum, int tqty, Colony *col) {
+  return tmp_tiny(tnum, tqty, col);
   }
 
-int TechTree::Crew(int tnum, int tqty, Planet *plan) {
-  return crw_tiny(tnum, tqty, plan);
+int TechTree::Crew(int tnum, int tqty, Colony *col) {
+  return crw_tiny(tnum, tqty, col);
   }
 
-int TechTree::Loyalty(int tnum, int tqty, Planet *plan) {
-  return loy_tiny(tnum, tqty, plan);
+int TechTree::Loyalty(int tnum, int tqty, Colony *col) {
+  return loy_tiny(tnum, tqty, col);
   }
 
-int TechTree::Security(int tnum, int tqty, Planet *plan) {
-  return sec_tiny(tnum, tqty, plan);
+int TechTree::Security(int tnum, int tqty, Colony *col) {
+  return sec_tiny(tnum, tqty, col);
   }
 
-int TechTree::Happiness(int tnum, int tqty, Planet *plan) {
-  return hap_tiny(tnum, tqty, plan);
+int TechTree::Happiness(int tnum, int tqty, Colony *col) {
+  return hap_tiny(tnum, tqty, col);
   }
 
 int tech_reduce(int v, int t) {

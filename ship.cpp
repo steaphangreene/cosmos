@@ -34,3 +34,8 @@ Ship::Ship(int tec, int own) {
 
 void Ship::TakeTurn() {
   }
+
+int Ship::CanLand() {
+  if(sclass == SCLASS_COLONIZER || sclass == SCLASS_COLONYSHIP) return 1;
+  return 0;
+  }

@@ -124,8 +124,6 @@ void stats_draw_planet(Planet *plan, int upd) {
   int line = 0;
   char buf[80];
   int col = 7;
-  if(plan->claimed >= 0) col = cur_game->players[plan->claimed]->color;
-
 
   line = 0;
   sprintf(buf, "Atmosphere: %d", plan->Atmosphere());
@@ -145,26 +143,26 @@ void stats_draw_planet(Planet *plan, int upd) {
   string_drawr(screen, 768, 13+24*(line++), cur_font[col], buf);
 
 
-  if(plan->claimed >= 0) {
+  if(plan->colonies.size() > 0) {
     line = 0;
-    sprintf(buf, "Pop: %s", popstr(plan->Population(), plan->PopulationM()));
+    sprintf(buf, "Pop: %s", popstr(plan->colonies[0]->Population(), plan->colonies[0]->PopulationM()));
     string_draw(screen, 12, (768-24*3-11)+24*(line++), cur_font[col], buf);
 
-    sprintf(buf, "Free: %s", popstr(plan->FreePop(), plan->FreePopM()));
+    sprintf(buf, "Free: %s", popstr(plan->colonies[0]->FreePop(), plan->colonies[0]->FreePopM()));
     string_draw(screen, 12, (768-24*3-11)+24*(line++), cur_font[col], buf);
 
-    sprintf(buf, "Growth: %s", popstr(plan->Growth(), plan->GrowthM()));
+    sprintf(buf, "Growth: %s", popstr(plan->colonies[0]->Growth(), plan->colonies[0]->GrowthM()));
     string_draw(screen, 12, (768-24*3-11)+24*(line++), cur_font[col], buf);
 
 
     line = 0;
-    sprintf(buf, "Loyalty: %d", plan->Loyalty());
+    sprintf(buf, "Loyalty: %d", plan->colonies[0]->Loyalty());
     string_drawr(screen, 768, (768-24*3-11)+24*(line++), cur_font[col], buf);
 
-    sprintf(buf, "Security: %d", plan->Security());
+    sprintf(buf, "Security: %d", plan->colonies[0]->Security());
     string_drawr(screen, 768, (768-24*3-11)+24*(line++), cur_font[col], buf);
 
-    sprintf(buf, "Happiness: %d", plan->Happiness());
+    sprintf(buf, "Happiness: %d", plan->colonies[0]->Happiness());
     string_drawr(screen, 768, (768-24*3-11)+24*(line++), cur_font[col], buf);
     }
   }

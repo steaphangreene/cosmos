@@ -2,16 +2,20 @@
 
 using namespace std;
 
+class Planet;
+
 #ifndef PLANET_H
 #define PLANET_H
 
 #include "fleet.h"
 #include "techtree.h"
 #include "satellite.h"
+#include "system.h"
+#include "colony.h"
 
 class Planet {
 public:
-  Planet(int ord, int sz, int min, int atmos);
+  Planet(System *s, int ord, int sz, int min, int atmos);
   ~Planet();
   int XPos(int);
   int YPos(int);
@@ -22,33 +26,20 @@ public:
   int Temperature();
   int Minerals();
 
-  int Industry();
-  int SpareIndustry();
-
-  int Growth();
-  int GrowthM();
-  int Population();
-  int PopulationM();
-  int FreePop();
-  int FreePopM();
-
-  int Happiness();
-  int Loyalty();
-  int Security();
-
   void TakeTurn();
 
   int num_satellites;
   Satellite **satellites;
-  vector<int> objs;
-  vector<int> oqty;
-  vector<int> projs;
-  vector<int> prog;
-  vector<Fleet*> fleets;
+  vector <Colony *> colonies;
 
-  int claimed;
+  void FleetLeaves(Fleet *);
+  void FleetArrives(Fleet *);
+  vector<Fleet *> fleets;
+
+  System *Sys() { return system; };
+
 private:
-  int population, pop_minor;
+  System *system;
   friend class System;
   int order, size, minerals, atmosphere, temperature, radiation;
   int startpos, period;

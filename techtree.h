@@ -6,6 +6,11 @@ class TechTree;
 #ifndef TECHTREE_H
 #define TECHTREE_H
 
+#include "planet.h"
+#include "colony.h"
+#include "fleet.h"
+#include "ship.h"
+
 using namespace std;
 
 class Planet;
@@ -50,19 +55,19 @@ public:
   int *Homeworld() { return homeworld; }
   int Homeworld(int n) { return homeworld[n]; }
 
-  int Industry(int tnum, int tqty, Planet *plan);
+  int Industry(int tnum, int tqty, Colony *col);
 
-  int Upkeep(int tnum, int tqty, Planet *plan);
+  int Upkeep(int tnum, int tqty, Colony *col);
 
-  int Minerals(int tnum, int tqty, Planet *plan);
-  int Atmosphere(int tnum, int tqty, Planet *plan);
-  int Radiation(int tnum, int tqty, Planet *plan);
-  int Temperature(int tnum, int tqty, Planet *plan);
+  int Minerals(int tnum, int tqty, Colony *col);
+  int Atmosphere(int tnum, int tqty, Colony *col);
+  int Radiation(int tnum, int tqty, Colony *col);
+  int Temperature(int tnum, int tqty, Colony *col);
 
-  int Crew(int tnum, int tqty, Planet *plan);
-  int Loyalty(int tnum, int tqty, Planet *plan);
-  int Security(int tnum, int tqty, Planet *plan);
-  int Happiness(int tnum, int tqty, Planet *plan);
+  int Crew(int tnum, int tqty, Colony *col);
+  int Loyalty(int tnum, int tqty, Colony *col);
+  int Security(int tnum, int tqty, Colony *col);
+  int Happiness(int tnum, int tqty, Colony *col);
 
 private:
   int *homeworld;

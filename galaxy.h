@@ -7,12 +7,8 @@ using namespace std;
 
 class Galaxy {
 public:
-//  Galaxy(int numsys, int minl, int atmosl, int *devl) {
-//    vector<Player *> mtvec;
-//    Galaxy(numsys, minl, atmosl, devl, mtvec);
-//    };
-//  Galaxy(int numsys, int minl, int atmosl, int *devl, vector<Player *> &pl);
-  Galaxy(int numsys, int minl, int atmosl, int *devl, const vector<Player *> &pl = vector<Player *>());
+  Galaxy(int numsys, int minl, int atmosl,
+	const vector<Player *> &pl = vector<Player *>());
 
   void TakeTurn();
 

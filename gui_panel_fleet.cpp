@@ -50,6 +50,18 @@ void panel_draw_fleet() {
     sprintf(buf, "  %s", flt->ships[ctr]->name.c_str());
     string_draw(screen, 816, 13+24*(line++), cur_font[clr], buf);
     }
+
+  if(flt->CanLand() && page == PAGE_SYSTEM
+	&& flt->Destination() == NULL && flt->ships.size() > 0) {
+    buttlist[PANEL_FLEET][BUTTON_LAND] =	10;
+    mo[BUTTON_LAND] = -1;
+    }
+  else {
+    buttlist[PANEL_FLEET][BUTTON_LAND] =	0;
+    SDL_Rect canrec = {800, 768-64*2, 224, 64};
+    SDL_FillRect(screen, &canrec, black);
+    update(&canrec);
+    }
   }
 
 void panel_clicked_fleet(int mx, int my, int mb) {
@@ -117,6 +129,25 @@ void mouse_moved_fleet(int mx, int my) {
   }
 
 void button_clicked_fleet(int button) {
+  Fleet *flt = cur_game->fleets[cur_fleet];
+  if(button == BUTTON_LAND) {
+    if(flt->Location()->colonies.size() < 1) {
+      flt->Location()->colonies.push_back(
+	new Colony(flt->Owner(), flt->Location())
+	);
+      }
+    flt->Location()->colonies[0]->LandShip(flt->ships[0]);
+
+    flt->ships.erase(flt->ships.begin());
+    if(flt->ships.size() < 1) {
+      flt->SetPos(0, 0, cur_game->frame-1);
+      panel = PANEL_GAME;
+      cur_fleet = -1;
+      }
+
+    panel_draw();
+    page_draw();
+    }
   }
 
 void panel_update_fleet() {

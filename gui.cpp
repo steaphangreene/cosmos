@@ -225,6 +225,8 @@ void gui_main() {
       else if(event.key.keysym.sym == SDLK_TAB) {
 //	if(event.key.keysym.mod & (KMOD_LCTRL|KMOD_RCTRL)) {
 	  if(cur_game) {
+	    update_sprite(1);
+	    set_sprite(1, NULL);
 	    cur_game->TakeTurn();
 	    page_init();
 	    panel_init();
@@ -336,6 +338,8 @@ void gui_init() {
   button[BUTTON_BUILD][1] = build_button1("Build");
   button[BUTTON_ABANDON][0] = build_button0("Abandon");
   button[BUTTON_ABANDON][1] = build_button1("Abandon");
+  button[BUTTON_LAND][0] = build_button0("Land Ship(s)");
+  button[BUTTON_LAND][1] = build_button1("Land Ship(s)");
 
   panelmap[PAGE_ROOT] = PANEL_ROOT;
   buttlist[PANEL_ROOT][BUTTON_LOADGAME] = 7;
@@ -446,6 +450,8 @@ void button_clicked(int button) {
       }
     case(PANEL_GAME): {
       if(button == BUTTON_TURN) {
+	update_sprite(1);
+	set_sprite(1, NULL);
 	cur_game->TakeTurn();
 	page_draw();
 	}

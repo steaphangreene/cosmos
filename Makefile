@@ -25,8 +25,9 @@ STRIP:=	strip
 OBJS:=	main.o gui.o audio.o fonts.o graphics.o \
 	gui_page_galaxy.o gui_page_system.o gui_page_planet.o \
 	gui_panel_colony.o gui_panel_fleet.o gui_panel_ship.o \
-	ship.o fleet.o game.o galaxy.o system.o planet.o satellite.o player.o \
-	techtree.o tech_tiny.o
+	ship.o fleet.o game.o player.o colony.o \
+	galaxy.o system.o planet.o satellite.o \
+	techtree.o tech_tiny.o \
 
 WCC:=   win32-gcc -DVERSION=\"pre$(TSTR)\" -O2 -pipe -Wall `win32-exec sdl-config --cflags` -s
 WLIBS:= `win32-exec sdl-config --libs` -lstdc++
@@ -54,6 +55,9 @@ $(BIN):	$(OBJS)
 ########THIS IS WHERE IT SPLITS OFF FROM THE LOCAL FILE!
 
 all:	cosmos_src.tar.gz $(BINS) graphics/*.raw
+
+#This has to be dependant on all - because it gets the version info!
+main.o:	*.cpp *.h data/*.h
 
 cosmos.Linux-i586:	cosmos_src.tar.gz $(OBJS)
 	scp cosmos_src.tar.gz reactor:

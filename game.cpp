@@ -104,11 +104,10 @@ void Game::Fill() {
 
   int num_galaxys = setting[10];
   galaxys.push_back(new Galaxy(setting[11]*20,
-	setting[12], setting[13], cur_tree->Homeworld(),
-	players));
+	setting[12], setting[13], players));
   for(int ctr=1; ctr<num_galaxys; ++ctr) {
     galaxys.push_back(new Galaxy(setting[11]*20,
-	setting[12], setting[13], cur_tree->Homeworld()));
+	setting[12], setting[13]));
     }
   }
 

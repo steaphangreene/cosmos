@@ -1,3 +1,8 @@
+class Satellite;
+
+#ifndef SATELLITE_H
+#define SATELLITE_H
+
 class Satellite {
 public:
   Satellite(int ang, int tp);
@@ -12,3 +17,5 @@ public:
 private:
   int startpos, angle, type;
   };
+
+#endif

@@ -25,7 +25,7 @@ void TechTree::init_tiny(int techl, int devl) {
   lst.push_back(new Tech(TECH_STRUCTURE, "City", "Cities",
 	"Large, multifunction living and working spaces that require\n"
 	"a population of one billion each to operate.",
-	5, 100, 20, 1000, 0, 0, 0, 0,
+	5, 100, 10, 500, 0, 0, 0, 0,
 	-1, -1, -1, -1));
   start[lst.size()] = 1;
   lst.push_back(new Tech(TECH_PROJECT, "Entertainment", "Entertainment",
@@ -45,8 +45,8 @@ void TechTree::init_tiny(int techl, int devl) {
   start[lst.size()] = 1;
   lst.push_back(new Tech(TECH_SHIP, "Colonizer", "Colonizers",
 	"A massive system ship containing a portable self-contained city\n"
-	"which can be sent to another planet in the system to establish a\n"
-	"new colony",
+	"which can be landed on another planet in the system to establish\n"
+	"or enhance a colony",
 	75, 200, 4, 1000, 0, 10, 10, SCLASS_COLONIZER,
 	TECH_TINY_CITY, -1, -1, -1));
   start[lst.size()] = 2;
@@ -57,8 +57,8 @@ void TechTree::init_tiny(int techl, int devl) {
   start[lst.size()] = 0;
   lst.push_back(new Tech(TECH_SHIP, "Colony Ship", "Colony Ships",
 	"A massive hyperspace ship containing a portable self-contained city\n"
-	"which can be sent to a planet to establish a new colony",
-	150, 1000, 10, 1000, 0, 10, 10, SCLASS_COLONYSHIP,
+	"which can be landed on a planet to establish or enhance a colony",
+	150, 1000, 10, 500, 0, 10, 10, SCLASS_COLONYSHIP,
 	TECH_TINY_CITY, TECH_TINY_COLONIZER, -1, -1));
   start[lst.size()] = 0;
   lst.push_back(new Tech(TECH_SHIP, "Destroyer", "Destroyers",
@@ -71,71 +71,77 @@ void TechTree::init_tiny(int techl, int devl) {
   homeworld = start;
   }
 
-int min_tiny(int tnum, int tqty, Planet *plan) {
+int min_tiny(int tnum, int tqty, Colony *col) {
   switch(tnum) {
     case(TECH_TINY_CITY): return -tqty;
-    case(TECH_TINY_LINARMINING): return ((plan->num_satellites ? 4:0) <? tqty);
+    case(TECH_TINY_LINARMINING): {
+      if(col->Plan() == NULL) return 0;
+      return ((col->Plan()->num_satellites ? 4:0) <? tqty);
+      }
     }
   return 0;
   }
 
-int atm_tiny(int tnum, int tqty, Planet *plan) {
+int atm_tiny(int tnum, int tqty, Colony *col) {
   switch(tnum) {
     case(TECH_TINY_CITY): return -((tqty+2)/3);
     }
   return 0;
   }
 
-int ind_tiny(int tnum, int tqty, Planet *plan) {
+int ind_tiny(int tnum, int tqty, Colony *col) {
   switch(tnum) {
-    case(TECH_TINY_CITY): return plan->Minerals()*tqty;
+    case(TECH_TINY_CITY): {
+      if(col->Plan() == NULL) return 0;
+      return col->Plan()->Minerals()*tqty;
+      }
     }
   return 0;
   }
 
-int rad_tiny(int tnum, int tqty, Planet *plan) {
-  switch(tnum) {
-    }
-  return 0;
-  }
-
-int tmp_tiny(int tnum, int tqty, Planet *plan) {
+int rad_tiny(int tnum, int tqty, Colony *col) {
   switch(tnum) {
     }
   return 0;
   }
 
-int upk_tiny(int tnum, int tqty, Planet *plan) {
+int tmp_tiny(int tnum, int tqty, Colony *col) {
+  switch(tnum) {
+    }
+  return 0;
+  }
+
+int upk_tiny(int tnum, int tqty, Colony *col) {
   int ret = cur_tree->GetTech(tnum)->upkeep * tqty;
-  ret = tech_reduce(ret, cur_tree->GetTech(tnum)->known[plan->claimed]);
+  ret = tech_reduce(ret, cur_tree->GetTech(tnum)->known[col->Owner()]);
   return ret;
   }
 
-int crw_tiny(int tnum, int tqty, Planet *plan) {
+int crw_tiny(int tnum, int tqty, Colony *col) {
   int ret = cur_tree->GetTech(tnum)->crew * tqty;
   return ret;
   }
 
-int loy_tiny(int tnum, int tqty, Planet *plan) {
+int loy_tiny(int tnum, int tqty, Colony *col) {
   int ret = cur_tree->GetTech(tnum)->loyalty * tqty;
   if(ret < 0) {
-    ret = (-ret) * cur_tree->GetTech(tnum)->known[plan->claimed];
+    ret = (-ret) * cur_tree->GetTech(tnum)->known[col->Owner()];
     }
   return ret;
   }
 
-int sec_tiny(int tnum, int tqty, Planet *plan) {
+int sec_tiny(int tnum, int tqty, Colony *col) {
   int ret = cur_tree->GetTech(tnum)->security * tqty;
   if(ret < 0) {
-    ret = (-ret) * cur_tree->GetTech(tnum)->known[plan->claimed];
+    ret = (-ret) * cur_tree->GetTech(tnum)->known[col->Owner()];
     }
   return ret;
   }
 
-int hap_tiny(int tnum, int tqty, Planet *plan) {
+int hap_tiny(int tnum, int tqty, Colony *col) {
   int ret = cur_tree->GetTech(tnum)->happiness * tqty;
   if(ret < 0) {
-    ret = (-ret) * cur_tree->GetTech(tnum)->known[plan->claimed];
+    ret = (-ret) * cur_tree->GetTech(tnum)->known[col->Owner()];
     }
   return ret;
   }

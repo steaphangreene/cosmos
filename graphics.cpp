@@ -262,6 +262,10 @@ void set_sprite(int n, SDL_Surface *c) {
     spriter.push_back(nullr);
     spritef.push_back(0);
     }
+  if(sprite[n] && (spritef[n] & SPRITE_UPDATE)) {
+    update(&spriter[n]);
+    spritef[n] &= (~(SPRITE_UPDATE));
+    }
   sprite[n] = c;
   if(c == NULL) {
     spriteb[n] = NULL;
@@ -273,11 +277,11 @@ void set_sprite(int n, SDL_Surface *c) {
   }
 
 void update_sprite(int n) {
-  spritef[n] |= (SPRITE_UPDATE);
+  if(n < int(spritef.size())) spritef[n] |= (SPRITE_UPDATE);
   }
 
 void move_sprite(int n, int x, int y) {
-  if(spritef[n] & SPRITE_UPDATE) {
+  if(n < int(spritef.size()) && sprite[n] && (spritef[n] & SPRITE_UPDATE)) {
     update(&spriter[n]);
     spritef[n] &= (~(SPRITE_UPDATE));
     }

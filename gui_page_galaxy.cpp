@@ -42,12 +42,12 @@ void page_draw_galaxy() {
   SDL_Rect rec = {0, 0, 3, 3};
   for(int snum=0; snum < cur_game->galaxys[cur_galaxy]->num_systems; ++snum) {
     System *sys = cur_game->galaxys[cur_galaxy]->systems[snum];
-    if(sys->claimed > -1) {
+    if(sys->Owner() > -1) {
       SDL_Rect rec2 = {0, 0, 9, 9};
       rec2.x = sys->xpos - 4;
       rec2.y = sys->ypos - 4;
       SDL_FillRect(screen, &rec2, color3(
-	cur_game->players[sys->claimed]->color
+	cur_game->players[sys->Owner()]->color
 	));
       }
     rec.x = sys->xpos - 1;
@@ -55,12 +55,14 @@ void page_draw_galaxy() {
     SDL_BlitSurface(gstar, NULL, screen, &rec);
 
     vector<Fleet *> present;
-    for(int shp = 0; shp < int(sys->fleets.size()); ++shp) {
-      present.push_back(sys->fleets[shp]);
+    for(int fn = 0; fn < int(sys->fleets.size()); ++fn) {
+      if(sys->fleets[fn]->ships.size() <= 0) continue;
+      present.push_back(sys->fleets[fn]);
       }
     for(int plan=0; plan < sys->num_planets; ++plan) {
-      for(int shp = 0; shp < int(sys->planets[plan]->fleets.size()); ++shp) {
-	present.push_back(sys->planets[plan]->fleets[shp]);
+      for(int fn = 0; fn < int(sys->planets[plan]->fleets.size()); ++fn) {
+	if(sys->planets[plan]->fleets[fn]->ships.size() <= 0) continue;
+	present.push_back(sys->planets[plan]->fleets[fn]);
 	}
       }
     if(present.size() > 0) {
@@ -80,6 +82,8 @@ void page_update_galaxy() {
   }
 
 void page_clicked_galaxy(int mx, int my, int mb) {
+  if(mb != 1) return;
+
   int offx, offy;
   for(int sys=0; sys < cur_game->galaxys[cur_galaxy]->num_systems; ++sys) {
     offx = abs(cur_game->galaxys[cur_galaxy]->systems[sys]->xpos - mx);
@@ -92,6 +96,7 @@ void page_clicked_galaxy(int mx, int my, int mb) {
       }
     }
   for(int flt=0; flt < int(cur_game->fleets.size()); ++flt) {
+    if(cur_game->fleets[flt]->ships.size() <= 0) continue;
     offx = abs(cur_game->fleets[flt]->XPos() - mx);
     offy = abs(cur_game->fleets[flt]->YPos() - my);
     if(offx*offx + offy*offy <= 9) {
@@ -113,6 +118,7 @@ void mouse_moved_galaxy(int mx, int my) {
   static int mouse_over = 0;
   int offx, offy;
   for(int flt=0; flt < int(cur_game->fleets.size()); ++flt) {
+    if(cur_game->fleets[flt]->ships.size() <= 0) continue;
     offx = abs(cur_game->fleets[flt]->XPos() - mx);
     offy = abs(cur_game->fleets[flt]->YPos() - my);
     if(offx*offx + offy*offy <= 9) {
@@ -133,8 +139,10 @@ void mouse_moved_galaxy(int mx, int my) {
 		);
 	  set_sprite(1, line);
 	  move_sprite(1,
-		cur_game->fleets[bfleet]->XPos() <? cur_game->fleets[flt]->XPos(),
-		cur_game->fleets[bfleet]->YPos() <? cur_game->fleets[flt]->YPos()
+		cur_game->fleets[bfleet]->XPos()
+			<? cur_game->fleets[flt]->XPos(),
+		cur_game->fleets[bfleet]->YPos()
+			<? cur_game->fleets[flt]->YPos()
 		);
 	  update_sprite(1);
 	  }
@@ -149,7 +157,7 @@ void mouse_moved_galaxy(int mx, int my) {
     offx = abs(cur_game->galaxys[cur_galaxy]->systems[sys]->xpos - mx);
     offy = abs(cur_game->galaxys[cur_galaxy]->systems[sys]->ypos - my);
     if(offx*offx + offy*offy <= 36) {
-      if(cur_system != sys) {
+      if(cur_system != sys || mouse_over) {
 	if(mouse_over) {
 	  panel = bpanel;
 	  cur_fleet = bfleet;
