@@ -34,6 +34,8 @@ SDL_Surface *get_splanet_image();
 void drawline(SDL_Surface *, int, int, int, int, Uint32, Uint32);
 SDL_Surface *getline(int, int, int, int, Uint32, Uint32);
 
+void show_progress(int prog, int total);
+
 extern const unsigned int rchan;
 extern const unsigned int gchan;
 extern const unsigned int bchan;

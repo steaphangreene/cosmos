@@ -360,3 +360,7 @@ void drawline(SDL_Surface *s, int x1, int y1, int x2, int y2, Uint32 col, Uint32
   SDL_FreeSurface(tmp);
   update(&destr);
   }
+
+void show_progress(int prog, int total) {
+  update(12, 0, prog*1000/total, 768); do_updates();
+  }

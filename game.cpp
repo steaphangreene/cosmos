@@ -11,6 +11,7 @@
 
 #include "game.h"
 #include "position.h"
+#include "graphics.h"
 
 int MKDIR(const char *fn, int perms) {
   static char buf[1024] = {0};
@@ -68,7 +69,7 @@ Game::~Game() {
   Clear();
   }
 
-int Game::Load(const char *fn) {
+int Game::Load(const char *fn, int frac) {
   static char buf[1024] = {0};
   if(getenv("HOME"))
     sprintf(buf, "%s/.cosmos/saves/%s", getenv("HOME"), fn);

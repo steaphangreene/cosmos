@@ -305,7 +305,13 @@ void gui_main() {
     }
   }
 
-#define STARTUP ("  Starting Cosmos - Please Wait.  ")
+#define STARTUP ("Starting Cosmos - Please Wait.")
+
+static void p() {
+  static int prog = 0;
+  ++prog;
+  show_progress(prog, COUNTPS);
+  }
 
 void gui_init() {
   if(cur_game->started) cur_galaxy = cur_game->galaxys[0];
@@ -322,23 +328,23 @@ void gui_init() {
   cur_font[1] = font_colored(cur_font[8], color3(1));
   cur_font[0] = font_colored(cur_font[8], color3(0));
 
-  SDL_Rect rec = { 512, 384-12-4, 0, 24+8 };
-  rec.w = string_length(STARTUP, cur_font[4]) + 8;
-  rec.x -= rec.w/2;
-  SDL_FillRect(screen, &rec, color3(4));
-  rec.y += 4;  rec.x += 4;
-  rec.w -= 8;  rec.h -= 8;
-  SDL_FillRect(screen, &rec, black);
+  SDL_Rect statrec = { 8, 384-12-8, 1008, 24+16 };
+  SDL_FillRect(screen, &statrec, color3(4));
+  statrec.y += 4;  statrec.x += 4;
+  statrec.w -= 8;  statrec.h -= 8;
+  SDL_FillRect(screen, &statrec, black);
   string_drawc(screen, 512, 384-11, cur_font[4], STARTUP);
   update_all();
   do_updates();
+  SDL_FillRect(screen, &statrec, color3(4));
+  string_drawc(screen, 512, 384-11, cur_font[0], STARTUP);
+  statrec.y -= 4;  statrec.x -= 4;
+  statrec.w += 8;  statrec.h += 8;
 
   grabbed = -1;
 
-  check[0] = get_check0_image();
-  check[1] = get_check1_image();
-
-  set_cursor(get_cursor_image());
+  check[0] = get_check0_image();p();
+  check[1] = get_check1_image();p();
 
   intro = get_image("graphics/intro.raw", 800, 768);
   if(intro == NULL) {
@@ -348,54 +354,55 @@ void gui_init() {
     SDL_FillRect(tmp, NULL, 0);
     intro = SDL_DisplayFormat(tmp);
     SDL_FreeSurface(tmp);
-    }
-  string_drawr(intro, 768, 704, cur_font[4], version);
+    }p();
 
-  credg = get_string(cur_font[4], credits);
-  selectg = get_select_image();
+  string_drawr(intro, 768, 704, cur_font[4], version);p();
 
-  button[BUTTON_RESUMEGAME][0] = build_button0("Resume Game");
-  button[BUTTON_RESUMEGAME][1] = build_button1("Resume Game");
-  button[BUTTON_LOADGAME][0] = build_button0("Load Game");
-  button[BUTTON_LOADGAME][1] = build_button1("Load Game");
-  button[BUTTON_NEWGAME][0] = build_button0("Create New Game");
-  button[BUTTON_NEWGAME][1] = build_button1("Create New Game");
-  button[BUTTON_NETWORKGAME][0] = build_button0("Network Game");
-  button[BUTTON_NETWORKGAME][1] = build_button1("Network Game");
-  button[BUTTON_SYSTEMOPTIONS][0] = build_button0("System Options");
-  button[BUTTON_SYSTEMOPTIONS][1] = build_button1("System Options");
-  button[BUTTON_QUITGAME][0] = build_button0("Quit Game");
-  button[BUTTON_QUITGAME][1] = build_button1("Quit Game");
-  button[BUTTON_CANCEL][0] = build_button0("Cancel");
-  button[BUTTON_CANCEL][1] = build_button1("Cancel");
-  button[BUTTON_ACCEPT][0] = build_button0("Accept");
-  button[BUTTON_ACCEPT][1] = build_button1("Accept");
-  button[BUTTON_OPTIONS][0] = build_button0("Options");
-  button[BUTTON_OPTIONS][1] = build_button1("Options");
-  button[BUTTON_EXIT][0] = build_button0("Exit");
-  button[BUTTON_EXIT][1] = build_button1("Exit");
-  button[BUTTON_TURN][0] = build_button0("Turn");
-  button[BUTTON_TURN][1] = build_button1("Turn");
-  button[BUTTON_RESETALL][0] = build_button0("Reset All");
-  button[BUTTON_RESETALL][1] = build_button1("Reset All");
-  button[BUTTON_CLEARALL][0] = build_button0("Clear All");
-  button[BUTTON_CLEARALL][1] = build_button1("Clear All");
-  button[BUTTON_RANDOMIZE][0] = build_button0("Randomize");
-  button[BUTTON_RANDOMIZE][1] = build_button1("Randomize");
-  button[BUTTON_NEWPROJECT][0] = build_button0("New Project");
-  button[BUTTON_NEWPROJECT][1] = build_button1("New Project");
-  button[BUTTON_CANCELPROJECT][0] = build_button0("Cancel Project");
-  button[BUTTON_CANCELPROJECT][1] = build_button1("Cancel Project");
-  button[BUTTON_CANCELBUILD][0] = build_button0("Cancel Build");
-  button[BUTTON_CANCELBUILD][1] = build_button1("Cancel Build");
-  button[BUTTON_BUILD][0] = build_button0("Build");
-  button[BUTTON_BUILD][1] = build_button1("Build");
-  button[BUTTON_ABANDON][0] = build_button0("Abandon");
-  button[BUTTON_ABANDON][1] = build_button1("Abandon");
-  button[BUTTON_LAND][0] = build_button0("Land Ship(s)");
-  button[BUTTON_LAND][1] = build_button1("Land Ship(s)");
-  button[BUTTON_SPLIT][0] = build_button0("Split Fleet");
-  button[BUTTON_SPLIT][1] = build_button1("Split Fleet");
+  credg = get_string(cur_font[4], credits);p();
+  selectg = get_select_image();p();
+
+  button[BUTTON_RESUMEGAME][0] = build_button0("Resume Game");p();
+  button[BUTTON_RESUMEGAME][1] = build_button1("Resume Game");p();
+  button[BUTTON_LOADGAME][0] = build_button0("Load Game");p();
+  button[BUTTON_LOADGAME][1] = build_button1("Load Game");p();
+  button[BUTTON_NEWGAME][0] = build_button0("Create New Game");p();
+  button[BUTTON_NEWGAME][1] = build_button1("Create New Game");p();
+  button[BUTTON_NETWORKGAME][0] = build_button0("Network Game");p();
+  button[BUTTON_NETWORKGAME][1] = build_button1("Network Game");p();
+  button[BUTTON_SYSTEMOPTIONS][0] = build_button0("System Options");p();
+  button[BUTTON_SYSTEMOPTIONS][1] = build_button1("System Options");p();
+  button[BUTTON_QUITGAME][0] = build_button0("Quit Game");p();
+  button[BUTTON_QUITGAME][1] = build_button1("Quit Game");p();
+  button[BUTTON_CANCEL][0] = build_button0("Cancel");p();
+  button[BUTTON_CANCEL][1] = build_button1("Cancel");p();
+  button[BUTTON_ACCEPT][0] = build_button0("Accept");p();
+  button[BUTTON_ACCEPT][1] = build_button1("Accept");p();
+  button[BUTTON_OPTIONS][0] = build_button0("Options");p();
+  button[BUTTON_OPTIONS][1] = build_button1("Options");p();
+  button[BUTTON_EXIT][0] = build_button0("Exit");p();
+  button[BUTTON_EXIT][1] = build_button1("Exit");p();
+  button[BUTTON_TURN][0] = build_button0("Turn");p();
+  button[BUTTON_TURN][1] = build_button1("Turn");p();
+  button[BUTTON_RESETALL][0] = build_button0("Reset All");p();
+  button[BUTTON_RESETALL][1] = build_button1("Reset All");p();
+  button[BUTTON_CLEARALL][0] = build_button0("Clear All");p();
+  button[BUTTON_CLEARALL][1] = build_button1("Clear All");p();
+  button[BUTTON_RANDOMIZE][0] = build_button0("Randomize");p();
+  button[BUTTON_RANDOMIZE][1] = build_button1("Randomize");p();
+  button[BUTTON_NEWPROJECT][0] = build_button0("New Project");p();
+  button[BUTTON_NEWPROJECT][1] = build_button1("New Project");p();
+  button[BUTTON_CANCELPROJECT][0] = build_button0("Cancel Project");p();
+  button[BUTTON_CANCELPROJECT][1] = build_button1("Cancel Project");p();
+  button[BUTTON_CANCELBUILD][0] = build_button0("Cancel Build");p();
+  button[BUTTON_CANCELBUILD][1] = build_button1("Cancel Build");p();
+  button[BUTTON_BUILD][0] = build_button0("Build");p();
+  button[BUTTON_BUILD][1] = build_button1("Build");p();
+  button[BUTTON_ABANDON][0] = build_button0("Abandon");p();
+  button[BUTTON_ABANDON][1] = build_button1("Abandon");p();
+  button[BUTTON_LAND][0] = build_button0("Land Ship(s)");p();
+  button[BUTTON_LAND][1] = build_button1("Land Ship(s)");p();
+  button[BUTTON_SPLIT][0] = build_button0("Split Fleet");p();
+  button[BUTTON_SPLIT][1] = build_button1("Split Fleet");p();
 
   panelmap[PAGE_ROOT] = PANEL_ROOT;
   buttlist[PANEL_ROOT][BUTTON_LOADGAME] = 7;
@@ -409,7 +416,7 @@ void gui_init() {
   pagemap[PAGE_ROOT][BUTTON_NETWORKGAME] =	PAGE_NET;
   pagemap[PAGE_ROOT][BUTTON_SYSTEMOPTIONS] =	PAGE_SYSOPT;
 //  ambient[PAGE_ROOT] = audio_loadsound("sounds/ambient00.wav");
-  music[PAGE_ROOT] = audio_loadmusic("sounds/music00.wav");
+  music[PAGE_ROOT] = audio_loadmusic("sounds/music00.wav");p();
 
   panelmap[PAGE_NEW] = PANEL_NEW;
   buttlist[PANEL_NEW][BUTTON_CLEARALL] =		7;
@@ -439,21 +446,23 @@ void gui_init() {
 
   buttlist[PANEL_NONE][BUTTON_EXIT] =		11;
 
-  music[PAGE_GALAXY] = audio_loadmusic("sounds/music01.wav");
+  music[PAGE_GALAXY] = audio_loadmusic("sounds/music01.wav");p();
 
-  click1 = audio_buildsound(click01, sizeof(click01));
-  click2 = audio_buildsound(click02, sizeof(click02));
+  click1 = audio_buildsound(click01, sizeof(click01));p();
+  click2 = audio_buildsound(click02, sizeof(click02));p();
 
-  gui_init_galaxy();
-  gui_init_system();
-  gui_init_planet();
+  gui_init_galaxy();p();
+  gui_init_system();p();
+  gui_init_planet();p();
 
-  gui_init_colony();
-  gui_init_fleet();
-  gui_init_ship();
+  gui_init_colony();p();
+  gui_init_fleet();p();
+  gui_init_ship();p();
 
   page_init();
   panel_init();
+
+  set_cursor(get_cursor_image());
   }
 
 void button_clicked(int button) {

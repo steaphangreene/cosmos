@@ -11,16 +11,18 @@ DTARD:=	cosmos_data-$(TSTR).tar.gz
 BINS:=	        cosmos.exe cosmos.Linux-i686 cosmos.Linux-i586 \
 	cosmos.Linux-ppc cosmos.Linux-sparc64 \
 	cosmos.SunOS-sun4 cosmos.Darwin-ppc
+COUNTPS:=	$(shell grep ';p();' *.cpp | grep -v '//.*;p();' | wc -l | sed 's- --g')
+
 
 # Debugging settings
-#CC:=	gcc$(COSMOS_CTAIL) -DVERSION=\"$(VERSION)\" -DDEBUG=SDL_INIT_NOPARACHUTE -pipe -Wall `sdl-config --cflags` -g $(COSMOS_FLAGS)
-#CCC:=	g++$(COSMOS_CTAIL) -DVERSION=\"$(VERSION)\" -DDEBUG=SDL_INIT_NOPARACHUTE -pipe -Wall `sdl-config --cflags` -g $(COSMOS_FLAGS)
+#CC:=	gcc$(COSMOS_CTAIL) -DVERSION=\"$(VERSION)\" -DCOUNTPS=$(COUNTPS) -DDEBUG=SDL_INIT_NOPARACHUTE -pipe -Wall `sdl-config --cflags` -g $(COSMOS_FLAGS)
+#CCC:=	g++$(COSMOS_CTAIL) -DVERSION=\"$(VERSION)\" -DCOUNTPS=$(COUNTPS) -DDEBUG=SDL_INIT_NOPARACHUTE -pipe -Wall `sdl-config --cflags` -g $(COSMOS_FLAGS)
 #LIBS:=	`sdl-config --libs` -lefence $(COSMOS_LIBS) `gcc$(COSMOS_CTAIL) -print-file-name=libstdc++.a`
 #STRIP:=	touch
 
 # Production settings
-CC:=	gcc$(COSMOS_CTAIL) -DVERSION=\"$(VERSION)\" -O2 -pipe -Wall `sdl-config --cflags` $(COSMOS_FLAGS)
-CCC:=	g++$(COSMOS_CTAIL) -DVERSION=\"$(VERSION)\" -O2 -pipe -Wall `sdl-config --cflags` $(COSMOS_FLAGS)
+CC:=	gcc$(COSMOS_CTAIL) -DVERSION=\"$(VERSION)\" -DCOUNTPS=$(COUNTPS) -O2 -pipe -Wall `sdl-config --cflags` $(COSMOS_FLAGS)
+CCC:=	g++$(COSMOS_CTAIL) -DVERSION=\"$(VERSION)\" -DCOUNTPS=$(COUNTPS) -O2 -pipe -Wall `sdl-config --cflags` $(COSMOS_FLAGS)
 LIBS:=	`sdl-config --libs` $(COSMOS_LIBS) `gcc$(COSMOS_CTAIL) -print-file-name=libstdc++.a`
 STRIP:=	strip
 
@@ -31,7 +33,7 @@ OBJS:=	main.o data.o dict.o gui.o audio.o fonts.o graphics.o \
 	galaxy.o system.o planet.o satellite.o \
 	techtree.o tech_tiny.o \
 
-WCC:=   win32-gcc -DVERSION=\"$(VERSION)\" -O2 -pipe -Wall `win32-exec sdl-config --cflags` -s
+WCC:=   win32-gcc -DVERSION=\"$(VERSION)\" -DCOUNTPS=$(COUNTPS) -O2 -pipe -Wall `win32-exec sdl-config --cflags` -s
 WLIBS:= `win32-exec sdl-config --libs` -lstdc++
 WOBJS:= $(shell echo $(OBJS) | sed 's-\.o-.win32_o-g')
 

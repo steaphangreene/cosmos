@@ -34,7 +34,7 @@ public:
   void Fill();
 
   int Save(const char *);
-  int Load(const char *);
+  int Load(const char *, int frac=1);
 
   int GetTechTree();
   int GetShipCombat();
