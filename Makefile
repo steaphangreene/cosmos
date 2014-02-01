@@ -1,16 +1,17 @@
 TSTR:=  $(shell date -u +"%Y%m%d%H%M")
 VERSION:=	pre$(TSTR)
 
-BIN:=	cosmos.$(shell uname)-$(shell arch)
+#BIN:=	cosmos.$(shell uname)-$(shell arch)
+BIN:=	cosmos.Local
 BTAR:=	cosmos_binary.tar.gz
 BTARU:=	cosmos_binary.tar
 BTARD:=	cosmos_binary-$(TSTR).tar.gz
 DTAR:=	cosmos_data.tar.gz
 DTARU:=	cosmos_data.tar
 DTARD:=	cosmos_data-$(TSTR).tar.gz
-BINS:=	        cosmos.exe cosmos.Linux-i686 cosmos.Linux-i586 \
-	cosmos.Linux-ppc cosmos.Linux-sparc64 \
-	cosmos.SunOS-sun4 cosmos.Darwin-ppc
+BINS:=	cosmos.Linux-i686 cosmos.Linux-i586 \
+	cosmos.Linux-sparc64 cosmos.SunOS-sun4 cosmos.Darwin-ppc \
+	cosmos.Linux-ppc cosmos.exe \
 
 COUNTPS:=	$(shell grep ';p();' gui.cpp | grep -v '//.*;p();' | wc -l | sed 's- --g')
 
@@ -40,10 +41,16 @@ WOBJS:= $(shell echo $(OBJS) | sed 's-\.o-.win32_o-g')
 local:	$(BIN)
 
 clean:	.
-	rm -f *.o *.win32_o
+	rm -f *.o renderer/*.o *.win32_o deps.mk
+
+demo_ships:	demo_ships.cpp renderer/renderer.o renderer/linear.o graphics_ship.o
+	$(CCC) -o $@ demo_ships.cpp renderer/linear.o renderer/renderer.o graphics_ship.o $(LIBS) -L/usr/X11R6/lib -lGL -lGLU
 
 %.o:	%.cpp 
-	$(CCC) -c $<
+	$(CCC) -c $< -o $@
+
+%.win32_o:	%.cpp %.o
+	$(WCC) -c $< -o $@
 
 dep:	deps.mk
 
@@ -51,6 +58,9 @@ deps.mk:	*.cpp *.h data/*.h
 	gcc -MM `sdl-config --cflags` *.cpp > deps.mk
 
 include deps.mk
+
+cosmos.Windows:	$(WOBJS)
+	$(WCC) -o $@ $(WOBJS) $(WLIBS)
 
 $(BIN):	$(OBJS)
 	$(CC) -o $@ $(OBJS) $(LIBS)
@@ -79,40 +89,55 @@ dict.cpp:	dict.t dict.txt
 	tail +2 dict.t.01 >> dict.cpp
 	rm -f dict.t.*
 
+cosmos.exe:	cosmos_src.tar.gz $(OBJS)
+	scp cosmos_src.tar.gz marine:
+	ssh marine "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp VERSION=$(VERSION) -j2 cosmos.Windows"
+	scp marine:cosmos/cosmos.Windows ./$@
+	ssh marine rm -rf cosmos cosmos_src.tar.gz
+
 cosmos.Linux-i586:	cosmos_src.tar.gz $(OBJS)
 	scp cosmos_src.tar.gz reactor:
-	ssh reactor "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp VERSION=$(VERSION) -j2"
-	scp reactor:cosmos/$@ .
+	ssh reactor "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp VERSION=$(VERSION) -j2 local"
+	scp reactor:cosmos/cosmos.Local ./$@
 	ssh reactor rm -rf cosmos cosmos_src.tar.gz
+
+cosmos.Linux-i686:	cosmos_src.tar.gz $(OBJS)
+	scp cosmos_src.tar.gz reserve:
+	ssh reserve "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp VERSION=$(VERSION) -j2 local"
+	scp reserve:cosmos/cosmos.Local ./$@
+	ssh reserve rm -rf cosmos cosmos_src.tar.gz
 
 cosmos.Linux-sparc64:	cosmos_src.tar.gz $(OBJS)
 	scp cosmos_src.tar.gz beta:
-	ssh beta "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp VERSION=$(VERSION) -j2"
-	scp beta:cosmos/$@ .
+	ssh beta "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp VERSION=$(VERSION) -j2 local"
+	scp beta:cosmos/cosmos.Local ./$@
 	ssh beta rm -rf cosmos cosmos_src.tar.gz
 
 cosmos.SunOS-sun4:	cosmos_src.tar.gz $(OBJS)
 	scp cosmos_src.tar.gz topaz:
-	ssh topaz "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp VERSION=$(VERSION) -j8"
-	scp topaz:cosmos/$@ .
+	ssh topaz "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp VERSION=$(VERSION) -j8 local"
+	scp topaz:cosmos/cosmos.Local ./$@
 	ssh topaz rm -rf cosmos cosmos_src.tar.gz
 
 cosmos.Darwin-ppc:	cosmos_src.tar.gz $(OBJS)
 	scp cosmos_src.tar.gz inkhead-darwin:
-	ssh inkhead-darwin "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp VERSION=$(VERSION)"
-	scp inkhead-darwin:cosmos/$@ .
+	ssh inkhead-darwin "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp VERSION=$(VERSION) local"
+	scp inkhead-darwin:cosmos/cosmos.Local ./$@
 	ssh inkhead-darwin rm -rf cosmos cosmos_src.tar.gz
 
 cosmos.Linux-ppc:	cosmos_src.tar.gz $(OBJS)
 	scp cosmos_src.tar.gz inkhead-ppc:
-	ssh inkhead-ppc "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp VERSION=$(VERSION)"
-	scp inkhead-ppc:cosmos/$@ .
+	ssh inkhead-ppc "tar xzf cosmos_src.tar.gz; cd cosmos/; make -f make.tmp VERSION=$(VERSION) local"
+	scp inkhead-ppc:cosmos/cosmos.Local ./$@
 	ssh inkhead-ppc rm -rf cosmos cosmos_src.tar.gz
+
+#cosmos.Linux-ppc:	cosmos.Local
+#	cp -av cosmos.Local $@
 
 $(BTAR):	cosmos $(BINS)
 	rm -f $(BTAR)
-	cd .. ; tar chvf cosmos/$(BTARU) cosmos/cosmos cosmos/cosmos.* \
-		cosmos/README-SDL.txt cosmos/sdl.dll
+	cd .. ; tar chvf cosmos/$(BTARU) cosmos/cosmos cosmos/cosmos.*-* \
+		cosmos/cosmos.exe cosmos/README-SDL.txt cosmos/sdl.dll
 	gzip -9 $(BTARU)
 	rm -f cosmos_binary-*
 	ln $(BTAR) $(BTARD)
@@ -163,12 +188,6 @@ archive:	.
 		cosmos/cosmos cosmos/cosmos.* cosmos/CREDITS cosmos/dict.txt \
 		cosmos/*.pov cosmos/graphics cosmos/*.csh
 	gzip -9	~/c/archive/cosmos.$(TSTR).tar
-
-cosmos.exe:	$(WOBJS)
-	$(WCC) -o $@ $(WOBJS) $(WLIBS)
-
-%.win32_o:	%.cpp %.o
-	$(WCC) -c $< -o $@
 
 graphics/planet00.raw:	planet00.pov
 	povray -W768 -H768 planet00.pov

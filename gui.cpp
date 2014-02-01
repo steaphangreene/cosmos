@@ -52,7 +52,7 @@ int lastpage = PAGE_INVALID, page = PAGE_ROOT;
 int lastpanel = PANEL_NONE, panel = PANEL_NONE;
 int buttlist[PANEL_MAX][BUTTON_MAX] = {{0}};
 int pagemap[PAGE_MAX][BUTTON_MAX] = {{0}};
-int panelmap[PAGE_MAX] = {{0}};
+int panelmap[PAGE_MAX] = {0};
 
 int mousex=0, mousey=0, mouseb=0;
 int mo[BUTTON_MAX] = {0};

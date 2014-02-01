@@ -1,0 +1,66 @@
+-FIX BUG - Split FLEET when not on planet.
+
+-FIX BUG - Update Mouse_Move after an Action is performed.
+
+-Do System Arrive/Depart Stuff!
+
+-Show fleets leaving/ariving to systems.
+
+-Complete Galaxy fleet control interface (send fleets to fleets)
+
+-Complete Galaxy fleet control interface (interrupt hypertravel)
+
+-Update Selection Appropriately.
+
+-Truly Implement Saving/Loading of Games.
+
+-Add REAL Fleet Detection.
+
+-Add Auto Planetary Combat.
+
+-Design Computer Player AI.
+
+-Ditch max_factions HAXXOR.
+
+-Ditch split population major/minor HAXXOR.
+
+-Add death rate/hospitability/housing.
+
+-Seek and Destroy FIXME Markers.
+
+-Add Console/Savefile/E-Mail Multiplayer Support.
+
+-Fix Leap-Frog Fleet Acceleration BUG!
+
+
+
+
+-Implement/Optimize Fleet factory.
+
+-Implement battle groups.
+
+-Add Network Multiplayer Support.
+
+-Add Ship Design.
+
+-Implement REAL ship stats and such.
+
+-Add True Hyperspace System.
+
+-Add Wormholes and Jump System.
+
+-Add Other TechTrees.
+
+-Add 2-D Ship Combat.
+
+-Add 2-D Planetary Combat.
+
+-Add 2-D Tactical Ship Combat.
+
+-Add 2-D Tactical PlanetCombat.
+
+-Add Dynamic TechTrees.
+
+-Right-click on planet stats to get detailed info.
+
+-Autoscroll planet project list on drag.

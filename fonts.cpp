@@ -82,7 +82,7 @@ int string_length(const char *str, font *f) {
   for(int ctr=0; ctr<int(strlen(str)); ++ctr) {
     if(str[ctr] == '\r') { ret = ret >? ln; ln = 0; }
     if(str[ctr] == '\t') { ln += 64; ln &= (~(63)); }
-    else { ln += f->len[str[ctr]]; }
+    else { ln += f->len[int(str[ctr])]; }
     }
   return ret >? ln;
   }
@@ -112,11 +112,11 @@ SDL_Surface *get_string(font *f, const char *t) {
   SDL_SetAlpha(f->img, 0, 255);
   for(int ctr=0; ctr<int(strlen(t)); ++ctr) {
     if(isgraph(t[ctr]) || t[ctr] == ' ') {
-      sr.x = f->off[t[ctr]];
-      sr.w = f->len[t[ctr]];
+      sr.x = f->off[int(t[ctr])];
+      sr.w = f->len[int(t[ctr])];
       dr.x = xpos;
       SDL_BlitSurface(f->img, &sr, tmp, &dr);
-      xpos += f->len[t[ctr]];
+      xpos += f->len[int(t[ctr])];
       }
     else if(t[ctr] == '\n') {
       xpos = 0;

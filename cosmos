@@ -2,7 +2,11 @@
 
 #MUST BE NAMED COSMOS AND IN THE SAME DIR AS THE ACTUAL BINARIES!
 
-if [ -x $0.`uname`-`arch` ]; then
+if [ -x $0.Local ]; then
+	echo "Cosmos Autoselecter: Using cosmos.Local"
+	$0.Local "$@"
+	echo "Cosmos Autoselecter: Done"
+elif [ -x $0.`uname`-`arch` ]; then
 	echo "Cosmos Autoselecter: Running $0.`uname`-`arch`"
 	$0.`uname`-`arch` "$@"
 	echo "Cosmos Autoselecter: Done"
