@@ -81,12 +81,12 @@ data.cpp:	data.t CREDITS
 dict.cpp:	dict.t dict.txt
 	csplit -f dict.t. dict.t '/DICT/'
 	cat dict.t.00 \
-		| sed s#SIZE#`wc -l dict.txt | cut -c1-8 | sed "s- --g"`#g \
+		| sed s#SIZE#`wc -l dict.txt | cut -f1 -d' '`#g \
 		> dict.cpp
 	cat dict.txt | tr '\n' '#' \
 		| sed 's-^-@"-g' | sed 's-#-",#@"-g' | sed 's-,#@"$$-#-g' \
 		| tr '@' '\t' | tr '#' '\n' >> dict.cpp
-	tail +2 dict.t.01 >> dict.cpp
+	tail -n +2 dict.t.01 >> dict.cpp
 	rm -f dict.t.*
 
 cosmos.exe:	cosmos_src.tar.gz $(OBJS)
