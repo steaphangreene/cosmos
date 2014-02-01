@@ -24,7 +24,7 @@ Planet::Planet(System *s, int ord, int sz, int min, int atmos)
   temperature = (10-ord)*(10-ord)*4+33;
   radiation = (10-ord)*(10-ord)/2;
   num_satellites = (rand()%4)+1;
-  satellites = new (Satellite*)[num_satellites];
+  satellites = new Satellite*[num_satellites];
   for(int ctr=0; ctr<num_satellites; ++ctr) {
     satellites[ctr] = new Satellite(rand()&65535, sattp[num_satellites][ctr]);
     }
@@ -50,7 +50,7 @@ int Planet::Radiation() {
 		colonies[col]->oqty[ctr], colonies[col]);
       }
     }
-  return 0 >? rad;
+  return max(0, rad);
   }
 
 int Planet::Temperature() {
@@ -72,7 +72,7 @@ int Planet::Atmosphere() {
 		colonies[col]->oqty[ctr], colonies[col]);
       }
     }
-  return 0 >? atm;
+  return max(0, atm);
   }
 
 int Planet::Minerals() {
@@ -83,7 +83,7 @@ int Planet::Minerals() {
 		colonies[col]->oqty[ctr], colonies[col]);
       }
     }
-  return 0 >? min;
+  return max(0, min);
   }
 
 void Planet::TakeTurn() {

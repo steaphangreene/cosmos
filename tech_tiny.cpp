@@ -82,7 +82,7 @@ int min_tiny(int tnum, int tqty, Colony *col) {
     case(TECH_TINY_CITY): return -tqty;
     case(TECH_TINY_SATMINE): {
       if(col->Plan() == NULL) return 0;
-      return ((col->Plan()->num_satellites ? 4:0) <? tqty);
+      return min((col->Plan()->num_satellites ? 4:0), tqty);
       }
     }
   return 0;

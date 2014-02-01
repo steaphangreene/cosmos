@@ -2,6 +2,9 @@
 #include <cstring>
 #include <cstdio>
 #include <cctype>
+#include <algorithm>
+using std::max;
+using std::min;
 
 #include <SDL.h>
 
@@ -80,11 +83,11 @@ font *font_init() {
 int string_length(const char *str, font *f) {
   int ret=0, ln=0;
   for(int ctr=0; ctr<int(strlen(str)); ++ctr) {
-    if(str[ctr] == '\r') { ret = ret >? ln; ln = 0; }
+    if(str[ctr] == '\r') { ret = max(ret, ln); ln = 0; }
     if(str[ctr] == '\t') { ln += 64; ln &= (~(63)); }
     else { ln += f->len[int(str[ctr])]; }
     }
-  return ret >? ln;
+  return max(ret, ln);
   }
 
 int string_height(const char *str, font *f) {
@@ -162,7 +165,7 @@ font *font_colored(font *f, unsigned long c) {
     fprintf(stderr, "Error: You need to be in 32-bit mode\n");
     exit(0);
     }
-  unsigned long *tmp = (unsigned long *)(ret->img->pixels);
+  Uint32 *tmp = (Uint32 *)(ret->img->pixels);
   int base=0;
   for(int y=0; y<ret->img->h; ++y) {
     for(int x=0; x<ret->img->w; ++x) {

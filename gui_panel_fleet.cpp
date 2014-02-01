@@ -41,7 +41,7 @@ void panel_draw_fleet() {
   Fleet *flt = (Fleet*)cur_object;
   int col = cur_game->players[flt->Owner()]->color;
   SDL_Rect screenrec = {800, 12, 224, 24*23};
-  screenrec.h = screenrec.h <? 24*(flt->NumShips()+SKIP);
+  screenrec.h = min(int(screenrec.h), 24*(flt->NumShips()+SKIP));
   SDL_FillRect(screen, &screenrec, black);
 
   sprintf(buf, "Fleet: %s", flt->Name());
@@ -87,7 +87,7 @@ void panel_draw_fleet() {
     string_draw(screen, 816, 13+24*(line++), cur_font_black[col], buf);
     }
 
-  for(int ctr=0; ctr < (int(flt->NumShips()) <? (23-SKIP)); ++ctr) {
+  for(int ctr=0; ctr < min(int(flt->NumShips()), 23-SKIP); ++ctr) {
     int clr = cur_game->players[flt->GetShip(ctr)->Owner()]->color;
     if(ctr == selection) clr = 8;
     sprintf(buf, "  %s: %s",
@@ -120,7 +120,7 @@ void panel_clicked_fleet(int mx, int my, int mb) {
     --panel_offset;
     panel_draw_fleet();
     SDL_Rect screenrec = {800, 12+24*SKIP, 224, 24*23};
-    screenrec.h = screenrec.h <? 24*(flt->NumShips());
+    screenrec.h = min(int(screenrec.h), 24*(flt->NumShips()));
     update(&screenrec);
     return;
     }
@@ -128,7 +128,7 @@ void panel_clicked_fleet(int mx, int my, int mb) {
     ++panel_offset;
     panel_draw_fleet();
     SDL_Rect screenrec = {800, 12+24*SKIP, 224, 24*23};
-    screenrec.h = screenrec.h <? 24*(flt->NumShips());
+    screenrec.h = min(int(screenrec.h), 24*(flt->NumShips()));
     update(&screenrec);
     return;
     }

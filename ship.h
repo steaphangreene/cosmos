@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 using namespace std;
 
@@ -39,7 +40,7 @@ public:
   int MaxCrew() { return maxcrew; }
   int MinCrew() { return mincrew; }
   int AddCrew(int n)
-	{ crew += n; n = crew-maxcrew; crew <?= maxcrew; return n >? 0; }
+	{ crew += n; n = crew-maxcrew; crew = min(crew, maxcrew); return max(n, 0); }
   int Owner() { return owner; }
   void TakeTurn();
 

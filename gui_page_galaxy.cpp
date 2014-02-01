@@ -103,10 +103,10 @@ void page_draw_galaxy() {
 		);
 	  set_sprite(spnum, line);
 	  move_sprite(spnum,
-		sys->objects[obj]->GXPos()
-		<? sys->objects[obj]->Destination()->GXPos(),
-		sys->objects[obj]->GYPos()
-		<? sys->objects[obj]->Destination()->GYPos()
+		min(sys->objects[obj]->GXPos(),
+		    sys->objects[obj]->Destination()->GXPos()),
+		min(sys->objects[obj]->GYPos(),
+		    sys->objects[obj]->Destination()->GYPos())
 		);
 	  update_sprite(spnum++);
 	  }
@@ -215,8 +215,8 @@ void mouse_moved_galaxy(int mx, int my) {
 		);
 	set_sprite(2, line);
 	move_sprite(2,
-		cur_object->GXPos() <? sys->GXPos(),
-		cur_object->GYPos() <? sys->GYPos()
+		min(cur_object->GXPos(), sys->GXPos()),
+		min(cur_object->GYPos(), sys->GYPos())
 		);
 	update_sprite(2);
 	}

@@ -1,7 +1,4 @@
-#include <cmath>
-
-using namespace std;
-
+#include "math.h"
 #include "game.h"
 #include "ship.h"
 #include "fleet.h"
@@ -48,7 +45,7 @@ int Fleet::CanLand() {
 int Fleet::SMove() {            
   int ret = INT_MAX;
   for(int ctr=0; ctr<int(ships.size()); ++ctr) {
-    ret = ret <? ships[ctr]->SMove();
+    ret = min(ret, ships[ctr]->SMove());
     }
   return ret;
   }
@@ -56,7 +53,7 @@ int Fleet::SMove() {
 int Fleet::GMove() {
   int ret = INT_MAX;
   for(int ctr=0; ctr<int(ships.size()); ++ctr) {
-    ret = ret <? ships[ctr]->GMove();
+    ret = min(ret, ships[ctr]->GMove());
     }
   return ret;
   }
@@ -145,13 +142,13 @@ void Fleet::DestroyShips(int s, int e) {
 int Fleet::Offense() {
   int ret=0;
   for(int ctr=0; ctr<int(ships.size()); ++ctr) ret += ships[ctr]->Offense();
-  return ret>?1;
+  return max(ret, 1);
   }
 
 int Fleet::Defense() {
   int ret=0;
   for(int ctr=0; ctr<int(ships.size()); ++ctr) ret += ships[ctr]->Defense();
-  return ret>?1;
+  return max(ret, 1);
   }
 
 void Fleet::Attack(Fleet *f) {
@@ -159,15 +156,15 @@ void Fleet::Attack(Fleet *f) {
   int o2 = f->Offense();
   int d1 = Defense();
   int d2 = f->Defense();
-  int rounds = (d2+o1-1)/o1 <? (d1+o2-1)/o2;
+  int rounds = min((d2+o1-1)/o1, (d1+o2-1)/o2);
   if((d2+o1-1)/o1 <= (d1+o2-1)/o2) {
     f->DestroyShips(0);
-    int losses = NumShips() <? o2 * rounds * NumShips() / d1;
+    int losses = min(NumShips(), (o2 * rounds * NumShips() / d1));
     DestroyShips(NumShips()-losses);
     }
   else {
     DestroyShips(0);
-    int losses = f->NumShips() <? o1 * rounds * f->NumShips() / d2;
+    int losses = min(f->NumShips(), (o1 * rounds * f->NumShips() / d2));
     f->DestroyShips(f->NumShips()-losses);
     }
   }

@@ -45,7 +45,7 @@ void Colony::Init(int initial) {
       if(initial && cur_tree->Homeworld(ctr) > 0) {
 	Fleet *flt = new Fleet(planet, tc->names);
 	planet->Sys()->objects.push_back(flt);
-	for(int shp=0 ; shp < cur_tree->Homeworld(ctr); ++shp) {
+	for(int nshp=0 ; nshp < cur_tree->Homeworld(ctr); ++nshp) {
 	  Ship *shp = new Ship(ctr, owner);
 	  flt->AddShip(shp);
 	  shp->AddCrew(shp->MaxCrew());
@@ -87,7 +87,7 @@ int Colony::Industry() {
     tmp /= need;
     ind = tmp;
     }
-  return 0 >? ind;
+  return max(0, ind);
   }
 
 int Colony::SpareIndustry() {
@@ -95,7 +95,7 @@ int Colony::SpareIndustry() {
   for(int ctr=0; ctr<(int)objs.size(); ++ctr) {
     ind -= cur_tree->Upkeep(objs[ctr], oqty[ctr], this);
     }
-  return 0 >? ind;
+  return max(0, ind);
   }
 
 int Colony::Population() {
@@ -153,7 +153,7 @@ int Colony::Happiness() {
 	}
       }
     }
-  return 0 >? hap <? 1000;
+  return min(max(0, hap), 1000);
   }
 
 int Colony::Security() {
@@ -170,7 +170,7 @@ int Colony::Security() {
 	}
       }
     }
-  return 0 >? sec <? 1000;
+  return min(max(0, sec), 1000);
   }
 
 int Colony::Loyalty() {

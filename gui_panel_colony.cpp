@@ -55,7 +55,7 @@ void panel_clicked_colony(int mx, int my, int mb) {
     --panel_offset;
     stats_draw_colony(col, 0);
     SDL_Rect screenrec = {800, 12+24*SKIP, 224, 24*23};
-    screenrec.h = screenrec.h <? 24*(col->objs.size()+col->projs.size());
+    screenrec.h = min(int(screenrec.h), int(24*(col->objs.size()+col->projs.size())));
     update(&screenrec);
     return;
     }
@@ -63,7 +63,7 @@ void panel_clicked_colony(int mx, int my, int mb) {
     ++panel_offset;
     stats_draw_colony(col, 0);
     SDL_Rect screenrec = {800, 12+24*SKIP, 224, 24*23};
-    screenrec.h = screenrec.h <? 24*(col->objs.size()+col->projs.size());
+    screenrec.h = min(int(screenrec.h), int(24*(col->objs.size()+col->projs.size())));
     update(&screenrec);
     return;
     }
@@ -168,7 +168,7 @@ void panel_clicked_colony(int mx, int my, int mb) {
 
 void stats_draw_colony(Colony *col, int upd) {
   SDL_Rect screenrec = {800, 12, 224, 24*23};
-  screenrec.h = screenrec.h <? 24*(col->objs.size()+col->projs.size()+SKIP);
+  screenrec.h = min(int(screenrec.h), int(24*(col->objs.size()+col->projs.size()+SKIP)));
   if(upd) {
     update(&screenrec);
     }
@@ -184,14 +184,14 @@ void stats_draw_colony(Colony *col, int upd) {
   string_draw(screen, 816, 13+24*(line), cur_font_black[color], buf);
 
   if(panel_offset < 0) panel_offset = 0;
-  if(panel_offset > (0 >? int(col->objs.size())+int(col->projs.size())-22))
-    panel_offset = (0 >? int(col->objs.size())+int(col->projs.size())-22);
+  if(panel_offset > max(0, int(col->objs.size())+int(col->projs.size())-22))
+    panel_offset = max(0, int(col->objs.size())+int(col->projs.size())-22);
   line = -panel_offset;
   int indus = col->Industry(), need, used;
   for(int ctr=0; ctr<(int)col->objs.size() && line < 22; ++ctr,++line) {
     Tech *tc = cur_tree->GetTech(col->objs[ctr]);
-    need = cur_tree->Upkeep(col->objs[ctr], col->oqty[ctr], col) >? 0;
-    used = 0 >? (indus <? need);
+    need = max(cur_tree->Upkeep(col->objs[ctr], col->oqty[ctr], col), 0);
+    used = max(0, min(indus, need));
     indus -= need;
     if(line >= 0) {
       int clr = color;
@@ -208,9 +208,9 @@ void stats_draw_colony(Colony *col, int upd) {
   for(int ctr=0; ctr<(int)col->projs.size() && line < 22; ++ctr,++line) {
     Tech *tc;
     tc = cur_tree->GetTech(col->projs[ctr]);
-    need = tc->icost >? 1;
+    need = max(tc->icost, 1);
     indus += col->prog[ctr];
-    used = col->prog[ctr] >? (indus <? need);
+    used = max(col->prog[ctr], min(indus, need));
     indus -= need;
     if(line >= 0) {
       int clr = color;
@@ -236,13 +236,13 @@ void mouse_moved_colony(int mx, int my) {
   line = (my - (24*SKIP+12))/24;
   line += panel_offset;
   if(grabbed < int(col->objs.size())) {
-    line = panel_offset >? line;
-    line = line <? int(col->objs.size()) - 1;
+    line = max(panel_offset, line);
+    line = min(line, int(col->objs.size()) - 1);
     if(mx >= 800 && line != grabbed) {
       int vec = (line-grabbed)/(abs(line-grabbed));  // Direction: 1 or -1
       for(int ctr=grabbed; ctr != line; ctr += vec) {
-	int e1 = ctr <? (ctr + vec);
-	int e2 = ctr >? (ctr + vec);
+	int e1 = min(ctr, (ctr + vec));
+	int e2 = max(ctr, (ctr + vec));
 	int tmpo = col->objs[e1];
 	int tmpq = col->oqty[e1];
 	col->objs[e1] = col->objs[e2];
@@ -250,7 +250,7 @@ void mouse_moved_colony(int mx, int my) {
 	col->objs[e2] = tmpo;
 	col->oqty[e2] = tmpq;
 	}
-      update(800, 12+24*(SKIP+(grabbed<?line)-panel_offset),
+      update(800, 12+24*(SKIP+min(grabbed, line)-panel_offset),
 			224, 24*(1+abs(grabbed-line)));
       selection = line;
       grabbed = line;
@@ -259,15 +259,15 @@ void mouse_moved_colony(int mx, int my) {
       }
     }
   else {
-    line = int(col->objs.size()) >? panel_offset >? line;
-    line = line <? int(col->projs.size()+col->objs.size())-1;
+    line = max(max(int(col->objs.size()), panel_offset), line);
+    line = min(line, int(col->projs.size()+col->objs.size())-1);
     if(mx >= 800 && line != grabbed) {
       line -= int(col->objs.size());
       grabbed -= int(col->objs.size());
       int vec = (line-grabbed)/(abs(line-grabbed));  // Direction: 1 or -1
       for(int ctr=grabbed; ctr != line; ctr += vec) {
-	int e1 = ctr <? (ctr + vec);
-	int e2 = ctr >? (ctr + vec);
+	int e1 = min(ctr, (ctr + vec));
+	int e2 = max(ctr, (ctr + vec));
 	int tmp1 = col->projs[e1];
 	int tmp2 = col->prog[e1];
 	col->projs[e1] = col->projs[e2];
@@ -277,7 +277,7 @@ void mouse_moved_colony(int mx, int my) {
 	}
       line += int(col->objs.size());
       grabbed += int(col->objs.size());
-      update(800, 12+24*(SKIP + (grabbed<?line) - panel_offset),
+      update(800, 12+24*(SKIP + min(grabbed, line) - panel_offset),
 	224, 24*(1+abs(grabbed-line)));
       selection = line;
       grabbed = line;
@@ -324,7 +324,7 @@ void button_clicked_colony(int button) {
       col->projs.erase(col->projs.begin()+(selection-int(col->objs.size())));
       col->prog.erase(col->prog.begin()+(selection-int(col->objs.size())));
       SDL_Rect endrec = {800,
-	12+24*SKIP <? 12+(SKIP+selection-panel_offset)*24, 224, 0};
+	min(12+24*SKIP, 12+(SKIP+selection-panel_offset)*24), 224, 0};
       endrec.h = 768-64*3-endrec.y;
       if(endrec.h > 0) {
 	SDL_FillRect(screen, &endrec, black);
@@ -341,7 +341,7 @@ void button_clicked_colony(int button) {
       } break;
     case(BUTTON_ABANDON):
     case(BUTTON_CANCELPROJECT): {
-      col->oqty[selection] = 0 >? (col->oqty[selection] - 1);
+      col->oqty[selection] = max(0, col->oqty[selection] - 1);
       stats_draw_colony(col, 1);
       } break;
     case(BUTTON_NEWPROJECT):

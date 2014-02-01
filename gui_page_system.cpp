@@ -96,10 +96,10 @@ void page_draw_system() {
 	  );
 	set_sprite(spnum, line);
 	move_sprite(spnum,
-		flt->SXPos()
-		<? flt->Destination()->SXPos(),
-		flt->SYPos()
-		<? flt->Destination()->SYPos()
+		min(flt->SXPos(),
+		    flt->Destination()->SXPos()),
+		min(flt->SYPos(),
+		    flt->Destination()->SYPos())
 		);
 	update_sprite(spnum++);
 	}
@@ -224,10 +224,10 @@ void mouse_moved_system(int mx, int my) {
 	);
       set_sprite(2, line);
       move_sprite(2,
-	cur_object->SXPos()
-		<? ((Planet*)sys->objects[obj])->SXPos(),
-	cur_object->SYPos()
-		<? ((Planet*)sys->objects[obj])->SYPos()
+	min(cur_object->SXPos(),
+	    ((Planet*)sys->objects[obj])->SXPos()),
+	min(cur_object->SYPos(),
+	    ((Planet*)sys->objects[obj])->SYPos())
 	);
       update_sprite(2);
       return;

@@ -728,8 +728,8 @@ void page_update() {
     if(cred_pos >= credg->h + 110 + 512) cred_pos = 0;
     if(cred_pos > 110 && (cred_pos % 6) == 0) {
       int boff = cred_pos-110;
-      SDL_Rect crr = { 0, (-512+boff) >? 0, 768, boff <? 512 };
-      SDL_Rect scr = { 16, (640-boff) >? 128, 768, boff <? 512 };
+      SDL_Rect crr = { 0, max((-512+boff), 0), 768, min(boff, 512) };
+      SDL_Rect scr = { 16, max((640-boff), 128), 768, min(boff, 512) };
       SDL_BlitSurface(intro, &scr, screen, &scr);
       SDL_BlitSurface(credg, &crr, screen, &scr);
       update(&scr);
@@ -783,7 +783,7 @@ void mouse_moved(int mx, int my) {
     }
   else if(page == PAGE_SYSOPT) {
     if(grabbed != -1) {
-      page_clicked(360 >? mx <? 759, 24 + grabbed*24, 1);
+      page_clicked(min(max(360, mx), 759), 24 + grabbed*24, 1);
       }
     }
   if(panel == PANEL_COLONY) {

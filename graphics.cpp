@@ -321,8 +321,8 @@ SDL_Surface *getline(int x1, int y1, int x2, int y2, Uint32 col, Uint32 pat) {
 
   int rot = 0, slp = 1;
   if(abs(y1-y2) > abs(x1-x2)) rot = 1;
-  int rng = (abs(y1-y2) >? abs(x1-x2));
-  int div = (abs(y1-y2) <? abs(x1-x2));
+  int rng = max(abs(y1-y2), abs(x1-x2));
+  int div = min(abs(y1-y2), abs(x1-x2));
   if((x1 < x2 && y2 < y1) || (x2 < x1 && y1 < y2)) slp = -1;
 
   // Special Case to optimize sprite as line.
@@ -342,22 +342,22 @@ SDL_Surface *getline(int x1, int y1, int x2, int y2, Uint32 col, Uint32 pat) {
     SDL_LockSurface(tmp);
     if(!rot) {
       ((long*)(tmp->pixels))[tmp->pitch/4*sub+bas] = c1;
-      (*(sprite_ss[tmp]))[sub] = (*(sprite_ss[tmp]))[sub] <? bas;
-      (*(sprite_es[tmp]))[sub] = (*(sprite_es[tmp]))[sub] >? (bas+1);
+      (*(sprite_ss[tmp]))[sub] = min((*(sprite_ss[tmp]))[sub], bas);
+      (*(sprite_es[tmp]))[sub] = max((*(sprite_es[tmp]))[sub], (bas+1));
       if(rem) {
 	((long*)(tmp->pixels))[tmp->pitch/4*(sub+slp)+bas] = c2;
-	(*(sprite_ss[tmp]))[sub+slp] = (*(sprite_ss[tmp]))[sub+slp] <? bas;
-	(*(sprite_es[tmp]))[sub+slp] = (*(sprite_es[tmp]))[sub+slp] >? (bas+1);
+	(*(sprite_ss[tmp]))[sub+slp] = min((*(sprite_ss[tmp]))[sub+slp], bas);
+	(*(sprite_es[tmp]))[sub+slp] = max((*(sprite_es[tmp]))[sub+slp], (bas+1));
 	}
       }
     else {
       ((long*)(tmp->pixels))[tmp->pitch/4*bas+sub] = c1;
-      (*(sprite_ss[tmp]))[bas] = (*(sprite_ss[tmp]))[bas] <? sub;
-      (*(sprite_es[tmp]))[bas] = (*(sprite_es[tmp]))[bas] >? (sub+1);
+      (*(sprite_ss[tmp]))[bas] = min((*(sprite_ss[tmp]))[bas], sub);
+      (*(sprite_es[tmp]))[bas] = max((*(sprite_es[tmp]))[bas], (sub+1));
       if(rem) {
 	((long*)(tmp->pixels))[tmp->pitch/4*bas+(sub+slp)] = c2;
-	(*(sprite_ss[tmp]))[bas] = (*(sprite_ss[tmp]))[bas] <? (sub+slp);
-	(*(sprite_es[tmp]))[bas] = (*(sprite_es[tmp]))[bas] >? (sub+1+slp);
+	(*(sprite_ss[tmp]))[bas] = min((*(sprite_ss[tmp]))[bas], (sub+slp));
+	(*(sprite_es[tmp]))[bas] = max((*(sprite_es[tmp]))[bas], (sub+1+slp));
 	}
       }
     SDL_UnlockSurface(tmp);
@@ -376,7 +376,7 @@ SDL_Surface *getline(int x1, int y1, int x2, int y2, Uint32 col, Uint32 pat) {
 
 void drawline(SDL_Surface *s, int x1, int y1, int x2, int y2, Uint32 col, Uint32 pat) {
   SDL_Surface *tmp = getline(x1, y1, x2, y2, col, pat);
-  SDL_Rect destr = {x1<?x2, y1<?y2, abs(x1-x2)+1, abs(y1-y2)+1};
+  SDL_Rect destr = {min(x1, x2), min(y1, y2), abs(x1-x2)+1, abs(y1-y2)+1};
   SDL_BlitSurface(tmp, NULL, s, &destr);
   SDL_FreeSurface(tmp);
   update(&destr);
