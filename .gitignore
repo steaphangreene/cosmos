@@ -1,0 +1,6 @@
+*.o
+deps.mk
+cosmos.*
+demo_ships
+data.cpp
+dict.cpp
